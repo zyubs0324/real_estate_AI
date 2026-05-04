@@ -1,0 +1,6 @@
+# Claude Code
+.claude/
+
+# docs binaries and scripts
+docs/*.pptx
+docs/*.py

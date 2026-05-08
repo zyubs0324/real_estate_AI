@@ -1,0 +1,20 @@
+[
+  {
+    "bdMgtSn": "1120010200100010000000000",
+    "landUseZone": "제2종일반주거지역",
+    "officialLandPrice": 3850000,
+    "pricedAt": "2025"
+  },
+  {
+    "bdMgtSn": "1120010200200010000000000",
+    "landUseZone": "제2종일반주거지역",
+    "officialLandPrice": 3720000,
+    "pricedAt": "2025"
+  },
+  {
+    "bdMgtSn": "1117010700100010000000000",
+    "landUseZone": "제1종일반주거지역",
+    "officialLandPrice": 12500000,
+    "pricedAt": "2025"
+  }
+]

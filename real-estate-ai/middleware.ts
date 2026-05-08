@@ -8,7 +8,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from '@/lib/supabase/config'
 
 // 인증 없이 접근 가능한 공개 경로
-const PUBLIC_PATHS = ['/login']
+const PUBLIC_PATHS = ['/login', '/auth', '/api']
 
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl

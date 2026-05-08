@@ -105,10 +105,10 @@ const S = {
     transition: 'border-color 150ms ease, box-shadow 150ms ease',
   },
   inputError: {
-    borderColor: '#ff3b30',
+    border: '1px solid #ff3b30',
   },
   inputFocus: {
-    borderColor: '#0071e3',
+    border: '1px solid #0071e3',
     boxShadow: '0 0 0 3px rgba(0, 113, 227, 0.18)',
   },
   errorText: {
@@ -210,7 +210,7 @@ export default function LoginForm() {
       ...S.input,
       ...(hasError ? S.inputError : {}),
       ...(isFocused && !hasError ? S.inputFocus : {}),
-      ...(isFocused && hasError ? { ...S.inputError, boxShadow: '0 0 0 3px rgba(255, 59, 48, 0.15)' } : {}),
+      ...(isFocused && hasError ? { border: '1px solid #ff3b30', boxShadow: '0 0 0 3px rgba(255, 59, 48, 0.15)' } : {}),
     }
   }
 

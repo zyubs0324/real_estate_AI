@@ -1,0 +1,77 @@
+[
+  {
+    "bdMgtSn": "1120010200100010000000000",
+    "deals": [
+      {
+        "dealYear": 2025,
+        "dealMonth": 3,
+        "dealDay": 15,
+        "apartName": "옥수하이츠",
+        "area": 84.92,
+        "floor": 8,
+        "dealAmount": 1050000000,
+        "dealType": "매매"
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 1,
+        "dealDay": 7,
+        "apartName": "옥수하이츠",
+        "area": 59.67,
+        "floor": 12,
+        "dealAmount": 820000000,
+        "dealType": "매매"
+      },
+      {
+        "dealYear": 2024,
+        "dealMonth": 11,
+        "dealDay": 22,
+        "apartName": "옥수하이츠",
+        "area": 84.92,
+        "floor": 5,
+        "dealAmount": 980000000,
+        "dealType": "매매"
+      }
+    ]
+  },
+  {
+    "bdMgtSn": "1120010200200010000000000",
+    "deals": [
+      {
+        "dealYear": 2025,
+        "dealMonth": 2,
+        "dealDay": 3,
+        "apartName": "",
+        "area": 72.5,
+        "floor": 2,
+        "dealAmount": 650000000,
+        "dealType": "매매"
+      }
+    ]
+  },
+  {
+    "bdMgtSn": "1117010700100010000000000",
+    "deals": [
+      {
+        "dealYear": 2025,
+        "dealMonth": 4,
+        "dealDay": 10,
+        "apartName": "한남더힐",
+        "area": 235.62,
+        "floor": 15,
+        "dealAmount": 8900000000,
+        "dealType": "매매"
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 2,
+        "dealDay": 28,
+        "apartName": "한남더힐",
+        "area": 170.1,
+        "floor": 9,
+        "dealAmount": 6500000000,
+        "dealType": "매매"
+      }
+    ]
+  }
+]

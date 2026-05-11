@@ -54,14 +54,24 @@ export function buildContext(chunks: DocumentChunk[]): string {
 }
 
 // ─── 시스템 프롬프트 ─────────────────────────────────────
-export function buildSystemPrompt(context: string): string {
+export function buildSystemPrompt(context: string, webContext?: string): string {
+  const today = new Date().toLocaleDateString('ko-KR', {
+    year: 'numeric', month: 'long', day: 'numeric',
+  })
+
   const base = `당신은 대한민국 공인중개사를 위한 부동산 법률·정책 전문 AI 어시스턴트입니다.
+오늘 날짜: ${today}
+
 질문에 대해 실무적이고 구체적인 답변을 한국어로 제공하세요.
 참고 문서가 제공된 경우 해당 조문을 우선 인용하고, 없는 경우에도 일반 법률 지식을 바탕으로 최대한 유용한 답변을 제공하세요.
-답변은 3~5문장으로 핵심을 명확하게 전달하고, 관련 법령명(예: 주택임대차보호법 제3조)을 함께 언급하세요.
+답변은 핵심을 명확하게 전달하고, 관련 법령명(예: 주택임대차보호법 제3조)을 함께 언급하세요.
 
-⚠️ 본 AI 답변은 참고용이며 법률 조언이 아닙니다. 중요한 결정은 반드시 전문가에게 확인하세요.`
+⚠️ 중요: 규제지역 지정·해제, 대출 한도 등 수시로 변경되는 정책 정보는 학습 데이터 기준이므로 실제와 다를 수 있습니다.
+   최신 정보는 국토교통부(molit.go.kr) 또는 국가법령정보센터(law.go.kr)에서 반드시 확인하세요.`
 
-  if (!context) return base
-  return `${base}\n\n=== 참고 법령 문서 ===\n${context}`
+  const parts = [base]
+  if (webContext) parts.push(`=== 실시간 웹 검색 결과 ===\n${webContext}`)
+  if (context)    parts.push(`=== 참고 법령 문서 ===\n${context}`)
+
+  return parts.join('\n\n')
 }

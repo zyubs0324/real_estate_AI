@@ -32,9 +32,17 @@ export async function POST(req: NextRequest) {
   // 1. 관련 법령 문서 검색 (Cohere 임베딩 + pgvector)
   const chunks  = await searchDocuments(question, 5)
   const context = buildContext(chunks)
-  const system  = buildSystemPrompt(context)
 
-  // 2. Claude 스트리밍 응답 (히스토리 포함)
+  // 2. 웹 검색 (Tavily — TAVILY_API_KEY 설정 시 활성화)
+  let webContext: string | undefined
+  if (process.env.TAVILY_API_KEY) {
+    const { searchWeb } = await import('@/lib/tavily')
+    webContext = await searchWeb(question)
+  }
+
+  const system = buildSystemPrompt(context, webContext)
+
+  // 3. Claude 스트리밍 응답 (히스토리 포함)
   const stream = await streamChatClaude(system, question, history ?? [])
 
   return new Response(stream, {

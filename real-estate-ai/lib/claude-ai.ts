@@ -8,6 +8,7 @@
  * 임베딩은 계속 lib/github-ai.ts (Cohere via GitHub Models) 사용
  */
 import Anthropic from '@anthropic-ai/sdk'
+import type { MessageParam } from '@anthropic-ai/sdk/resources/messages'
 import type { DiagnosisInput } from '@/lib/github-ai'
 
 const MODEL = 'claude-sonnet-4-5'
@@ -59,12 +60,26 @@ export async function generateDiagnosisOpinionClaude(
 }
 
 // ─── 스트리밍 채팅 (SSE) ─────────────────────────────────
+interface ChatHistoryMessage {
+  role:    'user' | 'assistant'
+  content: string
+}
+
 export async function streamChatClaude(
   systemPrompt: string,
   userMessage:  string,
+  history:      ChatHistoryMessage[] = [],
 ): Promise<ReadableStream<Uint8Array>> {
   const client  = getClient()
   const encoder = new TextEncoder()
+
+  // 대화 히스토리 + 현재 질문 조합 (빈 content 제거)
+  const messages: MessageParam[] = [
+    ...history
+      .filter((m) => m.content.trim())
+      .map((m) => ({ role: m.role, content: m.content })),
+    { role: 'user', content: userMessage },
+  ]
 
   return new ReadableStream({
     async start(controller) {
@@ -73,7 +88,7 @@ export async function streamChatClaude(
           model:      MODEL,
           max_tokens: 2048,
           system:     systemPrompt,
-          messages:   [{ role: 'user', content: userMessage }],
+          messages,
           stream:     true,
         })
 

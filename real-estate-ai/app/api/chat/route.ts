@@ -1,14 +1,22 @@
 /**
  * POST /api/chat
  * RAG 기반 AI 질의응답 — SSE 스트리밍
- * U4-2 (Claude claude-sonnet-4-5로 교체)
+ * U4-2 (Claude claude-sonnet-4-5 + 대화 히스토리 지원)
  */
 import { NextRequest, NextResponse } from 'next/server'
 import { searchDocuments, buildContext, buildSystemPrompt } from '@/lib/rag'
 import { streamChatClaude } from '@/lib/claude-ai'
 
+interface HistoryMessage {
+  role:    'user' | 'assistant'
+  content: string
+}
+
 export async function POST(req: NextRequest) {
-  const { question } = (await req.json()) as { question: string }
+  const { question, history } = (await req.json()) as {
+    question: string
+    history?: HistoryMessage[]
+  }
 
   if (!question?.trim()) {
     return NextResponse.json({ error: '질문을 입력하세요.' }, { status: 400 })
@@ -26,8 +34,8 @@ export async function POST(req: NextRequest) {
   const context = buildContext(chunks)
   const system  = buildSystemPrompt(context)
 
-  // 2. Claude 스트리밍 응답
-  const stream = await streamChatClaude(system, question)
+  // 2. Claude 스트리밍 응답 (히스토리 포함)
+  const stream = await streamChatClaude(system, question, history ?? [])
 
   return new Response(stream, {
     headers: {

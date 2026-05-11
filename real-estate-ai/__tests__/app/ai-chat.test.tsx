@@ -9,6 +9,14 @@
  */
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 
+// react-markdown은 ESM 전용 패키지 — Jest(CommonJS) 환경에서 mock 처리
+jest.mock('react-markdown', () => {
+  const MockMarkdown = ({ children }: { children: string }) =>
+    <div data-testid="markdown">{children}</div>
+  MockMarkdown.displayName = 'ReactMarkdown'
+  return MockMarkdown
+})
+
 jest.mock('next/navigation', () => ({
   useRouter:   () => ({ push: jest.fn(), back: jest.fn() }),
   usePathname: () => '/ai-chat',

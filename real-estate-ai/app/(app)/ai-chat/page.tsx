@@ -2,10 +2,13 @@
 
 /**
  * U4-2 — AI 질의응답 페이지
- * RAG 기반 부동산 법률·정책 질의응답 (gpt-4o + GitHub Models)
+ * RAG 기반 부동산 법률·정책 질의응답 (Claude claude-sonnet-4-5)
+ * - 마크다운 렌더링 (react-markdown)
+ * - 대화 히스토리 유지
  */
 
 import { useCallback, useRef, useState } from 'react'
+import ReactMarkdown from 'react-markdown'
 import Header from '@/components/layout/Header'
 
 // ─── 타입 ─────────────────────────────────────────────────
@@ -32,22 +35,31 @@ const S = {
     alignItems: 'center' as const, justifyContent: 'center' as const,
     color: 'rgba(0,0,0,0.35)', gap: 12,
   },
-  emptyIcon: { fontSize: 40 },
+  emptyIcon:  { fontSize: 40 },
   emptyTitle: { fontSize: 16, fontWeight: 600, color: '#1d1d1f' },
-  emptyDesc: { fontSize: 13, color: 'rgba(0,0,0,0.45)', textAlign: 'center' as const, maxWidth: 300 },
-  bubble: (role: 'user' | 'assistant', error?: boolean) => ({
-    maxWidth: '80%',
-    alignSelf: (role === 'user' ? 'flex-end' : 'flex-start') as 'flex-end' | 'flex-start',
-    background: role === 'user'
-      ? '#0071e3'
-      : error ? '#fff2f2' : '#fff',
-    color: role === 'user' ? '#fff' : error ? '#ff3b30' : '#1d1d1f',
-    borderRadius: role === 'user' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
+  emptyDesc:  { fontSize: 13, color: 'rgba(0,0,0,0.45)', textAlign: 'center' as const, maxWidth: 300 },
+  userBubble: {
+    maxWidth:  '80%',
+    alignSelf: 'flex-end' as const,
+    background: '#0071e3',
+    color:      '#fff',
+    borderRadius: '18px 18px 4px 18px',
     padding: '12px 16px',
     fontSize: 14,
     lineHeight: 1.6,
-    boxShadow: role === 'assistant' ? '0 1px 4px rgba(0,0,0,0.06)' : 'none',
     whiteSpace: 'pre-wrap' as const,
+    wordBreak:  'keep-all' as const,
+  },
+  assistantBubble: (error?: boolean) => ({
+    maxWidth:  '85%',
+    alignSelf: 'flex-start' as const,
+    background: error ? '#fff2f2' : '#fff',
+    color:      error ? '#ff3b30' : '#1d1d1f',
+    borderRadius: '18px 18px 18px 4px',
+    padding: '14px 18px',
+    fontSize: 14,
+    lineHeight: 1.75,
+    boxShadow: '0 1px 4px rgba(0,0,0,0.06)',
     wordBreak: 'keep-all' as const,
   }),
   thinking: {
@@ -77,18 +89,51 @@ const S = {
   },
   sendBtn: (disabled: boolean) => ({
     background: disabled ? 'rgba(0,0,0,0.1)' : '#0071e3',
-    color: disabled ? 'rgba(0,0,0,0.3)' : '#fff',
+    color:      disabled ? 'rgba(0,0,0,0.3)' : '#fff',
     border: 'none', borderRadius: 10,
     padding: '10px 18px', fontSize: 13, fontWeight: 600,
-    cursor: disabled ? 'not-allowed' as const : 'pointer' as const,
+    cursor:   disabled ? 'not-allowed' as const : 'pointer' as const,
     fontFamily: 'inherit', whiteSpace: 'nowrap' as const,
-    flexShrink: 0,
-    height: 44,
+    flexShrink: 0, height: 44,
   }),
   notice: {
     padding: '8px 24px 0',
     fontSize: 11, color: 'rgba(0,0,0,0.35)', textAlign: 'center' as const,
   },
+}
+
+// 마크다운 컴포넌트 스타일
+const mdComponents = {
+  h1: ({ children }: { children?: React.ReactNode }) => (
+    <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8, marginTop: 4 }}>{children}</div>
+  ),
+  h2: ({ children }: { children?: React.ReactNode }) => (
+    <div style={{ fontSize: 15, fontWeight: 700, marginBottom: 6, marginTop: 10 }}>{children}</div>
+  ),
+  h3: ({ children }: { children?: React.ReactNode }) => (
+    <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, marginTop: 8 }}>{children}</div>
+  ),
+  p: ({ children }: { children?: React.ReactNode }) => (
+    <p style={{ margin: '4px 0', lineHeight: 1.75 }}>{children}</p>
+  ),
+  ul: ({ children }: { children?: React.ReactNode }) => (
+    <ul style={{ margin: '6px 0', paddingLeft: 20 }}>{children}</ul>
+  ),
+  ol: ({ children }: { children?: React.ReactNode }) => (
+    <ol style={{ margin: '6px 0', paddingLeft: 20 }}>{children}</ol>
+  ),
+  li: ({ children }: { children?: React.ReactNode }) => (
+    <li style={{ margin: '3px 0', lineHeight: 1.65 }}>{children}</li>
+  ),
+  strong: ({ children }: { children?: React.ReactNode }) => (
+    <strong style={{ fontWeight: 700, color: '#1d1d1f' }}>{children}</strong>
+  ),
+  blockquote: ({ children }: { children?: React.ReactNode }) => (
+    <blockquote style={{
+      borderLeft: '3px solid #0071e3', margin: '8px 0',
+      paddingLeft: 12, color: 'rgba(0,0,0,0.6)', fontStyle: 'italic',
+    }}>{children}</blockquote>
+  ),
 }
 
 const EXAMPLE_QUESTIONS = [
@@ -99,9 +144,15 @@ const EXAMPLE_QUESTIONS = [
 
 // ─── 채팅 버블 ────────────────────────────────────────────
 function ChatBubble({ msg }: { msg: Message }) {
+  if (msg.role === 'user') {
+    return <div style={S.userBubble}>{msg.content}</div>
+  }
   return (
-    <div style={S.bubble(msg.role, msg.error)}>
-      {msg.content}
+    <div style={S.assistantBubble(msg.error)}>
+      {msg.error
+        ? msg.content
+        : <ReactMarkdown components={mdComponents as never}>{msg.content}</ReactMarkdown>
+      }
     </div>
   )
 }
@@ -122,7 +173,8 @@ export default function AiChatPage() {
     if (!question || loading) return
 
     setInput('')
-    setMessages((prev) => [...prev, { role: 'user', content: question }])
+    const newUserMsg: Message = { role: 'user', content: question }
+    setMessages((prev) => [...prev, newUserMsg])
     setLoading(true)
     scrollToBottom()
 
@@ -130,10 +182,15 @@ export default function AiChatPage() {
     setMessages((prev) => [...prev, { role: 'assistant', content: '' }])
 
     try {
+      // 대화 히스토리: 현재 질문 직전까지의 완성된 메시지들
+      const history = messages
+        .filter((m) => m.content.trim() && !m.error)
+        .map((m) => ({ role: m.role, content: m.content }))
+
       const res = await fetch('/api/chat', {
         method:  'POST',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ question }),
+        body:    JSON.stringify({ question, history }),
       })
 
       if (!res.ok) throw new Error('API 오류')
@@ -167,6 +224,7 @@ export default function AiChatPage() {
           } catch { /* JSON 파싱 실패 무시 */ }
         }
       }
+      scrollToBottom()
     } catch {
       setMessages((prev) => {
         const next = [...prev]
@@ -179,9 +237,8 @@ export default function AiChatPage() {
       })
     } finally {
       setLoading(false)
-      scrollToBottom()
     }
-  }, [input, loading, scrollToBottom])
+  }, [input, loading, messages, scrollToBottom])
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === 'Enter' && !e.shiftKey) {

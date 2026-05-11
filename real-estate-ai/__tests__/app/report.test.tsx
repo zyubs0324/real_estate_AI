@@ -58,11 +58,19 @@ jest.mock('@/lib/supabase/diagnostics', () => ({
   saveDiagnostics: jest.fn().mockResolvedValue(undefined),
 }))
 
-jest.mock('@/lib/github-ai', () => ({
-  generateDiagnosisOpinion: jest.fn().mockResolvedValue(
-    '이 매물은 근저당이 설정되어 있어 주의가 필요합니다. 본 의견은 참고용이며 법적 효력이 없습니다.'
-  ),
-}))
+// fetch mock — /api/diagnosis/opinion 서버 라우트 시뮬레이션
+const AI_OPINION = '이 매물은 근저당이 설정되어 있어 주의가 필요합니다. 본 의견은 참고용이며 법적 효력이 없습니다.'
+let fetchMockOpinion: string | null = AI_OPINION
+
+global.fetch = jest.fn().mockImplementation((url: string) => {
+  if (url === '/api/diagnosis/opinion') {
+    return Promise.resolve({
+      ok:   true,
+      json: () => Promise.resolve({ opinion: fetchMockOpinion }),
+    })
+  }
+  return Promise.reject(new Error(`Unmocked fetch: ${url}`))
+}) as jest.Mock
 
 jest.mock('@/components/layout/Header', () => {
   const MockHeader = ({ title }: { title: string }) => <header>{title}</header>
@@ -74,7 +82,10 @@ import ReportPage from '@/app/(app)/report/page'
 
 // 모든 섹션은 비동기 로딩 후 표시 → waitFor/findBy 사용
 describe('ReportPage (U2-6)', () => {
-  beforeEach(() => jest.clearAllMocks())
+  beforeEach(() => {
+    jest.clearAllMocks()
+    fetchMockOpinion = AI_OPINION
+  })
 
   it('페이지 제목 "진단 리포트"를 렌더링한다', () => {
     render(<ReportPage />)
@@ -125,25 +136,24 @@ describe('ReportPage (U2-6)', () => {
   })
 
   it('G섹션 데이터 로드 후 AI 의견을 표시한다', async () => {
-    const { generateDiagnosisOpinion } = jest.requireMock('@/lib/github-ai')
     render(<ReportPage />)
     await waitFor(() =>
       expect(screen.getByText(/이 매물은 근저당이 설정되어 있어/)).toBeInTheDocument()
     )
-    expect(generateDiagnosisOpinion).toHaveBeenCalledWith(
-      expect.objectContaining({ address: expect.stringContaining('옥수') })
+    expect(global.fetch).toHaveBeenCalledWith(
+      '/api/diagnosis/opinion',
+      expect.objectContaining({ method: 'POST' })
     )
   })
 
   it('G섹션 AI 의견 생성 실패 시 오류 메시지를 표시한다', async () => {
-    const { generateDiagnosisOpinion } = jest.requireMock('@/lib/github-ai')
-    generateDiagnosisOpinion.mockResolvedValueOnce(null)
+    fetchMockOpinion = null
     render(<ReportPage />)
     await waitFor(() =>
       expect(screen.getByText('AI 종합 의견')).toBeInTheDocument()
     )
     await waitFor(() =>
-      expect(screen.getByText(/AI 의견을 생성하지 못했습니다|잠시 후 다시 시도|데이터 없음/)).toBeInTheDocument()
+      expect(screen.getByText(/AI 의견을 생성하지 못했습니다/)).toBeInTheDocument()
     )
   })
 

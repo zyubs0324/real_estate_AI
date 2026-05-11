@@ -15,7 +15,6 @@ import { fetchVWorld, type VWorldResult } from '@/lib/apis/vworld'
 import { fetchRealPrice, type RealPriceDeal } from '@/lib/apis/realPrice'
 import { checkRegulations, type RegulationResult } from '@/lib/regulations'
 import { saveDiagnostics } from '@/lib/supabase/diagnostics'
-import { generateDiagnosisOpinion } from '@/lib/github-ai'
 
 // ─── 스타일 ────────────────────────────────────────────────
 const S = {
@@ -213,7 +212,7 @@ function ReportContent() {
         riskItems,
       }).catch(() => {})
 
-      // U4-3: AI 종합 의견 생성 (GitHub Models gpt-4o)
+      // U4-3: AI 종합 의견 생성 — 서버 API 라우트 경유 (GITHUB_TOKEN 서버사이드 접근)
       const buildingSummary = b
         ? `${b.mainPurpose} / 지상 ${b.groundFloor}층 / 준공 ${b.approvalDate?.slice(0, 4) ?? '미상'}년`
         : undefined
@@ -225,13 +224,13 @@ function ReportContent() {
       const regulationSummary = regulationParts.length > 0 ? regulationParts.join(', ') : undefined
 
       setAiLoading(true)
-      generateDiagnosisOpinion({
-        address: roadAddr,
-        riskItems,
-        buildingSummary,
-        regulationSummary,
+      fetch('/api/diagnosis/opinion', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ address: roadAddr, riskItems, buildingSummary, regulationSummary }),
       })
-        .then((opinion) => setAiOpinion(opinion))
+        .then((res) => res.json())
+        .then(({ opinion }) => setAiOpinion(opinion ?? null))
         .catch(() => setAiOpinion(null))
         .finally(() => setAiLoading(false))
     }).finally(() => setIsLoading(false))

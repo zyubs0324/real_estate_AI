@@ -80,8 +80,10 @@ interface XmlPage {
   numOfRows: number
 }
 
-async function fetchXmlPage(url: string): Promise<XmlPage> {
-  const res = await fetch(url)
+async function fetchXmlPage(url: string, revalidate = 3600): Promise<XmlPage> {
+  // Next.js 서버사이드 캐시: 같은 URL은 revalidate 초 동안 캐싱
+  // 건축물대장 데이터는 자주 바뀌지 않으므로 1시간(3600s) 캐시 적용
+  const res = await fetch(url, { next: { revalidate } })
   const txt = await res.text()
   if (!res.ok) throw new Error(`[building] HTTP ${res.status}`)
 

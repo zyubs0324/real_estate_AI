@@ -51,7 +51,13 @@ export async function GET(req: NextRequest) {
     if (process.env.NODE_ENV !== 'production') {
       console.log(`[building-units] 결과: ${units.length}건`)
     }
-    return NextResponse.json({ units })
+    // 건축물대장 데이터는 자주 바뀌지 않으므로 1시간 캐시
+    // stale-while-revalidate: 캐시 만료 후에도 즉시 오래된 데이터를 반환하며 백그라운드 갱신
+    return NextResponse.json({ units }, {
+      headers: {
+        'Cache-Control': 'public, max-age=3600, stale-while-revalidate=86400',
+      },
+    })
   } catch (err) {
     console.error('[building-units] fetchBuildingUnits 실패:', err)
     return NextResponse.json({ units: [], error: 'upstream_error' }, { status: 502 })

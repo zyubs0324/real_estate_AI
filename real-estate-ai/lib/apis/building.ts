@@ -200,10 +200,16 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
   return list
     .map((it) => {
       const row = it as Record<string, unknown>
+      // API 응답 필드:
+      //   dongNm = "302"   (숫자만, "동" suffix 없음) → "302동"으로 정규화
+      //   hoNm   = "407호" (suffix 있음) — 필드명이 ho 가 아닌 hoNm 임에 주의
+      const rawDong = String(row.dongNm ?? '').trim()
+      const dong    = rawDong && /^\d+$/.test(rawDong) ? `${rawDong}동` : rawDong
+      const rawHo   = String(row.hoNm ?? row.ho ?? '').trim() // hoNm 우선, mock 호환용 ho 폴백
       return {
-        dongNm: String(row.dongNm ?? '').trim(),
+        dongNm: dong,
         flrNo:  String(row.flrNo  ?? '').trim(),
-        ho:     String(row.ho     ?? '').trim(),
+        ho:     rawHo,
         area:   Number(row.area   ?? 0),
       }
     })

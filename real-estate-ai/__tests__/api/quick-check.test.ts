@@ -9,6 +9,9 @@ jest.mock('@/lib/apis/building', () => ({
     totalFloorArea: 5000, groundFloor: 10, undergroundFloor: 1,
     isViolation: false, approvalDate: '2010-01-01',
   }),
+  buildingQueryFromJuso: jest.fn().mockReturnValue({
+    sigunguCd: '11200', bjdongCd: '10200', bun: '0001', ji: '0000', platGbCd: '0',
+  }),
 }))
 
 jest.mock('@/lib/apis/registry', () => ({
@@ -36,6 +39,10 @@ const mockSaveDiagnostics = saveDiagnostics as jest.Mock
 
 const INPUT = {
   bdMgtSn:  '1120010200100010000000000',
+  admCd:    '1120010200',
+  lnbrMnnm: 1,
+  lnbrSlno: 0,
+  mtYn:     '0',
   roadAddr: '서울특별시 성동구 옥수로 100',
   siNm: '서울특별시', sggNm: '성동구', emdNm: '옥수동',
 }
@@ -67,7 +74,7 @@ describe('runQuickCheck (U3-3)', () => {
     await runQuickCheck(INPUT)
     expect(mockSaveDiagnostics).toHaveBeenCalledTimes(1)
     expect(mockSaveDiagnostics).toHaveBeenCalledWith(
-      expect.objectContaining({ bdMgtSn: INPUT.bdMgtSn })
+      expect.objectContaining({ roadAddr: INPUT.roadAddr })
     )
   })
 

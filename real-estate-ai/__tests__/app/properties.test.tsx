@@ -7,6 +7,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn() }),
   usePathname: () => '/properties',
+  useSearchParams: () => new URLSearchParams(),
 }))
 
 jest.mock('@/lib/supabase/properties', () => ({

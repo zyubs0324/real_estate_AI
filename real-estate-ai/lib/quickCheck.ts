@@ -2,18 +2,22 @@
  * Quick Check 핵심 로직 — API Route와 분리하여 독립 테스트 가능
  * U3-3: 매물 등록 후 자동 실행
  */
-import { fetchBuilding } from '@/lib/apis/building'
+import { fetchBuilding, buildingQueryFromJuso } from '@/lib/apis/building'
 import { fetchRegistry, toRiskItems } from '@/lib/apis/registry'
 import { checkRegulations } from '@/lib/regulations'
 import { saveDiagnostics } from '@/lib/supabase/diagnostics'
 import type { QuickCheckItem as RiskItem } from '@/components/report/QuickCheck'
 
 export interface QuickCheckInput {
-  bdMgtSn:  string
-  roadAddr: string
-  siNm:     string
-  sggNm:    string
-  emdNm:    string
+  bdMgtSn:   string
+  admCd?:    string   // 건축물대장 조회용 (10자리 행정구역코드)
+  lnbrMnnm?: number  // 지번 본번
+  lnbrSlno?: number  // 지번 부번
+  mtYn?:     string  // 산 여부 ('0'|'1')
+  roadAddr:  string
+  siNm:      string
+  sggNm:     string
+  emdNm:     string
 }
 
 export interface QuickCheckOutput {
@@ -22,12 +26,17 @@ export interface QuickCheckOutput {
 }
 
 export async function runQuickCheck(input: QuickCheckInput): Promise<QuickCheckOutput> {
-  const { bdMgtSn, roadAddr, siNm, sggNm, emdNm } = input
+  const { bdMgtSn, admCd, lnbrMnnm = 0, lnbrSlno = 0, mtYn = '0', roadAddr, siNm, sggNm, emdNm } = input
   const riskItems: RiskItem[] = []
 
   try {
+    // 건축물대장은 admCd 기반 쿼리 우선, 없으면 스킵
+    const buildingQuery = admCd
+      ? buildingQueryFromJuso({ admCd, lnbrMnnm, lnbrSlno, mtYn })
+      : null
+
     const [building, registry] = await Promise.all([
-      fetchBuilding(bdMgtSn).catch(() => null),
+      buildingQuery ? fetchBuilding(buildingQuery).catch(() => null) : Promise.resolve(null),
       fetchRegistry(bdMgtSn).catch(() => null),
     ])
 

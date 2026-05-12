@@ -5,12 +5,12 @@
 // U3-2: 매물 등록 폼 + DB 저장
 // U3-4: 슬라이드 패널
 
-import { useCallback, useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import AddressSearch from '@/components/address/AddressSearch'
 import type { JusoResult } from '@/lib/apis/juso'
-import { fetchBuilding, fetchBuildingUnits, type BuildingUnit } from '@/lib/apis/building'
+import { fetchBuilding, fetchBuildingUnits, buildingQueryFromJuso, type BuildingUnit } from '@/lib/apis/building'
 import { saveProperty, listProperties, updatePropertyLabels, getPropertyMemos, addPropertyMemo, deletePropertyMemo, type PropertyRow, type SavePropertyPayload, type PropertyMemoRow } from '@/lib/supabase/properties'
 import MemoSection, { type MemoSavePayload } from '@/components/common/MemoSection'
 
@@ -319,22 +319,64 @@ const EMPTY_MSG: Record<TabKey, { title: string; desc: string }> = {
 }
 
 // ─── 매물 등록 폼 ────────────────────────────────────────
+
+/** 빠른 주소 검색에서 전달된 사전 입력 데이터 */
+export interface PropertyFormPrefill {
+  roadAddr:     string
+  bdMgtSn:      string
+  admCd:        string
+  lnbrMnnm:     string
+  lnbrSlno:     string
+  mtYn:         string
+  bdNm?:        string
+  dong?:        string
+  ho?:          string
+  propertyType?: string
+}
+
 interface PropertyFormProps {
-  onClose: () => void
-  onSaved: () => void
+  onClose:   () => void
+  onSaved:   () => void
+  prefill?:  PropertyFormPrefill
 }
 
 type BldTypeSource = 'idle' | 'loading' | 'api' | 'manual'
 type UnitSource    = 'idle' | 'loading' | 'list' | 'text'
 
-function PropertyForm({ onClose, onSaved }: PropertyFormProps) {
-  const [addr,          setAddr]          = useState<JusoResult | null>(null)
-  const [bldType,       setBldType]       = useState('')
-  const [bldTypeSource, setBldTypeSource] = useState<BldTypeSource>('idle')
-  const [dong,          setDong]          = useState('')          // detBdNmList 자동 저장
+function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
+  // prefill이 있으면 JusoResult와 유사한 구조로 초기화
+  const initAddr: JusoResult | null = prefill ? {
+    roadAddr:      prefill.roadAddr,
+    roadAddrPart1: prefill.roadAddr,
+    jibunAddr:     '',
+    zipNo:         '',
+    admCd:         prefill.admCd,
+    rnMgtSn:       '',
+    bdMgtSn:       prefill.bdMgtSn,
+    detBdNmList:   prefill.dong ?? '',
+    bdNm:          prefill.bdNm ?? '',
+    bdKdcd:        '',
+    siNm:          '',
+    sggNm:         '',
+    emdNm:         '',
+    liNm:          '',
+    rn:            '',
+    udrtYn:        '',
+    buldMnnm:      0,
+    buldSlno:      0,
+    mtYn:          prefill.mtYn,
+    lnbrMnnm:      Number(prefill.lnbrMnnm),
+    lnbrSlno:      Number(prefill.lnbrSlno),
+    emdNo:         '',
+  } : null
+
+  const [addr,          setAddr]          = useState<JusoResult | null>(initAddr)
+  const [bldType,       setBldType]       = useState(prefill?.propertyType ?? '')
+  const [bldTypeSource, setBldTypeSource] = useState<BldTypeSource>(prefill?.propertyType ? 'api' : 'idle')
+  const [dong,          setDong]          = useState(prefill?.dong ?? '')
   const [units,         setUnits]         = useState<BuildingUnit[]>([])
-  const [unitSource,    setUnitSource]    = useState<UnitSource>('idle')
-  const [unit,          setUnit]          = useState('')
+  const [unitSource,    setUnitSource]    = useState<UnitSource>(prefill?.ho ? 'text' : 'idle')
+  const [unit,          setUnit]          = useState(prefill?.ho ? `${prefill.ho}호` : '')
   const [deal,          setDeal]          = useState('')
   const [status,        setStatus]        = useState('공실')
   const [saving,        setSaving]        = useState(false)
@@ -354,9 +396,10 @@ function PropertyForm({ onClose, onSaved }: PropertyFormProps) {
 
     try {
       // 표제부(건물유형)와 전유부(호수 목록) 병렬 조회
+      const bq = buildingQueryFromJuso(r)
       const [bldResult, unitList] = await Promise.all([
-        fetchBuilding(r.bdMgtSn),
-        fetchBuildingUnits(r.bdMgtSn),
+        fetchBuilding(bq),
+        fetchBuildingUnits(bq),
       ])
 
       // 건물유형 — API 원문 그대로 저장 (매핑 없음)
@@ -403,11 +446,15 @@ function PropertyForm({ onClose, onSaved }: PropertyFormProps) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          bdMgtSn:  addr.bdMgtSn,
-          roadAddr: addr.roadAddr,
-          siNm:     addr.siNm,
-          sggNm:    addr.sggNm,
-          emdNm:    addr.emdNm,
+          bdMgtSn:   addr.bdMgtSn,
+          admCd:     addr.admCd,
+          lnbrMnnm:  addr.lnbrMnnm,
+          lnbrSlno:  addr.lnbrSlno,
+          mtYn:      addr.mtYn,
+          roadAddr:  addr.roadAddr,
+          siNm:      addr.siNm,
+          sggNm:     addr.sggNm,
+          emdNm:     addr.emdNm,
         }),
       }).catch(() => {/* Quick Check 실패는 무시 */})
 
@@ -742,14 +789,51 @@ function PropertyPanel({ row, onClose, onLabelChange }: PropertyPanelProps) {
   )
 }
 
-// ─── 페이지 ──────────────────────────────────────────────
-export default function PropertiesPage() {
+// ─── URL 파라미터 유효성 검증 헬퍼 ──────────────────────
+function safeIntParam(searchParams: ReturnType<typeof useSearchParams>, key: string, fallback = '0'): string {
+  const raw = searchParams.get(key) ?? fallback
+  const n   = Number(raw)
+  return Number.isFinite(n) ? String(Math.floor(n)) : fallback
+}
+
+// ─── 페이지 내부 (useSearchParams → Suspense 필수) ────────
+function PropertiesPageInner() {
+  const searchParams = useSearchParams()
   const [activeTab,    setActiveTab]    = useState<TabKey>('all')
   const [dealType,     setDealType]     = useState('')
   const [showForm,     setShowForm]     = useState(false)
+  const [formPrefill,  setFormPrefill]  = useState<PropertyFormPrefill | undefined>()
   const [rows,         setRows]         = useState<PropertyRow[]>([])
   const [loading,      setLoading]      = useState(false)
   const [selectedRow,  setSelectedRow]  = useState<PropertyRow | null>(null)
+  const prefillApplied = useRef(false)
+
+  // 빠른 주소 검색의 "매물로 등록" 버튼에서 redirect 시 폼 자동 오픈
+  useEffect(() => {
+    if (prefillApplied.current) return
+    if (searchParams.get('register') !== '1') return
+    prefillApplied.current = true
+
+    const roadAddr = searchParams.get('roadAddr') ?? ''
+    const bdMgtSn  = searchParams.get('bdMgtSn')  ?? ''
+    const admCd    = searchParams.get('admCd')    ?? ''
+    if (!roadAddr || !bdMgtSn) return
+
+    const pf: PropertyFormPrefill = {
+      roadAddr,
+      bdMgtSn,
+      admCd,
+      lnbrMnnm:     safeIntParam(searchParams, 'lnbrMnnm'),
+      lnbrSlno:     safeIntParam(searchParams, 'lnbrSlno'),
+      mtYn:         searchParams.get('mtYn') === '1' ? '1' : '0',
+      bdNm:         searchParams.get('bdNm')        || undefined,
+      dong:         searchParams.get('dong')        || undefined,
+      ho:           searchParams.get('ho')          || undefined,
+      propertyType: searchParams.get('propertyType') || undefined,
+    }
+    setFormPrefill(pf)
+    setShowForm(true)
+  }, [searchParams])
 
   const loadList = useCallback(async () => {
     setLoading(true)
@@ -849,8 +933,9 @@ export default function PropertiesPage() {
       {/* 매물 등록 폼 모달 */}
       {showForm && (
         <PropertyForm
-          onClose={() => setShowForm(false)}
-          onSaved={() => { setShowForm(false); loadList() }}
+          onClose={() => { setShowForm(false); setFormPrefill(undefined) }}
+          onSaved={() => { setShowForm(false); setFormPrefill(undefined); loadList() }}
+          prefill={formPrefill}
         />
       )}
 
@@ -870,5 +955,15 @@ export default function PropertiesPage() {
         </>
       )}
     </>
+  )
+}
+
+// ─── 페이지 (Suspense 경계) ──────────────────────────────
+// useSearchParams()는 Next.js App Router에서 Suspense 내부에서만 사용 가능
+export default function PropertiesPage() {
+  return (
+    <Suspense fallback={null}>
+      <PropertiesPageInner />
+    </Suspense>
   )
 }

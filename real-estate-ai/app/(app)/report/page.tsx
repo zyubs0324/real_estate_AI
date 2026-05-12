@@ -9,10 +9,10 @@ import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import QuickCheck, { type QuickCheckResult } from '@/components/report/QuickCheck'
 import RiskBadge from '@/components/report/RiskBadge'
-import { fetchBuilding, type BuildingResult } from '@/lib/apis/building'
-import { fetchRegistry, toRiskItems, type RegistryResult } from '@/lib/apis/registry'
-import { fetchVWorld, type VWorldResult } from '@/lib/apis/vworld'
-import { fetchRealPrice, type RealPriceDeal } from '@/lib/apis/realPrice'
+import { buildingQueryFromJuso, type BuildingResult } from '@/lib/apis/building'
+import { toRiskItems, type RegistryResult } from '@/lib/apis/registry'
+import type { VWorldResult } from '@/lib/apis/vworld'
+import type { RealPriceDeal } from '@/lib/apis/realPrice'
 import { checkRegulations, type RegulationResult } from '@/lib/regulations'
 import { saveDiagnostics } from '@/lib/supabase/diagnostics'
 
@@ -120,13 +120,30 @@ const S = {
 }
 
 // ─── 유틸 ────────────────────────────────────────────────
-function formatAmount(won: number): string {
+function formatWon(won: number): string {
   if (won >= 100000000) {
     const eok = Math.floor(won / 100000000)
     const man = Math.floor((won % 100000000) / 10000)
     return man > 0 ? `${eok}억 ${man.toLocaleString('ko-KR')}만원` : `${eok}억원`
   }
   return `${Math.floor(won / 10000).toLocaleString('ko-KR')}만원`
+}
+
+function formatDealPrice(deal: RealPriceDeal): string {
+  if (deal.dealType === '월세') {
+    const monthly = Math.floor(deal.monthlyRent / 10000).toLocaleString('ko-KR')
+    return `월세 ${monthly}만 / 보증 ${formatWon(deal.dealAmount)}`
+  }
+  if (deal.dealType === '전세') {
+    return `전세 ${formatWon(deal.dealAmount)}`
+  }
+  return formatWon(deal.dealAmount)
+}
+
+function dealTypeColor(dealType: string): string {
+  if (dealType === '전세') return '#0071e3'
+  if (dealType === '월세') return '#ff9f0a'
+  return '#1d1d1f'
 }
 
 // ─── 섹션 레이블 ─────────────────────────────────────────
@@ -155,13 +172,19 @@ export default function ReportPage() {
 
 function ReportContent() {
   const params = useSearchParams()
-  const bdMgtSn  = params.get('bdMgtSn')  ?? ''
-  const roadAddr = params.get('roadAddr') ?? ''
-  const siNm     = params.get('siNm')     ?? ''
+  const bdMgtSn      = params.get('bdMgtSn')      ?? ''
+  const roadAddr     = params.get('roadAddr')     ?? ''
+  const bdNm         = params.get('bdNm')         ?? ''   // 건물명 (아파트 aptNm 필터용)
+  const siNm         = params.get('siNm')         ?? ''
   const sggNm    = params.get('sggNm')    ?? ''
   const emdNm    = params.get('emdNm')    ?? ''
+  const admCd    = params.get('admCd')    ?? ''
+  const lnbrMnnm = params.get('lnbrMnnm') ?? '0'
+  const lnbrSlno = params.get('lnbrSlno') ?? '0'
+  const mtYn     = params.get('mtYn')     ?? '0'
 
-  const [isLoading, setIsLoading] = useState(!!bdMgtSn)
+  const hasAddr = !!(bdMgtSn || admCd)
+  const [isLoading, setIsLoading] = useState(hasAddr)
   const [building,  setBuilding]  = useState<BuildingResult | null>(null)
   const [registry,  setRegistry]  = useState<RegistryResult | null>(null)
   const [vworld,    setVworld]    = useState<VWorldResult | null>(null)
@@ -172,15 +195,35 @@ function ReportContent() {
   const [aiLoading,  setAiLoading]  = useState(false)
 
   useEffect(() => {
-    if (!bdMgtSn) return
+    if (!hasAddr) return
 
     setIsLoading(true)
-    Promise.all([
-      fetchBuilding(bdMgtSn),
-      fetchRegistry(bdMgtSn),
-      fetchVWorld(bdMgtSn),
-      fetchRealPrice(bdMgtSn),
-    ]).then(([b, r, v, d]) => {
+
+    // 4개 API 서버사이드 프록시 경유 (클라이언트에서 env var 접근 불가)
+    const bq = admCd
+      ? buildingQueryFromJuso({ admCd, lnbrMnnm: Number(lnbrMnnm), lnbrSlno: Number(lnbrSlno), mtYn })
+      : null
+
+    const qs = new URLSearchParams({ bdMgtSn })
+    if (roadAddr)  qs.set('roadAddr',     roadAddr)
+    if (lnbrMnnm) qs.set('lnbrMnnm',    lnbrMnnm)
+    if (bdNm)     qs.set('buildingName', bdNm)
+    if (bq) {
+      qs.set('sigunguCd', bq.sigunguCd)
+      qs.set('bjdongCd',  bq.bjdongCd)
+      if (bq.bun)      qs.set('bun',      bq.bun)
+      if (bq.ji)       qs.set('ji',       bq.ji)
+      if (bq.platGbCd) qs.set('platGbCd', bq.platGbCd)
+    }
+
+    fetch(`/api/property-data?${qs}`)
+      .then((res) => res.json() as Promise<{
+        building: BuildingResult | null
+        registry: RegistryResult | null
+        vworld:   VWorldResult   | null
+        deals:    RealPriceDeal[]
+      }>)
+      .then(({ building: b, registry: r, vworld: v, deals: d }) => {
       setBuilding(b)
       setRegistry(r)
       setVworld(v)
@@ -199,7 +242,7 @@ function ReportContent() {
       setQuickCheck({ items: riskItems, checkedAt: today })
 
       saveDiagnostics({
-        bdMgtSn, roadAddr,
+        bdMgtSn: bdMgtSn || admCd, roadAddr,
         hasViolation: b?.isViolation ?? false,
         hasMortgage:  r?.hasMortgage ?? false,
         hasSeizure:   r?.hasSeizure  ?? false,
@@ -234,9 +277,9 @@ function ReportContent() {
         .catch(() => setAiOpinion(null))
         .finally(() => setAiLoading(false))
     }).finally(() => setIsLoading(false))
-  }, [bdMgtSn]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [bdMgtSn, admCd]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  if (!bdMgtSn) {
+  if (!hasAddr) {
     return (
       <>
         <Header title="진단 리포트" />
@@ -351,9 +394,11 @@ function ReportContent() {
                   {deals.slice(0, 5).map((deal, idx) => (
                     <div key={idx} style={{ ...S.dealRow, ...(idx === deals.length - 1 || idx === 4 ? { borderBottom: 'none' } : {}) }}>
                       <div>
-                        <div style={S.dealAmount}>{formatAmount(deal.dealAmount)}</div>
+                        <div style={{ ...S.dealAmount, color: dealTypeColor(deal.dealType) }}>
+                          {formatDealPrice(deal)}
+                        </div>
                         <div style={S.dealMeta}>
-                          {deal.dealYear}.{String(deal.dealMonth).padStart(2, '0')}.{String(deal.dealDay).padStart(2, '0')} · {deal.area}㎡ · {deal.floor}층 · {deal.dealType}
+                          {deal.dealYear}.{String(deal.dealMonth).padStart(2, '0')}.{String(deal.dealDay).padStart(2, '0')} · {deal.buildingType} · {deal.area}㎡ · {deal.floor}층 · {deal.dealType}
                         </div>
                       </div>
                     </div>

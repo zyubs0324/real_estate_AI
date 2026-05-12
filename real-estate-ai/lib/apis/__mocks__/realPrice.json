@@ -10,7 +10,25 @@
         "area": 84.92,
         "floor": 8,
         "dealAmount": 1050000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "아파트",
+        "dealingGbn": "중개거래",
+        "buildYear": 2003
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 2,
+        "dealDay": 10,
+        "apartName": "옥수하이츠",
+        "area": 59.67,
+        "floor": 5,
+        "dealAmount": 500000000,
+        "monthlyRent": 0,
+        "dealType": "전세",
+        "buildingType": "아파트",
+        "dealingGbn": "",
+        "buildYear": 2003
       },
       {
         "dealYear": 2025,
@@ -20,7 +38,25 @@
         "area": 59.67,
         "floor": 12,
         "dealAmount": 820000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "아파트",
+        "dealingGbn": "직거래",
+        "buildYear": 2003
+      },
+      {
+        "dealYear": 2024,
+        "dealMonth": 12,
+        "dealDay": 5,
+        "apartName": "옥수하이츠",
+        "area": 46.2,
+        "floor": 3,
+        "dealAmount": 200000000,
+        "monthlyRent": 800000,
+        "dealType": "월세",
+        "buildingType": "아파트",
+        "dealingGbn": "",
+        "buildYear": 2003
       },
       {
         "dealYear": 2024,
@@ -30,7 +66,11 @@
         "area": 84.92,
         "floor": 5,
         "dealAmount": 980000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "아파트",
+        "dealingGbn": "중개거래",
+        "buildYear": 2003
       }
     ]
   },
@@ -39,13 +79,45 @@
     "deals": [
       {
         "dealYear": 2025,
+        "dealMonth": 4,
+        "dealDay": 18,
+        "apartName": "현대빌라",
+        "area": 65.3,
+        "floor": 2,
+        "dealAmount": 320000000,
+        "monthlyRent": 0,
+        "dealType": "전세",
+        "buildingType": "연립다세대",
+        "dealingGbn": "",
+        "buildYear": 1998
+      },
+      {
+        "dealYear": 2025,
         "dealMonth": 2,
         "dealDay": 3,
-        "apartName": "",
+        "apartName": "현대빌라",
         "area": 72.5,
         "floor": 2,
         "dealAmount": 650000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "연립다세대",
+        "dealingGbn": "중개거래",
+        "buildYear": 1998
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 1,
+        "dealDay": 20,
+        "apartName": "현대빌라",
+        "area": 52.8,
+        "floor": 1,
+        "dealAmount": 100000000,
+        "monthlyRent": 700000,
+        "dealType": "월세",
+        "buildingType": "연립다세대",
+        "dealingGbn": "",
+        "buildYear": 1998
       }
     ]
   },
@@ -60,7 +132,25 @@
         "area": 235.62,
         "floor": 15,
         "dealAmount": 8900000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "아파트",
+        "dealingGbn": "중개거래",
+        "buildYear": 2011
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 3,
+        "dealDay": 5,
+        "apartName": "한남더힐",
+        "area": 170.1,
+        "floor": 9,
+        "dealAmount": 3000000000,
+        "monthlyRent": 0,
+        "dealType": "전세",
+        "buildingType": "아파트",
+        "dealingGbn": "",
+        "buildYear": 2011
       },
       {
         "dealYear": 2025,
@@ -70,7 +160,58 @@
         "area": 170.1,
         "floor": 9,
         "dealAmount": 6500000000,
-        "dealType": "매매"
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "아파트",
+        "dealingGbn": "중개거래",
+        "buildYear": 2011
+      }
+    ]
+  },
+  {
+    "bdMgtSn": "1111010100100010000000000",
+    "deals": [
+      {
+        "dealYear": 2025,
+        "dealMonth": 4,
+        "dealDay": 2,
+        "apartName": "단독주택",
+        "area": 120.0,
+        "floor": 1,
+        "dealAmount": 850000000,
+        "monthlyRent": 0,
+        "dealType": "매매",
+        "buildingType": "단독다가구",
+        "dealingGbn": "중개거래",
+        "buildYear": 1985
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 3,
+        "dealDay": 14,
+        "apartName": "다가구주택",
+        "area": 45.5,
+        "floor": 2,
+        "dealAmount": 150000000,
+        "monthlyRent": 500000,
+        "dealType": "월세",
+        "buildingType": "단독다가구",
+        "dealingGbn": "",
+        "buildYear": 1985
+      },
+      {
+        "dealYear": 2025,
+        "dealMonth": 2,
+        "dealDay": 20,
+        "apartName": "다가구주택",
+        "area": 66.2,
+        "floor": 1,
+        "dealAmount": 280000000,
+        "monthlyRent": 0,
+        "dealType": "전세",
+        "buildingType": "단독다가구",
+        "dealingGbn": "",
+        "buildYear": 1985
       }
     ]
   }

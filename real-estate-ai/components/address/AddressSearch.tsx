@@ -10,6 +10,12 @@ interface AddressSearchProps {
   onSelect: (result: JusoResult) => void
   placeholder?: string
   disabled?: boolean
+  /**
+   * Juso bdKdcd 기반 건물 종류 필터.
+   * '0' = 단독주택만, '1' = 공동주택(아파트·오피스텔·연립)만.
+   * 미설정 시 전체 반환.
+   */
+  bdKdcdFilter?: '0' | '1'
 }
 
 const S = {
@@ -118,6 +124,7 @@ export default function AddressSearch({
   onSelect,
   placeholder = '도로명 또는 지번 주소 입력 (예: 성동구 옥수)',
   disabled = false,
+  bdKdcdFilter,
 }: AddressSearchProps) {
   const [query, setQuery] = useState('')
   const [results, setResults] = useState<JusoResult[]>([])
@@ -149,14 +156,19 @@ export default function AddressSearch({
     setIsLoading(true)
     try {
       const data = await fetchJuso(q)
-      setResults(data)
+      // bdKdcdFilter가 설정된 경우 클라이언트 필터링
+      // Juso API는 bdKdcd 파라미터를 지원하지 않으므로 응답 후 필터
+      const filtered = bdKdcdFilter
+        ? data.filter((item) => item.bdKdcd === bdKdcdFilter)
+        : data
+      setResults(filtered)
       setIsOpen(true)
     } catch {
       setResults([])
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [bdKdcdFilter])
 
   function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const val = e.target.value

@@ -1,16 +1,20 @@
 /**
  * U2-6: 진단 리포트 페이지 테스트
- * /report?bdMgtSn=...&roadAddr=...&siNm=...&sggNm=...&emdNm=...
+ * /report?bdMgtSn=...&admCd=...&roadAddr=...&siNm=...&sggNm=...&emdNm=...
  */
 import { render, screen, waitFor } from '@testing-library/react'
 
 // next/navigation 모킹
 const mockSearchParams = new URLSearchParams({
-  bdMgtSn: '1120010200100010000000000',
+  bdMgtSn:  '1120010200100010000000000',
+  admCd:    '1120010200',
+  lnbrMnnm: '1',
+  lnbrSlno: '0',
+  mtYn:     '0',
   roadAddr: '서울특별시 성동구 옥수동 옥수로 100',
-  siNm: '서울특별시',
-  sggNm: '성동구',
-  emdNm: '옥수동',
+  siNm:     '서울특별시',
+  sggNm:    '성동구',
+  emdNm:    '옥수동',
 })
 
 jest.mock('next/navigation', () => ({
@@ -24,6 +28,9 @@ jest.mock('@/lib/apis/building', () => ({
     buildingName: '옥수하이츠', mainPurpose: '공동주택(아파트)',
     totalFloorArea: 12500.5, groundFloor: 15, undergroundFloor: 2,
     isViolation: false, approvalDate: '2005-06-30',
+  }),
+  buildingQueryFromJuso: jest.fn().mockReturnValue({
+    sigunguCd: '11200', bjdongCd: '10200', bun: '0001', ji: '0000', platGbCd: '0',
   }),
 }))
 
@@ -58,16 +65,27 @@ jest.mock('@/lib/supabase/diagnostics', () => ({
   saveDiagnostics: jest.fn().mockResolvedValue(undefined),
 }))
 
-// fetch mock — /api/diagnosis/opinion 서버 라우트 시뮬레이션
+// fetch mock — /api/property-data 및 /api/diagnosis/opinion 시뮬레이션
 const AI_OPINION = '이 매물은 근저당이 설정되어 있어 주의가 필요합니다. 본 의견은 참고용이며 법적 효력이 없습니다.'
 let fetchMockOpinion: string | null = AI_OPINION
 
-global.fetch = jest.fn().mockImplementation((url: string) => {
+const { fetchBuilding: mockFetchBuilding } = require('@/lib/apis/building')
+const { fetchRegistry: mockFetchRegistry, toRiskItems: mockToRiskItems } = require('@/lib/apis/registry')
+const { fetchVWorld: mockFetchVWorld } = require('@/lib/apis/vworld')
+const { fetchRealPrice: mockFetchRealPrice } = require('@/lib/apis/realPrice')
+
+global.fetch = jest.fn().mockImplementation(async (url: string) => {
+  if (typeof url === 'string' && url.startsWith('/api/property-data')) {
+    const [building, registry, vworld, deals] = await Promise.all([
+      mockFetchBuilding(),
+      mockFetchRegistry(),
+      mockFetchVWorld(),
+      mockFetchRealPrice(),
+    ])
+    return { ok: true, json: () => Promise.resolve({ building, registry, vworld, deals }) }
+  }
   if (url === '/api/diagnosis/opinion') {
-    return Promise.resolve({
-      ok:   true,
-      json: () => Promise.resolve({ opinion: fetchMockOpinion }),
-    })
+    return { ok: true, json: () => Promise.resolve({ opinion: fetchMockOpinion }) }
   }
   return Promise.reject(new Error(`Unmocked fetch: ${url}`))
 }) as jest.Mock

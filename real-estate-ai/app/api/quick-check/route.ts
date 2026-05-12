@@ -14,12 +14,28 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
     return NextResponse.json({ error: 'Invalid JSON' }, { status: 400 })
   }
 
-  const { bdMgtSn, roadAddr = '', siNm = '', sggNm = '', emdNm = '' } = body
+  const {
+    bdMgtSn   = '',
+    admCd     = '',
+    lnbrMnnm  = '0',
+    lnbrSlno  = '0',
+    mtYn      = '0',
+    roadAddr  = '',
+    siNm      = '',
+    sggNm     = '',
+    emdNm     = '',
+  } = body
 
-  if (!bdMgtSn) {
-    return NextResponse.json({ error: 'bdMgtSn is required' }, { status: 400 })
+  if (!bdMgtSn && !admCd) {
+    return NextResponse.json({ error: 'bdMgtSn or admCd is required' }, { status: 400 })
   }
 
-  const result = await runQuickCheck({ bdMgtSn, roadAddr, siNm, sggNm, emdNm })
+  const result = await runQuickCheck({
+    bdMgtSn, admCd,
+    lnbrMnnm: Number(lnbrMnnm),
+    lnbrSlno: Number(lnbrSlno),
+    mtYn,
+    roadAddr, siNm, sggNm, emdNm,
+  })
   return NextResponse.json(result)
 }

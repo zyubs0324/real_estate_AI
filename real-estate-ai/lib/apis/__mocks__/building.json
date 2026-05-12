@@ -8,7 +8,7 @@
       "undergroundFloor": 2,
       "isViolation": false,
       "approvalDate": "2005-06-30",
-      "bdMgtSn": "1120010200100010000000000"
+      "mgmBldrgstPk": "1120010200100010000000000"
     },
     {
       "buildingName": "",
@@ -18,7 +18,7 @@
       "undergroundFloor": 0,
       "isViolation": false,
       "approvalDate": "1998-03-15",
-      "bdMgtSn": "1120010200200010000000000"
+      "mgmBldrgstPk": "1120010200200010000000000"
     },
     {
       "buildingName": "한남더힐",
@@ -28,53 +28,39 @@
       "undergroundFloor": 4,
       "isViolation": false,
       "approvalDate": "2011-11-01",
-      "bdMgtSn": "1117010700100010000000000"
+      "mgmBldrgstPk": "1117010700100010000000000"
     }
   ],
-  "units": {
-    "1120010200100010000000000": [
-      { "flrNo": "1",  "ho": "101", "area": 84.9 },
-      { "flrNo": "1",  "ho": "102", "area": 59.8 },
-      { "flrNo": "2",  "ho": "201", "area": 84.9 },
-      { "flrNo": "2",  "ho": "202", "area": 59.8 },
-      { "flrNo": "3",  "ho": "301", "area": 84.9 },
-      { "flrNo": "3",  "ho": "302", "area": 59.8 },
-      { "flrNo": "4",  "ho": "401", "area": 84.9 },
-      { "flrNo": "4",  "ho": "402", "area": 59.8 },
-      { "flrNo": "5",  "ho": "501", "area": 84.9 },
-      { "flrNo": "5",  "ho": "502", "area": 59.8 },
-      { "flrNo": "6",  "ho": "601", "area": 84.9 },
-      { "flrNo": "6",  "ho": "602", "area": 59.8 },
-      { "flrNo": "7",  "ho": "701", "area": 84.9 },
-      { "flrNo": "7",  "ho": "702", "area": 59.8 },
-      { "flrNo": "8",  "ho": "801", "area": 84.9 },
-      { "flrNo": "8",  "ho": "802", "area": 59.8 },
-      { "flrNo": "9",  "ho": "901", "area": 84.9 },
-      { "flrNo": "9",  "ho": "902", "area": 59.8 },
-      { "flrNo": "10", "ho": "1001", "area": 84.9 },
-      { "flrNo": "10", "ho": "1002", "area": 59.8 },
-      { "flrNo": "11", "ho": "1101", "area": 84.9 },
-      { "flrNo": "11", "ho": "1102", "area": 59.8 },
-      { "flrNo": "12", "ho": "1201", "area": 84.9 },
-      { "flrNo": "12", "ho": "1202", "area": 59.8 },
-      { "flrNo": "13", "ho": "1301", "area": 84.9 },
-      { "flrNo": "13", "ho": "1302", "area": 59.8 },
-      { "flrNo": "14", "ho": "1401", "area": 84.9 },
-      { "flrNo": "14", "ho": "1402", "area": 59.8 },
-      { "flrNo": "15", "ho": "1501", "area": 84.9 },
-      { "flrNo": "15", "ho": "1502", "area": 59.8 }
-    ],
-    "1117010700100010000000000": [
-      { "flrNo": "1",  "ho": "101", "area": 244.2 },
-      { "flrNo": "2",  "ho": "201", "area": 244.2 },
-      { "flrNo": "3",  "ho": "301", "area": 244.2 },
-      { "flrNo": "4",  "ho": "401", "area": 244.2 },
-      { "flrNo": "5",  "ho": "501", "area": 244.2 },
-      { "flrNo": "6",  "ho": "601", "area": 244.2 },
-      { "flrNo": "7",  "ho": "701", "area": 244.2 },
-      { "flrNo": "8",  "ho": "801", "area": 244.2 },
-      { "flrNo": "9",  "ho": "901", "area": 244.2 },
-      { "flrNo": "10", "ho": "1001", "area": 244.2 }
-    ]
-  }
+  "units": [
+    { "dongNm": "101동", "flrNo": "1",  "ho": "101", "area": 84.9 },
+    { "dongNm": "101동", "flrNo": "1",  "ho": "102", "area": 59.8 },
+    { "dongNm": "101동", "flrNo": "2",  "ho": "201", "area": 84.9 },
+    { "dongNm": "101동", "flrNo": "2",  "ho": "202", "area": 59.8 },
+    { "dongNm": "101동", "flrNo": "3",  "ho": "301", "area": 84.9 },
+    { "dongNm": "101동", "flrNo": "3",  "ho": "302", "area": 59.8 },
+    { "dongNm": "101동", "flrNo": "4",  "ho": "401", "area": 84.9 },
+    { "dongNm": "101동", "flrNo": "4",  "ho": "402", "area": 59.8 },
+    { "dongNm": "101동", "flrNo": "5",  "ho": "501", "area": 84.9 },
+    { "dongNm": "101동", "flrNo": "5",  "ho": "502", "area": 59.8 },
+    { "dongNm": "102동", "flrNo": "1",  "ho": "101", "area": 84.9 },
+    { "dongNm": "102동", "flrNo": "1",  "ho": "102", "area": 59.8 },
+    { "dongNm": "102동", "flrNo": "2",  "ho": "201", "area": 84.9 },
+    { "dongNm": "102동", "flrNo": "2",  "ho": "202", "area": 59.8 },
+    { "dongNm": "102동", "flrNo": "3",  "ho": "301", "area": 84.9 },
+    { "dongNm": "102동", "flrNo": "3",  "ho": "302", "area": 59.8 },
+    { "dongNm": "102동", "flrNo": "4",  "ho": "401", "area": 84.9 },
+    { "dongNm": "102동", "flrNo": "4",  "ho": "402", "area": 59.8 },
+    { "dongNm": "102동", "flrNo": "5",  "ho": "501", "area": 84.9 },
+    { "dongNm": "102동", "flrNo": "5",  "ho": "502", "area": 59.8 },
+    { "dongNm": "103동", "flrNo": "1",  "ho": "101", "area": 84.9 },
+    { "dongNm": "103동", "flrNo": "1",  "ho": "102", "area": 59.8 },
+    { "dongNm": "103동", "flrNo": "2",  "ho": "201", "area": 84.9 },
+    { "dongNm": "103동", "flrNo": "2",  "ho": "202", "area": 59.8 },
+    { "dongNm": "103동", "flrNo": "3",  "ho": "301", "area": 84.9 },
+    { "dongNm": "103동", "flrNo": "3",  "ho": "302", "area": 59.8 },
+    { "dongNm": "103동", "flrNo": "4",  "ho": "401", "area": 84.9 },
+    { "dongNm": "103동", "flrNo": "4",  "ho": "402", "area": 59.8 },
+    { "dongNm": "103동", "flrNo": "5",  "ho": "501", "area": 84.9 },
+    { "dongNm": "103동", "flrNo": "5",  "ho": "502", "area": 59.8 }
+  ]
 }

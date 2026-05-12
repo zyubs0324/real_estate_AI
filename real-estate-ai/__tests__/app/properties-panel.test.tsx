@@ -7,6 +7,7 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 jest.mock('next/navigation', () => ({
   useRouter: () => ({ push: jest.fn(), refresh: jest.fn() }),
   usePathname: () => '/properties',
+  useSearchParams: () => new URLSearchParams(),
 }))
 
 jest.mock('@/components/layout/Header', () => {

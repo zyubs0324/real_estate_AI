@@ -49,7 +49,15 @@ export async function fetchJuso(query: string): Promise<JusoResult[]> {
     )
   }
 
-  // 실제 API 호출
+  // 브라우저(클라이언트)에서 호출 시 → 서버사이드 프록시 경유
+  // JUSO_API_KEY는 서버 전용 환경변수이므로 브라우저에서 직접 접근 불가
+  if (typeof window !== 'undefined') {
+    const res = await fetch(`/api/juso?q=${encodeURIComponent(query)}`)
+    if (!res.ok) return []
+    return res.json() as Promise<JusoResult[]>
+  }
+
+  // 서버사이드 직접 호출
   const apiKey = process.env.JUSO_API_KEY
   if (!apiKey) {
     console.warn('[juso] JUSO_API_KEY 미설정 — Mock 모드로 폴백')
@@ -65,8 +73,17 @@ export async function fetchJuso(query: string): Promise<JusoResult[]> {
     resultType: 'json',
   })
 
+  // Juso API는 서버 사이드 fetch에서 Referer 헤더가 없으면 E0001(승인되지 않은 KEY) 반환
+  // URL 제한 등록 시 설정한 Referer를 명시적으로 추가
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
   const res = await fetch(
     `https://www.juso.go.kr/addrlink/addrLinkApi.do?${params}`,
+    {
+      headers: {
+        Referer: appUrl,
+        Origin:  appUrl,
+      },
+    },
   )
 
   if (!res.ok) {
@@ -74,5 +91,11 @@ export async function fetchJuso(query: string): Promise<JusoResult[]> {
   }
 
   const json = await res.json()
+  const errorCode = json?.results?.common?.errorCode
+  if (errorCode && errorCode !== '0') {
+    console.warn(`[juso] API 오류 코드: ${errorCode} — ${json?.results?.common?.errorMessage}`)
+    return []
+  }
+
   return (json?.results?.juso ?? []) as JusoResult[]
 }

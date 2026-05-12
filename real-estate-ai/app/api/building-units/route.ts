@@ -20,20 +20,37 @@ import { fetchBuildingUnits, type BuildingQuery } from '@/lib/apis/building'
 export async function GET(req: NextRequest) {
   const p = req.nextUrl.searchParams
 
-  const sigunguCd = p.get('sigunguCd') ?? ''
-  const bjdongCd  = p.get('bjdongCd')  ?? ''
-  const bun       = p.get('bun')       ?? undefined
-  const ji        = p.get('ji')        ?? undefined
-  const platGbCd  = p.get('platGbCd') ?? undefined
+  const sigunguCd        = p.get('sigunguCd')        ?? ''
+  const bjdongCd         = p.get('bjdongCd')         ?? ''
+  const bun              = p.get('bun')              ?? undefined
+  const ji               = p.get('ji')               ?? undefined
+  const platGbCd         = p.get('platGbCd')        ?? undefined
+  const bjdongCdFallback = p.get('bjdongCdFallback') ?? undefined
 
   if (!sigunguCd || !bjdongCd) {
     return NextResponse.json({ units: [] }, { status: 400 })
   }
 
-  const query: BuildingQuery = { sigunguCd, bjdongCd, bun, ji, platGbCd }
+  const query: BuildingQuery = { sigunguCd, bjdongCd, bun, ji, platGbCd, bjdongCdFallback }
+
+  // [DEV] 호출 파라미터 서버 로그 — Next.js 터미널에서 확인 가능
+  if (process.env.NODE_ENV !== 'production') {
+    const hasKey  = !!process.env.DATA_GO_KR_API_KEY
+    const isMock  = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true'
+    const bdMgtSn = p.get('bdMgtSn') // 디버그용: 원본 bdMgtSn 확인
+    console.log(
+      `[building-units] 조회 파라미터: ${JSON.stringify(query)}`,
+      `| API키: ${hasKey ? 'O' : 'X(없음→빈배열반환)'}`,
+      `| Mock: ${isMock}`,
+      bjdongCdFallback ? `| 폴백bjdong: ${bjdongCdFallback}` : '',
+    )
+  }
 
   try {
     const units = await fetchBuildingUnits(query)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[building-units] 결과: ${units.length}건`)
+    }
     return NextResponse.json({ units })
   } catch (err) {
     console.error('[building-units] fetchBuildingUnits 실패:', err)

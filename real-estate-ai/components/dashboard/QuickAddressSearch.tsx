@@ -340,9 +340,9 @@ export default function QuickAddressSearch() {
         const qs = new URLSearchParams({
           sigunguCd: bq.sigunguCd,
           bjdongCd:  bq.bjdongCd,
-          ...(bq.bun      && { bun:      bq.bun }),
-          ...(bq.ji       && { ji:       bq.ji }),
-          ...(bq.platGbCd && { platGbCd: bq.platGbCd }),
+          ...(bq.bun              && { bun:              bq.bun }),
+          ...(bq.ji               && { ji:               bq.ji }),
+          ...(bq.bjdongCdFallback && { bjdongCdFallback: bq.bjdongCdFallback }),
         })
         const res  = await fetch(`/api/building-units?${qs}`)
         const data = await res.json() as { units: BuildingUnit[] }

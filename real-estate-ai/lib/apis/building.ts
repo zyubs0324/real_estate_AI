@@ -11,11 +11,12 @@
 // ─── 타입 ─────────────────────────────────────────────────
 
 export interface BuildingQuery {
-  sigunguCd: string   // 시군구코드 5자리 (예: "11680" = 강남구)
-  bjdongCd:  string   // 법정동코드 5자리 (예: "10300" = 개포동)
-  bun?:      string   // 번 4자리 (예: "0012")
-  ji?:       string   // 지 4자리 (예: "0000")
-  platGbCd?: string   // 대지구분코드 (0=대지, 1=산, 2=블록)
+  sigunguCd:        string    // 시군구코드 5자리 (예: "11680" = 강남구)
+  bjdongCd:         string    // 법정동코드 5자리 (예: "10300" = 개포동)
+  bun?:             string    // 번 4자리 (예: "0012")
+  ji?:              string    // 지 4자리 (예: "0000")
+  platGbCd?:        string    // 대지구분코드 (0=대지, 1=산, 2=블록) — fetchBuildingUnits에서는 사용 안 함
+  bjdongCdFallback?: string   // admCd 기반 법정동코드 (bdMgtSn 코드와 불일치 시 폴백용)
 }
 
 export interface BuildingResult {
@@ -58,12 +59,16 @@ export function buildingQueryFromJuso(juso: {
   // bdMgtSn 최소 11자리(시군구5 + 법정동5 + 대지구분1) 필요
   const hasBd = typeof juso.bdMgtSn === 'string' && juso.bdMgtSn.length >= 11
 
+  const admBjdong = juso.admCd.slice(5)  // 행정동 기반 법정동코드 (폴백용)
+
   return {
-    sigunguCd: hasBd ? juso.bdMgtSn!.slice(0, 5)  : juso.admCd.slice(0, 5),
-    bjdongCd:  hasBd ? juso.bdMgtSn!.slice(5, 10) : juso.admCd.slice(5),
-    bun:       String(juso.lnbrMnnm).padStart(4, '0'),
-    ji:        String(juso.lnbrSlno).padStart(4, '0'),
-    platGbCd:  hasBd ? juso.bdMgtSn!.slice(10, 11) : (juso.mtYn === '1' ? '1' : '0'),
+    sigunguCd:        hasBd ? juso.bdMgtSn!.slice(0, 5)  : juso.admCd.slice(0, 5),
+    bjdongCd:         hasBd ? juso.bdMgtSn!.slice(5, 10) : admBjdong,
+    bun:              String(juso.lnbrMnnm).padStart(4, '0'),
+    ji:               String(juso.lnbrSlno).padStart(4, '0'),
+    platGbCd:         hasBd ? juso.bdMgtSn!.slice(10, 11) : (juso.mtYn === '1' ? '1' : '0'),
+    // bdMgtSn 법정동코드와 행정동 코드가 다를 경우 대비한 폴백
+    bjdongCdFallback: hasBd && juso.bdMgtSn!.slice(5, 10) !== admBjdong ? admBjdong : undefined,
   }
 }
 
@@ -184,16 +189,23 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
   const apiKey = process.env.DATA_GO_KR_API_KEY
   if (!apiKey) return []
 
-  const params = new URLSearchParams({
+  // ⚠️ platGbCd·exposPubuseGbCd 를 전달하지 않음:
+  //   platGbCd API 필터는 '1'(산) 등을 잘못 넣으면 등록이 다른 건물이 0건으로 반환됨.
+  //   exposPubuseGbCd는 요청 명세에 없는 파라미터.
+  const makeParams = (bj: string) => new URLSearchParams({
     pageNo: '1', numOfRows: '1000',
-    sigunguCd, bjdongCd,
-    exposPubuseGbCd: '1',
-    ...(platGbCd !== undefined && { platGbCd }),
+    sigunguCd, bjdongCd: bj,
     ...(bun !== undefined && { bun }),
     ...(ji  !== undefined && { ji }),
   })
 
-  const list = await fetchXmlItemsPaged('getBrExposPubuseAreaInfo', apiKey, params)
+  let list = await fetchXmlItemsPaged('getBrExposPubuseAreaInfo', apiKey, makeParams(bjdongCd))
+
+  // bjdongCd 폴백: bdMgtSn 기반 법정동코드가 건축물대장과 불일치할 경우
+  // bun+ji가 있으면 admCd 기반 코드도 시도 (bun 없이 조회하면 범위가 너무 넓음)
+  if (list.length === 0 && query.bjdongCdFallback && query.bjdongCdFallback !== bjdongCd) {
+    list = await fetchXmlItemsPaged('getBrExposPubuseAreaInfo', apiKey, makeParams(query.bjdongCdFallback))
+  }
 
   // dongNm + ho 조합으로 중복 제거 (동이 다르면 같은 호 번호여도 별개)
   const seen = new Set<string>()

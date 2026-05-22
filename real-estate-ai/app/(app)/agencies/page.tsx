@@ -1,14 +1,19 @@
 'use client'
 
-// apple.md §14 — 타부동산 관리 카드 레이아웃
+// apple.md §14 — 부동산 관리 카드 레이아웃
 // U3-10: 목록 + 등록 폼 + 부동산중개업 API 자동 조회
 
 import { useCallback, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
+import SearchInput from '@/components/common/SearchInput'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import {
+  deleteAgency,
   listAgencies,
   saveAgency,
+  updateAgency,
   type AgencyRow,
   type SaveAgencyPayload,
 } from '@/lib/supabase/agencies'
@@ -47,6 +52,12 @@ const S = {
     background: '#fff', borderRadius: 12,
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)', padding: '20px 24px',
     marginBottom: 12,
+  },
+  listScroll: {
+    overflow: 'auto' as const,
+    width: '100%',
+    maxHeight: 'calc(100vh - 300px)',
+    scrollbarGutter: 'stable' as const,
   },
   agencyCard: {
     background: '#fff', borderRadius: 12,
@@ -100,6 +111,44 @@ const S = {
     fontSize: 11, fontWeight: 700,
     background: '#ff3b3018', color: '#ff3b30',
   },
+  ourOfficeBadge: {
+    display: 'inline-block', padding: '2px 8px', borderRadius: 6,
+    fontSize: 11, fontWeight: 600,
+    background: '#e3f0ff', color: '#0071e3',
+  },
+  trustBadge: {
+    display: 'inline-block', padding: '2px 7px', borderRadius: 6,
+    fontSize: 11, fontWeight: 600,
+    background: '#e6f9ee', color: '#34c759',
+  },
+  cautionBadge: {
+    display: 'inline-block', padding: '2px 7px', borderRadius: 6,
+    fontSize: 11, fontWeight: 600,
+    background: '#ff3b3018', color: '#ff3b30',
+  },
+  tagChip: {
+    display: 'inline-block', padding: '1px 6px', borderRadius: 4,
+    fontSize: 11, background: '#f5f5f7', color: '#636366',
+  },
+  countLink: {
+    fontSize: 12, color: '#0071e3', background: 'none', border: 'none',
+    cursor: 'pointer' as const, padding: 0, fontFamily: 'inherit',
+    textDecoration: 'underline',
+  },
+  checkboxRow: {
+    display: 'flex' as const, alignItems: 'center' as const, gap: 8, marginBottom: 14,
+  },
+  tagInputRow: {
+    display: 'flex' as const, gap: 8, alignItems: 'center' as const,
+  },
+  tagList: {
+    display: 'flex' as const, flexWrap: 'wrap' as const, gap: 4, marginTop: 6,
+  },
+  tagItem: {
+    display: 'inline-flex' as const, alignItems: 'center' as const, gap: 4,
+    padding: '1px 6px', borderRadius: 4, fontSize: 11,
+    background: '#f5f5f7', color: '#636366',
+  },
 }
 
 // ─── 등록 폼 ──────────────────────────────────────────────
@@ -109,12 +158,17 @@ interface AgencyFormProps {
 }
 
 function AgencyForm({ onClose, onSaved }: AgencyFormProps) {
-  const [name,      setName]      = useState('')
-  const [licenseNo, setLicenseNo] = useState('')
-  const [rep,       setRep]       = useState('')
-  const [phone,     setPhone]     = useState('')
-  const [address,   setAddress]   = useState('')
-  const [notes,     setNotes]     = useState('')
+  const [name,        setName]       = useState('')
+  const [licenseNo,   setLicenseNo]  = useState('')
+  const [rep,         setRep]        = useState('')
+  const [phone,       setPhone]      = useState('')
+  const [address,     setAddress]    = useState('')
+  const [notes,       setNotes]      = useState('')
+  const [alias,       setAlias]      = useState('')
+  const [isOurOffice, setIsOurOffice] = useState(false)
+  const [trustLevel,  setTrustLevel] = useState('일반')
+  const [tags,        setTags]       = useState<string[]>([])
+  const [tagInput,    setTagInput]   = useState('')
 
   const [searching, setSearching] = useState(false)
   const [saving,    setSaving]    = useState(false)
@@ -160,6 +214,10 @@ function AgencyForm({ onClose, onSaved }: AgencyFormProps) {
         address:        address.trim()  || undefined,
         license_no:     licenseNo.trim() || undefined,
         notes:          notes.trim()    || undefined,
+        alias:          alias.trim()    || undefined,
+        is_our_office:  isOurOffice,
+        trust_level:    trustLevel,
+        tags:           tags.length > 0 ? tags : undefined,
       }
       await saveAgency(payload)
       onSaved()
@@ -168,12 +226,12 @@ function AgencyForm({ onClose, onSaved }: AgencyFormProps) {
     } finally {
       setSaving(false)
     }
-  }, [name, rep, phone, address, licenseNo, notes, onSaved])
+  }, [name, rep, phone, address, licenseNo, notes, alias, isOurOffice, trustLevel, tags, onSaved])
 
   return (
     <div style={S.overlay} onClick={onClose}>
       <div style={S.modal} data-testid="agency-form" onClick={(e) => e.stopPropagation()}>
-        <p style={S.modalTitle}>타부동산 등록</p>
+        <p style={S.modalTitle}>부동산 등록</p>
 
         {/* 자동 조회 섹션 */}
         <div style={S.searchRow}>
@@ -266,6 +324,91 @@ function AgencyForm({ onClose, onSaved }: AgencyFormProps) {
           />
         </div>
 
+        <div style={S.fieldGroup}>
+          <label htmlFor="agency-alias" style={S.label}>별칭 (선택)</label>
+          <input
+            id="agency-alias"
+            style={S.input}
+            value={alias}
+            onChange={(e) => setAlias(e.target.value)}
+            placeholder="짧은 별칭 (예: 한강부동산)"
+          />
+        </div>
+
+        <div style={S.fieldGroup}>
+          <label htmlFor="agency-trust" style={S.label}>신뢰 등급</label>
+          <select
+            id="agency-trust"
+            style={{ ...S.input, appearance: 'auto' }}
+            value={trustLevel}
+            onChange={(e) => setTrustLevel(e.target.value)}
+          >
+            <option value="신뢰">신뢰</option>
+            <option value="일반">일반</option>
+            <option value="주의">주의</option>
+          </select>
+        </div>
+
+        <div style={S.checkboxRow}>
+          <input
+            id="agency-our-office"
+            type="checkbox"
+            checked={isOurOffice}
+            onChange={(e) => setIsOurOffice(e.target.checked)}
+          />
+          <label htmlFor="agency-our-office" style={{ ...S.label, marginBottom: 0, cursor: 'pointer' }}>
+            우리사무소
+          </label>
+        </div>
+
+        <div style={S.fieldGroup}>
+          <label style={S.label}>태그</label>
+          <div style={S.tagInputRow}>
+            <input
+              style={{ ...S.input, flex: 1 }}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              placeholder="태그 입력 후 추가"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  e.preventDefault()
+                  const t = tagInput.trim()
+                  if (t && !tags.includes(t)) setTags((prev) => [...prev, t])
+                  setTagInput('')
+                }
+              }}
+            />
+            <button
+              type="button"
+              style={S.btnSecondary}
+              onClick={() => {
+                const t = tagInput.trim()
+                if (t && !tags.includes(t)) setTags((prev) => [...prev, t])
+                setTagInput('')
+              }}
+            >
+              추가
+            </button>
+          </div>
+          {tags.length > 0 && (
+            <div style={S.tagList}>
+              {tags.map((tag) => (
+                <span key={tag} style={S.tagItem}>
+                  {tag}
+                  <button
+                    type="button"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#636366', padding: 0, fontSize: 12, lineHeight: 1 }}
+                    onClick={() => setTags((prev) => prev.filter((t) => t !== tag))}
+                    aria-label={`태그 ${tag} 삭제`}
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+
         {error && <p style={S.errorText}>{error}</p>}
 
         <div style={S.actions}>
@@ -289,6 +432,11 @@ export default function AgenciesPage() {
   const [agencies,   setAgencies]   = useState<AgencyRow[]>([])
   const [loading,    setLoading]    = useState(true)
   const [showForm,   setShowForm]   = useState(false)
+  const [deleting,   setDeleting]   = useState<AgencyRow | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [search,     setSearch]     = useState('')
+  const debouncedSearch = useDebounce(search)
 
   const load = useCallback(async () => {
     setLoading(true)
@@ -307,28 +455,94 @@ export default function AgenciesPage() {
     await load()
   }, [load])
 
+  const filteredAgencies = agencies.filter((agency) => {
+    const q = debouncedSearch.trim().toLowerCase()
+    if (!q) return true
+    return [
+      agency.name,
+      agency.representative ?? '',
+      agency.phone ?? '',
+      agency.address ?? '',
+      agency.license_no ?? '',
+      agency.alias ?? '',
+    ].some((value) => value.toLowerCase().includes(q))
+  })
+  const visibleIds = filteredAgencies.map((agency) => agency.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAllVisible() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id))
+      else visibleIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    await Promise.all(ids.map((id) => deleteAgency(id)))
+    setBulkDeleting(false)
+    setSelectedIds(new Set())
+    await load()
+  }
+
   return (
     <>
-      <Header title="타부동산" />
+      <Header title="부동산" />
       <main style={S.main}>
         {/* 툴바 */}
         <div style={S.toolbar}>
-          <button style={S.btnPrimary} onClick={() => setShowForm(true)}>
-            타부동산 등록
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SearchInput value={search} onChange={setSearch} placeholder="상호, 대표, 등록번호 검색" label="부동산 검색" />
+            <button style={S.btnPrimary} onClick={() => setShowForm(true)}>
+              부동산 등록
+            </button>
+          </div>
         </div>
 
         {/* 목록 */}
+        {filteredAgencies.length > 0 && (
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#636366', marginBottom: 10 }}>
+            <input
+              aria-label="select-all-agencies"
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleAllVisible}
+            />
+            현재 목록 전체 선택
+          </label>
+        )}
+
+        {selectedIds.size > 0 && (
+          <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginBottom: 10 }}>
+            <button style={S.btnGhost} type="button" onClick={() => setSelectedIds(new Set())}>선택 해제</button>
+            <button style={{ ...S.btnGhost, color: '#ff3b30' }} type="button" onClick={() => setBulkDeleting(true)}>
+              선택 {selectedIds.size}개 삭제
+            </button>
+          </div>
+        )}
+
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px 0', color: 'rgba(0,0,0,0.35)', fontSize: 14 }}>
             로딩 중…
           </div>
-        ) : agencies.length === 0 ? (
+        ) : filteredAgencies.length === 0 ? (
           <div style={S.emptyBox}>
-            등록된 타부동산이 없습니다
+            등록된 부동산이 없습니다
           </div>
         ) : (
-          agencies.map((ag) => (
+          <div style={S.listScroll}>
+          {filteredAgencies.map((ag) => (
             <div
               key={ag.id}
               style={S.agencyCard}
@@ -340,22 +554,85 @@ export default function AgenciesPage() {
                 (e.currentTarget as HTMLElement).style.boxShadow = '0 1px 4px rgba(0,0,0,0.06)'
               }}
             >
-              <div>
-                <p style={S.agencyName}>{ag.name}</p>
+              <input
+                aria-label={`select-agency-${ag.id}`}
+                type="checkbox"
+                checked={selectedIds.has(ag.id)}
+                onClick={(event) => event.stopPropagation()}
+                onChange={() => toggleSelected(ag.id)}
+                style={{ marginRight: 10 }}
+              />
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={S.agencyName}>
+                  {ag.name}
+                  {ag.alias && (
+                    <span style={{ fontWeight: 400, color: '#636366', marginLeft: 6 }}>({ag.alias})</span>
+                  )}
+                </p>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 4, alignItems: 'center', marginBottom: 2 }}>
+                  {ag.is_our_office && (
+                    <span style={S.ourOfficeBadge}>우리사무소</span>
+                  )}
+                  {ag.trust_level === '신뢰' && (
+                    <span style={S.trustBadge}>신뢰</span>
+                  )}
+                  {ag.trust_level === '주의' && (
+                    <span style={S.cautionBadge}>주의</span>
+                  )}
+                  {ag.tags && ag.tags.length > 0 && ag.tags.map((tag) => (
+                    <span key={tag} style={S.tagChip}>{tag}</span>
+                  ))}
+                </div>
                 <p style={S.agencyMeta}>
                   {ag.representative && <span>{ag.representative}　</span>}
                   {ag.phone && <span>{ag.phone}　</span>}
                   {ag.address && <span>{ag.address}</span>}
                 </p>
+                {((ag.handling_count ?? 0) > 0 || (ag.co_broker_count ?? 0) > 0) && (
+                  <div style={{ display: 'flex', gap: 10, marginTop: 4 }}>
+                    {(ag.handling_count ?? 0) > 0 && (
+                      <button
+                        style={S.countLink}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/properties?handlingAgencyId=${ag.id}`)
+                        }}
+                      >
+                        핸들링 {ag.handling_count}
+                      </button>
+                    )}
+                    {(ag.co_broker_count ?? 0) > 0 && (
+                      <button
+                        style={S.countLink}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          router.push(`/properties?coBrokerAgencyId=${ag.id}`)
+                        }}
+                      >
+                        공동 중개 {ag.co_broker_count}
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4, marginLeft: 12 }}>
                 {ag.warning && <span style={S.warningBadge}>경고</span>}
                 {ag.license_no && (
                   <span style={S.badge}>{ag.license_no}</span>
                 )}
+                <button
+                  style={{ border: 'none', background: 'transparent', color: '#ff3b30', cursor: 'pointer', fontSize: 12, fontWeight: 700 }}
+                  onClick={(event) => {
+                    event.stopPropagation()
+                    setDeleting(ag)
+                  }}
+                >
+                  삭제
+                </button>
               </div>
             </div>
-          ))
+          ))}
+          </div>
         )}
       </main>
 
@@ -363,6 +640,28 @@ export default function AgenciesPage() {
         <AgencyForm
           onClose={() => setShowForm(false)}
           onSaved={handleSaved}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="부동산을 삭제할까요?"
+          description={`${deleting.name} 정보가 삭제됩니다.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={async () => {
+            await deleteAgency(deleting.id)
+            setDeleting(null)
+            await load()
+          }}
+        />
+      )}
+      {bulkDeleting && (
+        <ConfirmDialog
+          title="선택 부동산을 삭제할까요?"
+          description={`${selectedIds.size}개 부동산 정보가 삭제됩니다.`}
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
         />
       )}
     </>

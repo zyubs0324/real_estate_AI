@@ -112,4 +112,19 @@ describe('QuickAddressSearch', () => {
 
     expect((global.fetch as jest.Mock).mock.calls.length).toBe(fetchBeforeDongSelect)
   })
+
+  it('filters non-dong annex names from Juso detail building names', async () => {
+    mockJusoResult.detBdNmList = '노인정,관리사무실,3동,1동,극동유치원,2동'
+    render(<QuickAddressSearch />)
+
+    fireEvent.click(screen.getByRole('button', { name: '한남더힐 선택' }))
+
+    await waitFor(() => {
+      expect(screen.getByLabelText('동 선택')).toBeInTheDocument()
+    })
+    expect(screen.getByRole('option', { name: '1동' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: '2동' })).toBeInTheDocument()
+    expect(screen.getByRole('option', { name: '3동' })).toBeInTheDocument()
+    expect(screen.queryByRole('option', { name: '극동유치원' })).not.toBeInTheDocument()
+  })
 })

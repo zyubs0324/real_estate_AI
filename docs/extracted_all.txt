@@ -1,0 +1,8505 @@
+================================================================================
+FILE: 아파트_매매 (아파트+매매+실거래가+상세자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 아파트  매매  실거래가  상세  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Detailed  data  on  actual  apartment  sales  prices
+API명(국문)
+아파트  매매  실거래가  상세  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  아파트  매매 
+상세  자료를  제공하는  아파트  매매  실거래가  상세  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRT
+(WSDL  또는  WADL)
+MSDataSvcAptTradeDev?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+1
+아파트  매매  신고  상세자료
+getRTMSDataSvcAptTradeDev 아파트  매매  신고  상세자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+아파트  매매  실거래가  상세  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+아파트  매매신고  상세자료  조회
+Call  Back  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvc
+AptTradeDev
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+구분*
+샘플
+데이터
+인증키
+항목설명
+serviceKey
+인증키
+100
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+4
+4
+5
+6
+1
+0
+0
+1
+1
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+1
+페이지번호
+10
+한  페이지  결과  수
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+resultCode
+결과코드
+결과코드
+resultMsg
+결과메세지
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+sggCd
+법정동시군구코드
+법정동시군구코드
+umdCd
+법정동읍면동코드
+법정동읍면동코드
+landCd
+법정동지번코드
+법정동지번코드
+bonbun
+법정동본번코드
+법정동본번코드
+bubun
+법정동부번코드
+법정동부번코드
+3
+100
+4
+4
+4
+5
+5
+1
+4
+4
+roadNm
+도로명
+도로명
+100
+roadNmSggCd 도로명시군구코드
+도로명시군구코드
+roadNmCd
+도로명코드
+도로명코드
+roadNmSeq
+roadNmbCd
+roadNmBonbun
+roadNmBubun
+umdNm
+aptNm
+도로명일련번호
+코드
+도로명지상지하
+코드
+도로명건물본번
+호코드
+도로명건물부번
+호코드
+법정동
+단지명
+도로명일련번호코드
+도로명지상지하코드
+도로명건물본번호코드
+도로명건물부번호코드
+법정동
+단지명
+60
+100
+5
+7
+2
+1
+5
+5
+1
+1
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+1
+1
+000
+OK
+10
+1
+40
+11110
+숭인동
+1
+0202
+0003
+종로66길
+11110
+4100372
+01
+0
+00028
+00000
+17500
+종로중흥S클래스
+
+--- Page 6 ---
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+jibun
+지번
+지번
+excluUseAr
+전용면적
+전용면적
+dealYear
+계약년도
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+계약월
+계약일
+dealAmount
+거래금액
+거래금액(만원)
+floor
+층
+층
+buildYear
+건축년도
+건축년도
+aptSeq
+단지  일련번호
+단지  일련번호
+cdealType
+해제여부
+해제여부
+cdealDay
+해제사유발생일
+해제사유발생일
+dealingGbn
+거래유형
+거래유형
+(중개및직거래여부)
+estateAgentSggN
+m
+중개사소재지
+중개사소재지
+(시군구단위)
+rgstDate
+등기일자
+등기일자
+aptDong
+아파트  동명
+아파트  동명
+slerGbn
+매도자
+buyerGbn
+매수자
+거래주체정보
+(개인/법인/공공기관/기타)
+거래주체정보
+(개인/법인/공공기관/기타)
+20
+22
+4
+2
+2
+40
+10
+4
+20
+1
+8
+10
+3000
+8
+400
+100
+100
+landLeaseholdGbn
+토지임대부 
+아파트  여부
+토지임대부  아파트  여부
+1
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+0
+0
+1
+1
+1
+1
+0
+0
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+202-3
+17.811
+2024
+7
+23
+12,000
+10
+2013
+11110-2339
+중개거래
+서울  종로구
+개인
+개인
+N
+
+--- Page 7 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcAptTradeDev/getRTMSDataSvcAptTradeDev?serviceK
+ey=서비스키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<aptDong>  </aptDong>
+<aptNm>종로중흥S클래스</aptNm>
+<aptSeq>11110-2339</aptSeq>
+<bonbun>0202</bonbun>
+<bubun>0003</bubun>
+<buildYear>2013</buildYear>
+<buyerGbn>개인</buyerGbn>
+<cdealDay>  </cdealDay>
+<cdealType>  </cdealType>
+<dealAmount>12,000</dealAmount>
+<dealDay>23</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<dealingGbn>중개거래</dealingGbn>
+<estateAgentSggNm>서울  종로구</estateAgentSggNm>
+<excluUseAr>17.811</excluUseAr>
+<floor>10</floor>
+<jibun>202-3</jibun>
+<landCd>1</landCd>
+<landLeaseholdGbn>N</landLeaseholdGbn>
+<rgstDate>  </rgstDate>
+<roadNm>종로66길</roadNm>
+<roadNmBonbun>00028</roadNmBonbun>
+<roadNmBubun>00000</roadNmBubun>
+<roadNmCd>4100372</roadNmCd>
+<roadNmSeq>01</roadNmSeq>
+<roadNmSggCd>11110</roadNmSggCd>
+<roadNmbCd>0</roadNmbCd>
+<sggCd>11110</sggCd>
+<slerGbn>개인</slerGbn>
+<umdCd>17500</umdCd>
+<umdNm>숭인동</umdNm>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>40</totalCount>
+</body>
+</response>
+
+--- Page 8 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 9 ---
+참  고   OPEN  API  코드  신구대조표 
+아파트매매 실거래 상세자료
+아파트 매매 실거래가 상세자료
+컬럼명
+sggcd
+(구 API)
+항목명
+법정동시군구코드
+컬럼명
+sggCd
+(신규 API)
+항목명
+법정동시군구코드
+umdcd
+법정동읍면동코드
+umdCd
+법정동읍면동코드
+landcd
+법정동지번코드
+landCd
+법정동지번코드
+bonbun
+법정동본번코드
+bonbun
+법정동본번코드
+bubun
+법정동부번코드
+bubun
+법정동부번코드
+roadnm
+도로명
+roadNm
+도로명
+roadnmsggcd
+도로명시군구코드
+roadNmSggCd
+도로명시군구코드
+roadnmcd
+도로명코드
+roadNmCd
+도로명코드
+roadnmseq
+도로명일련번호코드
+roadNmSeq
+도로명일련번호코드
+roadnmbcd
+도로명지상지하코드
+roadNmbCd
+도로명지상지하코드
+roadnmbonbun
+도로명건물본번호코드
+roadNmBonbun
+도로명건물본번호코드
+roadnmbubun
+도로명건물부번호코드
+roadNmBubun
+도로명건물부번호코드
+umdnm
+법정동
+umdNm
+법정동
+aptname
+아파트
+aptNm
+단지명
+jibun
+지번
+jibun
+지번
+excluusear
+전용면적
+excluUseAr
+전용면적
+
+--- Page 10 ---
+아파트매매 실거래 상세자료
+아파트 매매 실거래가 상세자료
+컬럼명
+dealyear
+dealmonth
+dealday
+(구 API)
+항목명
+년
+월
+일
+(신규 API)
+컬럼명
+dealYear
+항목명
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+dealamount
+거래금액
+dealAmount
+floor
+층
+floor
+거래금액
+(만원)
+층
+buildyear
+건축년도
+buildYear
+건축년도
+aptSeq
+일련번호
+aptSeq
+단지  일련번호
+cdealtype
+해제여부
+cdealType
+해제여부
+cdealday
+해제사유발생일
+cdealDay
+해제사유발생일
+reqgbn
+거래유형
+dealingGbn
+rdealerlawdnm
+중개사소재지
+estateAgentSggNm
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+rgstdate
+등기일자
+rgstDate
+등기일자
+aptdong
+동
+aptDong
+아파트  동명
+slergbn
+buyergbn
+매도자
+매수자
+slerGbn
+buyerGbn
+거래주체정보_매도자
+(개인/법인/공공기관/기타)
+거래주체정보_매수자
+(개인/법인/공공기관/기타)
+hllandgbn
+토지임대부  아파트  여부
+landLeaseholdGbn
+토지임대부  아파트  여부
+
+
+================================================================================
+FILE: 아파트_전월세 (아파트+전월세+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 아파트  전월세  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Apartment  jeonse  and  monthly  rent  acutal  transaction  price  data
+API명(국문)
+아파트  전월세  실거래가  상세  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  아파트  전월세 
+자료를  제공하는  아파트  전월세  실거래가  상세  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+서비스  URL
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+http://apis.data.go.kr/1613000/RTMSDataSvcAptRent
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcAptRent
+(WSDL  또는  WADL)
+/getRTMSDataSvcAptRent?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+1
+아파트  전월세  실거래가  자료 getRTMSDataSvcAptRent
+아파트  전월세  실거래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+아파트  전월세  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+Call  Back  URL
+아파트  전월세  실거래가  상세자료  조회
+http://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptR
+ent
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+구분*
+샘플
+데이터
+인증키
+항목설명
+serviceKey
+인증키
+100
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+5
+6
+1
+1
+1
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+resultCode
+resultMsg
+결과코드
+결과메세지
+결과코드
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+totalCount
+전체  결과  수
+페이지  번호
+전체  결과  수
+sggCd
+umdNm
+aptNm
+jibun
+excluUseAr
+dealYear
+dealMonth
+dealDay
+지역코드
+법정동
+아파트명
+지번
+전용면적
+계약년도
+계약월
+계약일
+deposit
+보증금액
+monthlyRent
+월세금액
+floor
+buildYear
+contractTerm
+contractType
+층
+건축년도
+계약기간
+계약구분
+지역코드
+법정동
+아파트명
+지번
+전용면적
+계약년도
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+층
+건축년도
+계약기간
+계약구분
+useRRRight
+갱신요구권사용
+갱신요구권사용
+preDeposit
+종전계약보증금
+종전계약보증금
+preMonthlyRent
+종전계약월세
+종전계약월세
+3
+100
+4
+4
+4
+5
+30
+100
+20
+22
+4
+2
+2
+40
+40
+10
+4
+12
+4
+4
+40
+40
+roadnm
+도로명
+도로명
+100
+roadnmsggcd
+도로명시군구코드
+도로명시군구코드
+roadnmcd
+도로명코드
+도로명코드
+roadnmseq
+roadnmbcd
+roadnmbonbun
+roadnmbubun
+도로명일련번호
+코드
+도로명지상지하
+코드
+도로명건물본번
+호코드
+도로명건물부번
+호코드
+도로명일련번호코드
+도로명지상지하코드
+도로명건물본번호코드
+도로명건물부번호코드
+5
+7
+2
+1
+5
+5
+aptSeq
+단지  일련번호
+단지  일련번호
+20
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+※  신규  추가  항목은  빨간색으로  표시해  두었음
+1
+1
+1
+1
+1
+1
+1
+1
+0
+0
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+0
+000
+OK
+10
+1
+96
+11110
+평창동
+삼성
+596
+59.97
+2024
+7
+25
+29,768
+0
+9
+1998
+0
+지봉로5길  7
+11110
+4100390
+1
+0
+00007
+00000
+11110-34
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcAptRent/getRTMSDataSvcAptRent?serviceKey=서비스
+키&LAWD_CD=11110&DEAL_YMD=202407
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<aptNm>두산</aptNm>
+<aptSeq>11110-34</aptSeq>
+<buildYear>1999</buildYear>
+<contractTerm>  </contractTerm>
+<contractType>  </contractType>
+<dealDay>20</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<deposit>50,000</deposit>
+<excluUseAr>59.95</excluUseAr>
+<floor>3</floor>
+<jibun>232</jibun>
+<monthlyRent>0</monthlyRent>
+<preDeposit>  </preDeposit>
+<preMonthlyRent>  </preMonthlyRent>
+<roadnm>지봉로5길  7</roadnm>
+<roadnmbcd>0</roadnmbcd>
+<roadnmbonbun>00007</roadnmbonbun>
+<roadnmbubun>00000</roadnmbubun>
+<roadnmcd>4100390</roadnmcd>
+<roadnmseq>1</roadnmseq>
+<roadnmsggcd>11110</roadnmsggcd>
+<sggCd>11110</sggCd>
+<umdNm>창신동</umdNm>
+<useRRRight>  </useRRRight>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>159</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+
+================================================================================
+FILE: 연립다세대_매매 (연립다세대+매매+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 연립다세대  매매  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Actual  transaction  price  data  for  townhouse  multi-family  housing
+API명(국문)
+연립다세대  매매  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  연립다세대  매
+매  자료를  제공하는  연립다세대  매매  실거래가  상세  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcRHTrade
+서비스  명세  URL
+https://apis.data.go.kr/1613000/RTMSDataSvcRHTrade/getRTMS
+(WSDL  또는  WADL)
+DataSvcRHTrade?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+1
+연립다세대  매매  실거래가  자료
+getRTMSDataSvcAptRent
+연립다세대  매매  실거래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+연립다세대  매매  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+Call  Back  URL
+연립다세대  매매  실거래가  상세자료  조회
+https://apis.data.go.kr/1613000/RTMSDataSvcRHTrade/getRTMSDataSvcRH
+Trade
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+구분*
+샘플
+데이터
+인증키
+항목설명
+serviceKey
+인증키
+100
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+5
+6
+4
+4
+1
+1
+1
+0
+0
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+resultCode
+결과코드
+resultMsg
+결과메세지
+결과코드
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+지역코드
+지역코드
+sggCd
+umdNm
+mhouseNm
+jibun
+buildYear
+excluUseAr
+landAr
+dealYear
+dealMonth
+dealDay
+법정동
+단지명
+지번
+건축년도
+전용면적
+대지권면적
+계약년도
+계약월
+계약일
+dealAmount
+거래금액
+floor
+층
+cdealType
+해제여부
+법정동
+단지명
+지번
+건축년도
+전용면적
+대지권면적
+계약년도
+계약월
+계약일
+거래금액
+(만원)
+층
+해제여부
+cdealDay
+해제사유발생일
+해제사유발생일
+dealingGbn
+거래유형
+estateAgentSggNm 중개사소재지
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+rgstDate
+등기일자
+등기일자
+slerGbn
+매도자
+buyerGbn
+매수자
+houseType
+주택유형구분
+거래주체정보
+(개인/법인/공공기관/기타)
+거래주체정보
+(개인/법인/공공기관/기타)
+주택유형구분
+(연립/다세대)
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+※  신규  추가  항목은  빨간색으로  표시해  두었음
+3
+100
+4
+4
+4
+5
+60
+100
+20
+4
+22
+22
+4
+2
+2
+40
+10
+1
+8
+10
+3000
+8
+100
+100
+10
+1
+1
+1
+1
+1
+1
+1
+1
+0
+0
+0
+0
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+0
+0
+000
+OK
+10
+1
+19
+11110
+숭인동
+현진빌라B동
+178-84
+2003
+57.21
+29.17
+2024
+7
+23
+36,900
+2
+중개거래
+서울  종로구
+개인
+개인
+다세대
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcRHTrade/getRTMSDataSvcRHTrade?serviceKey=서비
+스키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<buildYear>2003</buildYear>
+<buyerGbn>개인</buyerGbn>
+<cdealDay>  </cdealDay>
+<cdealType>  </cdealType>
+<dealAmount>36,900</dealAmount>
+<dealDay>23</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<dealingGbn>중개거래</dealingGbn>
+<estateAgentSggNm>서울  종로구</estateAgentSggNm>
+<excluUseAr>57.21</excluUseAr>
+<floor>2</floor>
+<houseType>다세대</houseType>
+<jibun>178-84</jibun>
+<landAr>29.17</landAr>
+<mhouseNm>현진빌라B동</mhouseNm>
+<rgstDate>  </rgstDate>
+<sggCd>11110</sggCd>
+<slerGbn>개인</slerGbn>
+<umdNm>숭인동</umdNm>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>19</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+연립다세대 매매 실거래자료
+연립다세대 매매 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+항목명
+지역코드
+컬럼명
+sggCd
+umdnm
+법정동
+umdNm
+mhname
+연립다세대
+mhouseNm
+jibun
+지번
+jibun
+항목명
+지역코드
+법정동
+단지명
+지번
+buildyear
+건축년도
+buildYear
+건축년도
+excluusear
+전용면적
+excluUseAr
+전용면적
+landar
+대지권면적
+landAr
+대지권면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+dealamount
+거래금액
+dealAmount
+거래금액
+(만원)
+floor
+층
+floor
+층
+cdealtype
+해제여부
+cdealType
+해제여부
+cdealday
+해제사유발생일
+cdealDay
+해제사유발생일
+reqgbn
+거래유형
+dealingGbn
+rdealerlawdnm
+중개사소재지
+estateAgentSggNm
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+rgstdate
+slergbn
+buyergbn
+등기일자
+rgstDate
+등기일자
+매도자
+매수자
+slerGbn
+buyerGbn
+거래주체정보_매도자
+(개인/법인/공공기관/기타)
+거래주체정보_매수자
+(개인/법인/공공기관/기타)
+
+
+================================================================================
+FILE: 연립다세대_전월세 (연립다세대+전월세+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 연립다세대  전월세  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Multi-household  lease  actual  transaction  price  data
+API명(국문)
+연립다세대  전월세  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  연립다세대  전월
+세  실거래가  자료를  제공하는  연립다세대  전월세  실거래가  정보  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcRHRent
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDa
+(WSDL  또는  WADL)
+taSvcRHRent?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2016.02.01
+서비스  배포일
+2016.02.01
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+1
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+연립다세대  전월세 
+실거래가  자료
+getRTMSDataSvcRHRent
+연립다세대  전월세 
+실거래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+연립다세대  전월세  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+연립다세대  매매  신고정보를  조회
+Call  Back  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataSvcR
+HRent
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+샘플
+구분*
+데이터
+항목설명
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+5
+6
+serviceKey
+인증키
+100
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+4
+4
+1
+1
+1
+0
+0
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+인증키
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+  c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+resultCode
+결과코드
+결과코드
+resultMsg
+결과메세지
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+sggCd
+지역코드
+umdNm
+법정동
+houseType
+주택유형
+지역코드
+법정동
+주택유형
+(연립/다세대)
+항목
+크기
+3
+100
+4
+4
+4
+5
+30
+6
+mhouseNm
+연립다세대명
+연립다세대명
+100
+jibun
+지번
+지번
+buildYear
+건축년도
+건축년도
+excluUseAr
+전용면적
+전용면적
+dealYear
+계약년도
+계약년도
+dealMonth
+dealDay
+계약월
+계약일
+deposit
+보증금액
+monthlyRent
+월세금액
+floor
+층
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+층
+contractTerm
+계약기간
+계약기간
+contractType
+계약구분
+계약구분
+useRRRight
+갱신요구권사용
+갱신요구권사용
+preDeposit
+종전계약보증금
+종전계약보증금
+preMonthlyRent
+종전계약월세
+종전계약월세
+20
+4
+22
+4
+2
+2
+40
+40
+10
+12
+4
+4
+40
+40
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+※  신규  추가  항목은  빨간색으로  표시해  두었음
+항목
+구분
+샘플데이터
+000
+OK
+10
+1
+117
+11110
+신영동
+연립
+북악더테라스2단지
+211-11
+2019
+84.99
+2024
+7
+10
+70,000
+0
+-1
+1
+1
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+
+--- Page 6 ---
+  d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcRHRent/getRTMSDataSvcRHRent?serviceKey=서비스
+키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<buildYear>2019</buildYear>
+<contractTerm/>
+<contractType>  </contractType>
+<dealDay>10</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<deposit>70,000</deposit>
+<excluUseAr>84.99</excluUseAr>
+<floor>-1</floor>
+<houseType>연립</houseType>
+<jibun>211-11</jibun>
+<mhouseNm>북악더테라스2단지</mhouseNm>
+<monthlyRent>0</monthlyRent>
+<preDeposit/>
+<preMonthlyRent/>
+<sggCd>11110</sggCd>
+<umdNm>신영동</umdNm>
+<useRRRight>  </useRRRight>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>117</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+연립다세대 전월세 자료
+연립다세대 전월세 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+항목명
+지역코드
+컬럼명
+sggCd
+항목명
+지역코드
+umdnm
+법정동
+umdNm
+법정동
+mhname
+연립다세대
+mhouseNm
+연립다세대명
+jibun
+지번
+jibun
+지번
+buildyear
+건축년도
+buildYear
+건축년도
+excluusear
+전용면적
+excluUseAr
+전용면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+dealDay
+deposit
+보증금액
+deposit
+monthlyrent
+월세금액
+monthlyRent
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+floor
+층
+floor
+층
+contractterm
+계약기간
+contractTerm
+계약기간
+contracttype
+계약구분
+contractType
+계약구분
+urrcontractright
+갱신요구권사용
+useRRRight
+갱신요구권사용
+predeposit
+종전계약보증금
+preDeposit
+종전계약보증금
+premonthlyrent
+종전계약월세
+preMonthlyRent
+종전계약월세
+
+
+================================================================================
+FILE: 단독다가구_매매 (단독다가구+매매+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 단독/다가구  매매  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Single-family/multi-family  sale  actual  transaction  price  data
+API명(국문)
+단독/다가구  매매  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  단독다가구  매매 
+실거래가  자료를  제공하는  단독다가구  매매  실거래가  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcSHTrade
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcSHTrade/getRTM
+(WSDL  또는  WADL)
+SDataSvcSHTrade?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+1
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+단독/다가구  매매  실거래
+가  자료
+getRTMSDataSvcShTrade
+단독/다가구  매매  실거래
+가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+단독/다가구  매매  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+단독다가구  매매  신고정보를  조회
+Call  Back  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcSHTrade/getRTMSDataSvcS
+HTrade
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+샘플
+구분*
+데이터
+항목설명
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+5
+6
+serviceKey
+인증키
+100
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+4
+4
+1
+1
+1
+0
+0
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+인증키
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+resultCode
+결과코드
+결과코드
+resultMsg
+결과메세지
+결과메세지
+numOfRows
+한  페이지  결과 
+수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+sggCd
+umdNm
+지역코드
+법정동
+houseType
+주택유형
+지역코드
+법정동
+주택유형
+(단독/다가구)
+jibun
+totalFloorAr
+plottageAr
+dealYear
+dealMonth
+dealDay
+지번
+연면적
+대지면적
+계약년도
+계약월
+계약일
+dealAmount
+거래금액
+buildYear
+cdealType
+건축년도
+해제여부
+지번
+연면적
+대지면적
+계약년도
+계약월
+계약일
+거래금액
+(만원)
+건축년도
+해제여부
+cdealDay
+해제사유발생일
+해제사유발생일
+dealingGbn
+거래유형
+estateAgentSggNm 중개사소재지
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+거래주체정보
+항목
+크기
+3
+100
+4
+4
+4
+5
+60
+6
+20
+22
+22
+4
+2
+2
+40
+40
+1
+8
+10
+3000
+slerGbn
+매도자
+(개인/법인/공공기관/
+100
+기타)
+거래주체정보
+buyerGbn
+매수자
+(개인/법인/공공기관/
+100
+기타)
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+항목
+구분
+샘플데이터
+1
+1
+1
+1
+1
+1
+1
+0
+0
+0
+0
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+000
+OK
+10
+1
+11
+11110
+옥인동
+단독
+120.2
+83
+2024
+7
+13
+98,700
+1973
+중개거래
+서울  종로구
+개인
+개인
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcSHTrade/getRTMSDataSvcSHTrade?serviceKey=서비
+스키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<buildYear>1973</buildYear>
+<buyerGbn>개인</buyerGbn>
+<cdealDay>  </cdealDay>
+<cdealType>  </cdealType>
+<dealAmount>98,700</dealAmount>
+<dealDay>13</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<dealingGbn>중개거래</dealingGbn>
+<estateAgentSggNm>서울  종로구</estateAgentSggNm>
+<houseType>단독</houseType>
+<jibun/>
+<plottageAr>83</plottageAr>
+<sggCd>11110</sggCd>
+<slerGbn>개인</slerGbn>
+<totalFloorAr>120.2</totalFloorAr>
+<umdNm>옥인동</umdNm>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>11</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+단독/다가구 매매 실거래 자료
+단독다가구 매매 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+항목명
+지역코드
+컬럼명
+sggCd
+항목명
+지역코드
+umdnm
+법정동
+umdNm
+법정동
+housetype
+주택유형
+houseType
+주택유형
+(단독/다가구)
+jibun
+totalfloorar
+지번
+연면적
+jibun
+지번
+totalFloorAr
+연면적
+plottagear
+대지면적
+plottageAr
+대지면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+dealamount
+거래금액
+dealAmount
+buildyear
+건축년도
+buildYear
+거래금액
+(만원)
+건축년도
+cdealtype
+해제여부
+cdealType
+해제여부
+cdealday
+해제사유발생일
+cdealDay
+해제사유발생일
+reqgbn
+거래유형
+dealingGbn
+rdealerlawdnm
+중개사소재지
+estateAgentSggNm
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+slergbn
+buyergbn
+매도자
+매수자
+slerGbn
+buyerGbn
+거래주체정보_매도자
+(개인/법인/공공기관/기타)
+거래주체정보_매수자
+(개인/법인/공공기관/기타)
+
+
+================================================================================
+FILE: 단독다가구_전월세 (단독다가구+전월세+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 단독/다가구  전월세  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Single-family/multi-family  rental  actual  transaction  price  data
+API명(국문)
+단독/다가구  전월세  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  단독다가구  전월
+세  실거래가  자료를  제공하는  단독다가구  전월세  실거래가  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcSHRent
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcSHRent/getRTMS
+(WSDL  또는  WADL)
+DataSvcSHRent?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+1
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+단독/다가구  전월세  실거
+래가  자료
+getRTMSDataSvcSHRent
+단독/다가구  전월세  실거
+래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+단독/다가구  전월세  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+단독다가구  매매  신고정보를  조회
+Call  Back  URL
+https://apis.data.go.kr/1613000/RTMSDataSvcSHRent/getRTMSDataSvcS
+HRent
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+샘플
+구분*
+데이터
+항목설명
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+5
+6
+serviceKey
+인증키
+100
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+4
+4
+1
+1
+1
+0
+0
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+인증키
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+resultCode
+결과코드
+결과코드
+resultMsg
+결과메세지
+결과메세지
+numOfRows
+한 페이지 결과 수 한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+sggCd
+지역코드
+houseType
+주택유형
+umdNm
+totalFloorAr
+법정동
+연면적
+지역코드
+주택유형
+(단독/다가구)
+법정동
+연면적
+dealYear
+계약년도
+계약년도
+dealMonth
+dealDay
+계약월
+계약일
+deposit
+보증금액
+monthlyRent
+월세금액
+buildYear
+건축년도
+contractTerm
+계약기간
+contractType
+계약구분
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+건축년도
+계약기간
+계약구분
+useRRRight
+갱신요구권사용
+갱신요구권사용
+항목
+크기
+3
+100
+4
+4
+4
+5
+6
+30
+22
+4
+2
+2
+40
+40
+4
+12
+4
+4
+preDeposit
+종전계약보증금
+종전계약보증금
+40
+preMonthlyRent
+종전계약월세
+종전계약월세
+40
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+항목
+구분
+샘플데이터
+000
+OK
+10
+1
+166
+11110
+단독
+청운동
+55
+2024
+7
+26
+10,000
+100
+1
+1
+1
+1
+1
+1
+0
+1
+0
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcSHRent/getRTMSDataSvcSHRent?serviceKey=서비스
+키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<contractTerm/>
+<contractType>  </contractType>
+<dealDay>26</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<deposit>10,000</deposit>
+<houseType>단독</houseType>
+<monthlyRent>100</monthlyRent>
+<preDeposit/>
+<preMonthlyRent/>
+<sggCd>11110</sggCd>
+<totalFloorAr>55</totalFloorAr>
+<umdNm>청운동</umdNm>
+<useRRRight>  </useRRRight>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>166</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+단독다가구 전월세 자료
+단독다가구 전월세 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+항목명
+지역코드
+컬럼명
+sggCd
+항목명
+지역코드
+umdnm
+법정동
+umdNm
+법정동
+totalfloorarea
+계약면적
+totalFloorAr
+연면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+deposit
+보증금액
+deposit
+monthlyrent
+월세금액
+monthlyRent
+보증금액
+(만원)
+월세금액
+(만원)
+buildyear
+건축년도
+buildYear
+건축년도
+contractterm
+계약기간
+contractTerm
+계약기간
+contracttype
+계약구분
+contractType
+계약구분
+urrcontractright
+갱신요구권사용
+useRRRight
+갱신요구권사용
+predeposit
+종전계약보증금
+preDeposit
+종전계약보증금
+premonthlyrent
+종전계약월세
+preMonthlyRent
+종전계약월세
+
+
+================================================================================
+FILE: 오피스텔_매매 (오피스텔+매매+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 오피스텔  매매  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Officetel  sales  actual  transaction  price  data
+API명(국문)
+오피스텔  매매  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  오피스텔  매매 
+자료를  제공하는  오피스텔  매매  실거래가  상세  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMS
+(WSDL  또는  WADL)
+DataSvcOffiTrade?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+1
+오피스텔  매매  실거래가  자료 getRTMSDataSvcAptRent
+오피스텔  매매  실거래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+오피스텔  매매  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+Call  Back  URL
+오피스텔  매매  실거래가  상세자료  조회
+http://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMSDataSvcOffi
+Trade
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+구분*
+샘플
+데이터
+인증키
+항목설명
+serviceKey
+인증키
+100
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+5
+6
+4
+4
+1
+1
+1
+0
+0
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+resultCode
+결과코드
+결과코드
+resultMsg
+결과메세지
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+지역코드
+지역코드
+sggCd
+sggNm
+umdNm
+jibun
+offiNm
+시군구
+법정동
+지번
+단지명
+excluUseAr
+전용면적
+dealYear
+계약년도
+dealMonth
+계약월
+dealDay
+계약일
+dealAmount
+거래금액
+floor
+층
+buildYear
+건축년도
+cdealType
+해제여부
+시군구
+법정동
+지번
+단지명
+전용면적
+계약년도
+계약월
+계약일
+거래금액
+(만원)
+층
+건축년도
+해제여부
+cdealDay
+해제사유발생일
+해제사유발생일
+dealingGbn
+거래유형
+estateAgentSggNm 중개사소재지
+slerGbn
+매도자
+buyerGbn
+매수자
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+거래주체정보
+(개인/법인/공공기관/기타)
+거래주체정보
+(개인/법인/공공기관/기타)
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+※  신규  추가  항목은  빨간색으로  표시해  두었음
+3
+100
+4
+4
+4
+5
+30
+60
+20
+100
+22
+4
+2
+2
+40
+10
+4
+1
+8
+10
+3000
+100
+100
+1
+1
+1
+1
+1
+1
+1
+1
+0
+1
+0
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+0
+000
+OK
+10
+1
+27
+11110
+종로구
+75
+용비어천가
+28.19
+2024
+7
+17
+25,200
+9
+2004
+중개거래
+서울  종로구
+개인
+개인
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcOffiTrade/getRTMSDataSvcOffiTrade?serviceKey=서
+비스키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<buildYear>2004</buildYear>
+<buyerGbn>개인</buyerGbn>
+<cdealDay>  </cdealDay>
+<cdealType>  </cdealType>
+<dealAmount>25,200</dealAmount>
+<dealDay>17</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<dealingGbn>중개거래</dealingGbn>
+<estateAgentSggNm>서울  종로구</estateAgentSggNm>
+<excluUseAr>28.19</excluUseAr>
+<floor>9</floor>
+<jibun>75</jibun>
+<offiNm>용비어천가</offiNm>
+<sggCd>11110</sggCd>
+<sggNm>종로구</sggNm>
+<slerGbn>개인</slerGbn>
+<umdNm>내수동</umdNm>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>27</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+오피스텔 매매 신고 조회 서비스
+오피스텔 매매 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+sggnm
+umdnm
+jibun
+offiname
+항목명
+지역코드
+시군구
+법정동
+지번
+단지
+컬럼명
+sggCd
+sggNm
+umdNm
+jibun
+offiNm
+항목명
+지역코드
+시군구
+법정동
+지번
+단지명
+excluusear
+전용면적
+excluUseAr
+전용면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+dealDay
+계약월
+계약일
+거래금액
+(만원)
+dealamount
+거래금액
+dealAmount
+floor
+층
+floor
+층
+buildyear
+건축년도
+buildYear
+건축년도
+cdealtype
+해제여부
+cdealType
+해제여부
+cdealday
+해제사유발생일
+cdealDay
+해제사유발생일
+reqgbn
+거래유형
+dealingGbn
+rdealerlawdnm
+중개사소재지
+estateAgentSggNm
+slergbn
+buyergbn
+매도자
+매수자
+slerGbn
+buyerGbn
+거래유형
+(중개및직거래여부)
+중개사소재지
+(시군구단위)
+거래주체정보_매도자
+(개인/법인/공공기관/기타)
+거래주체정보_매수자
+(개인/법인/공공기관/기타)
+
+
+================================================================================
+FILE: 오피스텔_전월세 (오피스텔+전월세+실거래가+자료+기술문서.hwp.pdf)
+================================================================================
+--- Page 1 ---
+국토교통부  실거래가  정보 
+오픈API  활용  가이드
+- 오피스텔  전월세  실거래가  자료  -
+
+--- Page 2 ---
+목    차
+    Ⅰ.  서비스  명세 ·······················································   1 
+          가.  API  서비스  개요 ··········································································································   5           
+          나.  상세기능  목록 ··············································································································   6           
+          다.  상세기능내역 ················································································································   6           
+Ⅱ.  OPENAPI  에러  코드정리 ·······························   2
+
+--- Page 3 ---
+Ⅰ   서비스  명세
+ 공공데이터  OpenAPI  조회  서비스
+가.  API  서비스 개요
+API  서비스 
+정보
+API  서비스 
+보안적용 
+기술  수준
+API명(영문)
+Officetel  jenose  monthly  rent  actual  transaction  price  data
+API명(국문)
+오피스텔  전월세  실거래가  자료
+API  설명
+지역코드와  기간을  설정하여  해당지역,  해당기간의  오피스텔  전월
+세  자료를  제공하는  오피스텔  전월세  실거래가  상세  자료  조회
+서비스  인증/권한
+[O]  Service  Key        [  ]  인증서  (GPKI/NPKI)
+[  ]  BASID(IP/PW)    [  ]  없음
+메시지  레벨  암호화 [  ]  전자서명    [  ]  암호화    [O]  없음
+전송  레벨  암호화
+[  ]  SSL    [O]  없음
+[  ]  SOAP  1.2  (RPC-Encoded,  Document  Literal,  Document 
+인터페이스  표준
+Literal  Wrapped)  [O]  REST  (GET)    [  ]  RSS  1.0   
+[  ]  RSS  2.0    [  ]ATOM  1.0    [  ]  기타
+교환  데이터  표준
+(중복선택가능)
+[O]  XML    [  ]  JSON    [  ]  MINE    [  ]  MTOM
+서비스  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcOffiRent
+서비스  명세  URL
+http://apis.data.go.kr/1613000/RTMSDataSvcOffiRent/ggetRTMS
+(WSDL  또는  WADL)
+DataSvcOffiRent?_wadl&type=xml
+서비스  버전
+1.0
+API  서비스 
+배포정보
+서비스  시작일
+2024.07.17
+서비스  배포일
+2024.07.17
+서비스  이력
+메시지  교환유형
+[O]  Request-Response    [  ]  Publish-Subscribe
+[  ]  Fire-and-Forgot    [  ]  Notification
+서비스  제공자
+(운영)  남희훈  /  한국부동산원  /  053-663-8642
+데이터  갱신주기
+일  1회
+
+--- Page 4 ---
+나.  상세기능 목록
+번호
+API명(국문)
+상세기능명(영문)
+상세기능명(국문)
+1
+오피스텔  전월세  실거래가  자료
+getRTMSDataSvcOffiRent
+오피스텔  전월세  실거래가  자료
+다.  상세기능내역
+  a)  상세기능정보
+상세기능  번호
+1
+상세기능  유형
+조회  (자료)
+상세기능명(국문)
+오피스텔  전월세  실거래가  자료
+상세기능  설명
+서울  종로구  -  11110),  계약년월(예시  :  201801)로  해당  지역,  해당  기간의 
+행정표준코드관리시스템(www.code.go.kr)의  법정동  코드  중  앞5자리(예시  : 
+Call  Back  URL
+오피스텔  전월세  실거래가  상세자료  조회
+https://apis.data.go.kr/1613000/RTMSDataSvcOffiRent/getRTMSDataSvcOffi
+Rent
+최대  메시지  사이즈
+[1000  bytes]
+평균  응답  시간
+[500]  ms
+초당  최대  트랙잭션
+[30]  tps
+  b)  요청 메시지 명세
+항목명(영문) 항목명(국문)
+항목
+크기
+항목
+구분*
+샘플
+데이터
+인증키
+항목설명
+serviceKey
+인증키
+100
+LAWD_CD
+지역코드
+DEAL_YMD
+계약월
+pageNo
+페이지번호
+numOfRows
+한  페이지 
+결과  수
+5
+6
+4
+4
+1
+1
+1
+0
+0
+(URL 
+공공데이터포털에서  발급받은  인증키
+Encode)
+각  지역별  코드  행정표준코드관리시스템
+11110
+(www.code.go.kr)의  법정동코드  10자리 
+중  앞  5자리
+202407 실거래  자료의  계약년월(6자리)
+1
+페이지번호
+10
+한  페이지  결과  수
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+
+--- Page 5 ---
+c)  응답 메시지 명세
+항목명(영문)
+항목명(국문)
+항목설명
+항목
+크기
+항목
+구분
+샘플데이터
+resultCode
+resultMsg
+결과코드
+결과메세지
+결과코드
+결과메세지
+numOfRows
+한  페이지  결과  수
+한  페이지  결과  수
+pageNo
+페이지  번호
+페이지  번호
+totalCount
+전체  결과  수
+전체  결과  수
+지역코드
+지역코드
+sggCd
+sggNm
+umdNm
+jibun
+offiNm
+excluUseAr
+dealYear
+dealMonth
+시군구
+법정동
+지번
+단지명
+전용면적
+계약년도
+계약월
+dealDay
+계약일
+deposit
+보증금액
+monthlyRent
+월세금액
+floor
+buildYear
+층
+건축년도
+contractTerm
+계약기간
+시군구
+법정동
+지번
+단지명
+전용면적
+계약년도
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+층
+건축년도
+계약기간
+contractType
+계약구분
+계약구분
+useRRRight
+갱신요구권사용
+갱신요구권사용
+preDeposit
+종전계약보증금
+종전계약보증금
+preMonthlyRent
+종전계약월세
+종전계약월세
+※  항목구분  :  필수(1),  옵션(0),  1건  이상  복수건(1..n),  0건  또는  복수건(0..n)
+000
+OK
+10
+1
+138
+11110
+종로구
+숭인동
+1425
+한라  운종가
+21.14
+2024
+7
+31
+19,400
+0
+13
+2022
+24.09~26.09
+신규
+3
+100
+4
+4
+4
+5
+30
+60
+20
+100
+22
+4
+2
+2
+40
+40
+10
+4
+12
+4
+4
+40
+40
+1
+1
+1
+1
+1
+1
+1
+1
+0
+0
+0
+1
+1
+1
+1
+1
+0
+0
+0
+0
+0
+0
+0
+
+--- Page 6 ---
+d)  요청/응답 메시지 예제
+요청메시지
+https://apis.data.go.kr/1613000/RTMSDataSvcOffiRent/getRTMSDataSvcOffiRent?serviceKey=서비
+스키&LAWD_CD=11110&DEAL_YMD=202407&pageNo=1&numOfRows=1
+응답  메시지
+<response>
+<header>
+<resultCode>000</resultCode>
+<resultMsg>OK</resultMsg>
+</header>
+<body>
+<items>
+<item>
+<buildYear>2022</buildYear>
+<contractTerm>24.09~26.09</contractTerm>
+<contractType>신규</contractType>
+<dealDay>31</dealDay>
+<dealMonth>7</dealMonth>
+<dealYear>2024</dealYear>
+<deposit>19,400</deposit>
+<excluUseAr>21.14</excluUseAr>
+<floor>13</floor>
+<jibun>1425</jibun>
+<monthlyRent>0</monthlyRent>
+<offiNm>한라  운종가</offiNm>
+<preDeposit/>
+<preMonthlyRent/>
+<sggCd>11110</sggCd>
+<sggNm>종로구</sggNm>
+<umdNm>숭인동</umdNm>
+<useRRRight>  </useRRRight>
+</item>
+</items>
+<numOfRows>1</numOfRows>
+<pageNo>1</pageNo>
+<totalCount>138</totalCount>
+</body>
+</response>
+
+--- Page 7 ---
+  OpenAPI  에러  코드정리
+OPEN  API  에러  코드  별  조치방안
+code
+코드값
+설명
+조치방안
+01
+Application Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+02
+DB Error
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+03
+No Data
+데이터없음 에러
+04
+HTTP Error
+05
+service time out
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+제공기관  서비스  제공  상태가  원활하
+지 않습니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+서비스 제공기관의 관리자에게 문의하시기 바랍니다.
+10
+11
+잘못된  요청  파라
+OpenApi  요청시  ServiceKey  파라미터
+•OpenAPI 요청 값에서 ServiceKey 파라미터가 누락되었습니다.
+미터 에러
+가 없음
+•OpenAPI 요청 URL을 확인하시기 바랍니다.
+필수  요청  파라미
+요청하신  OpenApi의  필수  파라미터가 
+터가 없음
+누락되었습니다.
+기술문서를 다시 한 번 확인하시어 주시기 바랍니다.
+해당  오픈  API  서
+•제공기관 관리자에게 폐기된 서비스인지 확인합니다.
+12
+비스가  없거나  폐
+OpenApi 호출시 URL이 잘못됨
+폐기된  서비스가  아니면  개발가이드에서  OpenApi  요청  URL을 
+기됨
+다시 확인하시기 바랍니다.
+20 서비스 접근 거부 활용승인이 되지 않은 OpenApi 호출
+용할 수 있습니다.
+•OpenApi활용 신청정보의 승인상태를 확인하시기 바랍니다.
+•활용신청에  대해  제공기관  담당자가  확인  후  ‘승인’이후부터  사
+•신청  후  2~3일이  소요되고  결과는  회원가입  시  등록한  e-mail
+로 발송합니다.
+•OpenAPI  활용신청정보의  서비스  상세기능별  일일트랙픽량을 
+확인하시기 바랍니다.
+서비스  요청  제한 
+일일 활용건수가 초과함
+•개발계정의  경우  제공기관에서  정의한  트래픽을  초과하여  활용
+횟수 초과 에러
+(활용건수 증가 필요)
+할 수 없습니다.
+•운영계정의  경우  변경신청을  통해서  일일트래픽량을  변경할  수 
+있습니다.
+•OpenAPI  활용신청정보의  발급받은  서비스키를  다시  확인하시
+등록되지  않은  서
+잘못된  서비스키를  사용하였거나  서비
+기 바랍니다.
+비스키
+스키를 URL 인코딩하지 않음
+•서비스키  값이  같다면  서비스키가  URL  인코딩  되었는지  다시 
+기간  만료된  서비
+OpenApi 사용기간이 만료됨
+스키
+(활용연장신청 후 사용가능)
+등록되지  않은  도
+32
+메인명  또는  IP  주
+소
+활용신청한  서버의 IP와 실제  OpenAPI
+호출한 서버가 다를 경우
+확인하시기 바랍니다.
+•OpenAPI 활용신청정보의 활용기간을 확인합니다.
+•활용기간이  지난  서비스는  이용할  수  없으며  연장신청을  통해 
+승인받은 후 다시 이용이 가능합니다.
+•OpenAPI활용신청정보의 등록된 도메인명이나 IP주소를 다시 확
+인합니다.
+•IP나 도메인의 정보를 변경하기 위해 변경신청을 할 수 있습니다.
+22
+30
+31
+
+--- Page 8 ---
+참  고   OPEN  API  코드  신구대조표 
+오피스텔 전월세 신고 조회 서비스
+오피스텔 전월세 실거래가 자료
+(구 API)
+(신규 API)
+컬럼명
+sggcd
+sggnm
+umdnm
+jibun
+offiname
+항목명
+지역코드
+시군구
+법정동
+지번
+단지
+컬럼명
+sggCd
+sggNm
+umdNm
+jibun
+offiname
+항목명
+지역코드
+시군구
+법정동
+지번
+단지명
+excluusear
+전용면적
+excluUseAr
+전용면적
+dealyear
+dealmonth
+dealday
+년
+월
+일
+dealYear
+계약년도
+dealMonth
+dealDay
+deposit
+보증금액
+deposit
+monthlyrent
+월세금액
+monthlyRent
+계약월
+계약일
+보증금액
+(만원)
+월세금액
+(만원)
+floor
+층
+floor
+층
+buildyear
+건축년도
+buildYear
+건축년도
+contractterm
+계약기간
+contractTerm
+계약기간
+contracttype
+계약구분
+contractType
+계약구분
+urrcontractright
+갱신요구권사용
+useRRRight
+갱신요구권사용
+predeposit
+종전계약보증금
+preDeposit
+종전계약보증금
+premonthlyrent
+종전계약월세
+preMonthlyRent
+종전계약월세
+
+
+================================================================================
+FILE: 건축물대장 (OpenAPI활용가이드-_건축HUB_건축물대장_1.0.hwp.pdf)
+================================================================================
+--- Page 1 ---
+제·개 정 이 력
+버전
+변경일
+변경사유
+변경내용
+작성자 승인자
+1.0
+2024.10.  01 최초 작성
+이한형 손창성
+2024년도 공공데이터 이용활성화 지원사업
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024.  10
+
+--- Page 2 ---
+목
+차
+1.  서비스 개요 ·································································································· 1
+    1.1.  OpenAPI  서비스 개요 ···················································································· 1
+          가.  배경 및 필요성 ························································································ 1
+          나.  OpenAPI  서비스 설명 ··············································································· 1
+    1.2.  기대효과 ··········································································································· 1
+    1.3.  참고사항 ··········································································································· 2
+2.  서비스 사용 ·································································································· 3
+    2.1.  서비스 Key  발급 및 활용 ············································································ 3
+          가.  서비스 Key(인증신청 및 발급) ······························································· 3
+          나.  서비스 인증키 활용 ·················································································· 5
+          다.  페이징(pagination)  방법 ··········································································· 5
+3.  서비스 명세 ································································································ 7
+    3.1.  건축HUB  건축물대장정보 서비스 ······························································· 7
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+1.  개 요
+  1.1  OpenAPI  서비스 개요
+    가.  배경 및 필요성
+      1)  공공정보의 개방·활용에 대한 사회적 요구 확산
+          -  국가자원은 공공영역을 넘어 사적 영역의 다양한 사회적,  경제적 가
+치 창출에 활용될 수 있는 잠재성 내재
+          -  민간 영역의 자원과 융·복합을 통한 신규 비즈니스 창출이 용이한
+형태의 국가 자원 개방·공유에 대한 수용 증대
+          -  건축정보 중 건축물대장,  건축인허가,  주택인허가,  폐쇄말소대장 등
+을 개방하여 민간 활용 활성화에 기여
+      2) OpenAPI기반으로 개발/제공함으로써 실시간 연계/활용이 가능하고 다
+른 정보와의 융합서비스 개발에 용의하게 정보 제공
+    나.  OpenAPI  서비스 설명
+      건축서비스산업 정보체계(건축HUB)  시스템의 건축정보를 관련기관 및
+민간에서 쉽게 제공받아 활용할 수 있도록 표준화 방식으로 개방한 공
+유서비스
+  1.2  기대효과
+        -  건축서비스산업 정보체계(건축HUB)  시스템에서 제공되는 있는 데이
+터를 활용하기 쉬운 OpenAPI  기반으로 일반 개발자에 공개하여 대
+국민의 접근성을 높이는 서비스
+-  1  -
+ 
+
+--- Page 3 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+  1.3  참고사항
+        -  OpenAPI  요청 및 응답에 나오는 시군구코드 및 법정동코드는
+행정기관에서 제공받은 표준코드이며,  행정표준코드관리시스템
+(https://www.code.go.kr) - 코드검색 – 법정동코드목록조회 메뉴 에서
+확인 가능합니다.
+2.  서비스 사용
+  2.1  서비스 Key  발급 및 활용
+    가.  서비스 Key발급 (인증신청 및 발급)
+      1)  공공데이터포털(https://www.data.go.kr)  활용자
+          - 활용신청하고자 하는 API를 오픈API 탭에서 검색하여 제목을 클릭한다
+          -  서비스정보와 상세기능 확인 후,  활용신청 버튼을 클릭한다.
+-  2  -
+-  3  -
+
+--- Page 4 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+          -  활용신청하고자 하는 내역을 입력하고,  활용할 API를 선택하여 신청
+버튼을 클릭한다.
+    나.  서비스 인증키 활용
+      1)  REST  방식의 인증키 활용
+        -  인증키 예시
+https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?&sigu
+nguCd=11680&bjdongCd=10300&platGbCd=0&bun=0012&ji=0000&numO
+fRows=10&pageNo=1&_type=json&serviceKey=인증키
+        *  자세한 요청주소는 [오픈API상세 –  상세기능 –  요청주소]에서 확인 가능
+    다.  페이징(pagination)  방법
+      1)  페이징 설명
+        -  API  요청시 1회 요청 가능한 목록 수(numOfRows)  최대 100건 제한
+        - 100건 이상의 데이터 혹은 전체 목록이 필요할 시 페이징 기능 이용
+      2)  페이징 방법
+        -  페이징 관련 변수 설명
+구분
+변수 명
+설명
+numOfRows
+페이지당 목록 수
+요청변수
+pageNo
+페이지 번호
+        -  페이징 방법
+              (원하는 데이터 건 수)÷(페이지당 목록 수(numOfRows))를 계산하여 나온
+              수의 소수점자리 올림 값 만큼 페이지 번호(pageNo)를 반복하여 API 요청
+              *  원하는 데이터 건 수가 전체 데이터일 경우,  1회 API  요청 후 응답메세지의
+                  totalCount  값에서 전체 데이터 건 수를 확인 가능
+-  4  -
+-  5  -
+     
+       
+   
+
+--- Page 5 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+        -  페이지 방법 예시
+※  전체 데이터를 요청할 경우 최초 API요청 후 totalCount(전체 데이터 개수)  확
+인 후 아래 계산식을 이용하여 페이지 반복 처리
+(예시)
+numOfRows(페이지당 목록 수)  :  10  ,  totalCount(전체 데이터 개수)  :  23
+계산식 : Math.ceil(23 (totalCount) ÷ 10 (numOfRows)) = 3 (2.3 소수점자리 올림)
+요청URL의 요청 변수 pageNo를 1부터 3까지 총 3회 API  요청
+1회 차 요청)
+https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?&sigunguCd=11680&bj
+dongCd=10300&platGbCd=0&bun=0012&ji=0000&numOfRows=10&pageNo=1&_type=jso
+n&serviceKey=인증키
+2회 차 요청)
+https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?&sigunguCd=11680&bj
+dongCd=10300&platGbCd=0&bun=0012&ji=0000&numOfRows=10&pageNo=2&_type=jso
+n&serviceKey=인증키
+3회 차 요청)
+https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?&sigunguCd=11680&bj
+dongCd=10300&platGbCd=0&bun=0012&ji=0000&numOfRows=10&pageNo=3&_type=jso
+n&serviceKey=인증키
+---------------------------------------------------------------------------------
+*  전체 데이터의 개수는 응답 메세지에서 확인 가능
+(응답 메세지)
+{
+        "response":  {
+                "header":  {
+                        "resultCode":  "00",
+                        "resultMsg":  "NORMAL  SERVICE"
+                },
+                "body":  {
+                        "items":  {
+                                "item":  {  ………  }
+                        },
+                        "numOfRows":  1,    -------------  페이지당 목록 수
+                        "pageNo":  1,    -----------------  페이지 번호
+                        "totalCount":  23  ---------------  전체 데이터 개수
+                }
+        }
+}
+3.  서비스 명세
+  3.1  건축HUB  건축물대장정보 서비스
+    가.  서비스 개요
+서비스ID
+서비스
+정보
+서비스
+보안
+적용기
+술수준
+서비스
+URL
+서비스
+WADL
+서비스
+배포정
+보
+서비스명(국문) 건축HUB  건축물대장정보 서비스
+서비스명(영문)
+BldRgstHubService
+서비스설명
+건축물대장 정보 제공
+서비스인증/권한
+[ O ] 서비스 Key    [ ] 인증서 (GPKI)
+[      ]  Basic  (ID/PW)    [  ]  없음
+[    ]  WS-Security
+메시지레벨암호화 [    ]  전자서명[    ]  암호화[      ]  없음
+전송레벨암호화 [    ]  SSL [    ]  없음
+인터페이스표준
+[    ]  SOAP  1.2
+(RPC-Encoded,  Document  Literal,  Document  Literal  Wrapped)
+[  O  ]  REST  (GET,  POST,  PUT,  DELETE)
+[  ]  RSS  1.0  [  ]  RSS  2.0  [  ]  Atom  1.0  [  ]  기타
+교환데이터표준 [  O  ]  XML
+[  O  ]  JSON
+[  ]  MIME [  ]  MTOM
+개발환경
+https://apis.data.go.kr/1613000/BldRgstHubService
+운영환경
+https://apis.data.go.kr/1613000/BldRgstHubService
+개발환경
+운영환경
+N/A
+N/A
+서비스버전
+1.0
+유효일자
+N/A
+배포일자 N/A
+서비스이력
+N/A
+메시지교환유형
+[  O  ]  Request-Response
+[      ]  Fire-and-Forgot
+[      ]  Publish-Subscribe
+[      ]  Notification
+메시지로깅수준
+성공
+[O] Header [ ] Body 실패 [O]  Header  [O}  Body
+사용제약사항(비고)
+-  6  -
+-  7  -
+       
+   
+
+--- Page 6 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+  나.  오퍼레이션 목록
+일련
+번호
+1
+2
+3
+4
+5
+6
+7
+8
+9
+서비스명(국문)
+오퍼레이션명(영문)
+오퍼레이션명(국문)
+건축HUB 
+건축물대장정보
+서비스
+getBrBasisOulnInfo
+건축물대장 기본개요 조회
+getBrRecapTitleInfo
+건축물대장 총괄표제부 조회
+getBrTitleInfo
+건축물대장 표제부 조회
+getBrFlrOulnInfo
+건축물대장 층별개요 조회
+getBrAtchJibunInfo
+건축물대장 부속지번 조회
+getBrExposPubuseAreaInfo 건축물대장 전유공용면적 조회
+getBrWclfInfo
+건축물대장 오수정화시설 조회
+getBrHsprcInfo
+건축물대장 주택가격 조회
+getBrExposInfo
+건축물대장 전유부 조회
+10
+getBrJijiguInfo
+건축물대장 지역지구구역 조회
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+필
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+1)  건축물대장 기본개요 조회 오퍼레이션 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+오퍼레이션 번호
+1
+오퍼레이션명(국문)
+건축물대장 기본개요
+조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrBasisOulnInfo
+오퍼레이션 설명
+장의 대장종류,  대장구분,  지번주소 및 새주소,  지역/지구/구역 등의 기
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+본정보를 제공한다.
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+    -  요청메시지 명세
+Items
+복
+newPlatPlc
+도로명대지위
+치
+VARCHAR(1000)
+bldNm
+splotNm
+block
+lot
+건물명
+  VARCHAR(200)
+특수지명
+  VARCHAR(1000)
+블록
+로트
+  VARCHAR(500)
+  VARCHAR(500)
+bylotCnt
+외필지수
+  NUMBER(10)
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30)
+  VARCHAR(30)
+  VARCHAR(30)
+naMainBun
+새주소본번
+  VARCHAR(20)
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+서울특별시 강남구
+개포로109길 5 
+(개포동)
+대치아파트303동
+0
+116804166040       
+10301
+0
+21
+도로명대지
+위치
+건물명
+특수지명
+블록
+로트
+외필지수
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+-  8  -
+-  9  -
+ 
+ 
+ 
+
+--- Page 7 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+naSubBun
+새주소부번
+  VARCHAR(20)
+jiyukCd
+지역코드
+  VARCHAR(30)
+jiguCd
+지구코드
+  VARCHAR(30)
+guyukCd
+구역코드
+  VARCHAR(30)
+jiyukCdNm
+지역코드명
+  VARCHAR(1000)
+jiguCdNm
+지구코드명
+  VARCHAR(1000)
+guyukCdNm
+구역코드명
+  VARCHAR(1000)
+crtnDay
+생성일자
+VARCHAR(30)
+rnum
+순번
+NUMBER(8)
+platPlc
+대지위치
+VARCHAR(1000)
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드
+  VARCHAR(30)
+bun
+ji
+번
+지
+mgmBldrgstPk
+mgmUpBldrgstP
+k
+bldgId
+관리건축물대
+장PK
+관리상위건축
+물대장PK
+건물_아이디
+  VARCHAR(20)
+  VARCHAR(20)
+  VARCHAR(30)
+  VARCHAR(30)
+NUMBER(50)
+regstrGbCd
+대장구분코드
+  VARCHAR(30)
+regstrGbCdNm
+대장구분코드
+명
+  VARCHAR(1000)
+regstrKindCd 대장종류코드
+  VARCHAR(30)
+regstrKindCdN
+대장종류코드
+m
+명
+VARCHAR(1000)
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+필
+옵
+필
+필
+필
+옵
+옵
+옵
+필
+필
+옵
+옵
+옵
+옵
+옵
+0
+새주소부번
+    -  요청/응답 메시지 명세
+지역코드
+지구코드
+구역코드
+지역코드명
+지구코드명
+구역코드명
+20220813
+생성일자
+1
+순번
+서울특별시 강남구
+개포동 12번지
+11680
+10300
+0
+0012
+0000
+1024185513
+2
+집합
+4
+전유부
+대지위치
+행정표준코
+드
+행정표준코
+드
+0:대지 1:산
+2:블록
+번
+지
+관리건축물
+대장PK
+관리상위건
+드
+대장구분코
+드명
+대장종류코
+드
+대장종류코
+드명
+10241935
+축물대장PK
+2220041240026916 건물_아이디
+대장구분코
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrBasisOulnInfo?sigunguCd=11680&bjdongCd=103
+00&bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>1024185513</mgmBldrgstPk>
+<mgmUpBldrgstPk>10241935</mgmUpBldrgstPk>
+<bldgId>2220041240026916</bldgId>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>4</regstrKindCd>
+<regstrKindCdNm>전유부</regstrKindCdNm>
+<newPlatPlc>서울특별시 강남구 개포로109길 21  (개포동)</newPlatPlc>
+<bldNm>대청아파트303동</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<bylotCnt>0</bylotCnt>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+-  10  -
+-  11  -
+ 
+ 
+ 
+ 
+ 
+ 
+
+--- Page 8 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>21</naMainBun>
+<naSubBun>0</naSubBun>
+<jiyukCd>  </jiyukCd>
+<jiguCd>  </jiguCd>
+<guyukCd>  </guyukCd>
+<jiyukCdNm>  </jiyukCdNm>
+<jiguCdNm>  </jiguCdNm>
+<guyukCdNm>  </guyukCdNm>
+<crtnDay>20220813</crtnDay>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>4336</totalCount>
+    </body>
+</response>
+2)  건축물대장 총괄표제부 조회 오퍼레이션 명세
+오퍼레이션 번호
+2
+오퍼레이션명(국문)
+건축물대장 총괄표제
+부 조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrRecapTitleInfo
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+장 총괄표제부의 지번주소 및 새주소,  대지면적,  건축면적,  연면적,  건
+폐율,  용적율,  용도,  주차방식 및 주차대수,  부속건축물의 면적,  허가관
+리기관,  에너지관련 등급 등의 정보를 제공한다.
+오퍼레이션 설명
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+        -  요청메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+필
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+itgBldGrade
+itgBldCert
+crtnDay
+naBjdongCd
+naUgrndCd
+지 능 형 건 축 물
+등급
+지 능 형 건 축 물
+인증점수
+생성일자
+새 주 소 법 정 동
+코드
+새 주 소 지 상 지
+하코드
+1..n
+  VARCHAR(100) 옵
+  NUMBER(22,9) 옵
+0
+지 능 형 건 축
+물등급
+지 능 형 건 축
+물인증점수
+  VARCHAR(30) 필
+20220813
+생성일자
+  VARCHAR(30) 옵
+10301
+  VARCHAR(30) 옵
+naMainBun
+새주소본번
+  VARCHAR(20) 옵
+naSubBun
+새주소부번
+  VARCHAR(20) 옵
+platArea
+대지면적(㎡)
+  NUMBER(30,9) 옵
+0
+5
+0
+0
+새 주 소 법 정
+동코드
+새 주 소 지 상
+지하코드
+새주소본번
+새주소부번
+대지면적(㎡)
+건축면적(㎡)
+건폐율(%)
+-  12  -
+-  13  -
+archArea
+건축면적(㎡)
+  NUMBER(30,9) 옵
+15403.97
+bcRat
+건폐율(%)
+  NUMBER(22,9) 옵
+0
+　
+
+--- Page 9 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+totArea
+연면적(㎡)
+  NUMBER(30,9) 옵
+224217.01
+연면적(㎡)
+vlRatEstmTotAr
+용 적 률 산 정 연
+면적(㎡)
+ea
+vlRat
+용적률(%)
+  NUMBER(22,9) 옵
+0
+  NUMBER(30,9) 옵
+21833.55
+mainPurpsCd 주용도코드
+  VARCHAR(5) 옵
+02000
+mainPurpsCdN
+m
+주용도코드명
+VARCHAR(1000) 옵
+공동주택
+etcPurps
+기타용도
+VARCHAR(4000) 옵
+hhldCnt
+세대수(세대)
+  NUMBER(10) 옵
+fmlyCnt
+가구수(가구)
+  NUMBER(10) 옵
+mainBldCnt
+주건축물수
+  NUMBER(10) 옵
+atchBldCnt
+부속건축물수
+  NUMBER(10) 옵
+주거시설 근린생
+활시설
+4199
+0
+27
+3
+atchBldArea
+부 속 건 축 물 면
+적(㎡)
+  NUMBER(30,9) 옵
+64.26
+0
+0
+0
+0
+0
+0
+0
+0
+0
+totPkngCnt
+총주차수
+  NUMBER(10) 옵
+indrMechUtcnt
+indrMechArea
+oudrMechUtcnt
+oudrMechArea
+indrAutoUtcnt
+indrAutoArea
+oudrAutoUtcnt
+oudrAutoArea
+pmsDay
+stcnsDay
+옥 내 기 계 식 대
+수(대)
+옥 내 기 계 식 면
+적(㎡)
+옥 외 기 계 식 대
+수(대)
+옥 외 기 계 식 면
+적(㎡)
+옥 내 자 주 식 대
+수(대)
+옥 내 자 주 식 면
+적(㎡)
+옥 외 자 주 식 대
+수(대)
+옥 외 자 주 식 면
+적(㎡)
+허가일
+착공일
+  NUMBER(10) 옵
+  NUMBER(30,9) 옵
+  NUMBER(10) 옵
+  NUMBER(30,9) 옵
+  NUMBER(10) 옵
+  NUMBER(30,9) 옵
+  NUMBER(10) 옵
+  NUMBER(30,9) 옵
+  VARCHAR(8) 옵
+  VARCHAR(8) 옵
+useAprDay
+사용승인일
+  VARCHAR(8) 옵
+pmsnoYear
+허가번호년
+  VARCHAR(4) 옵
+pmsnoKikCd 허 가 번 호 기 관   VARCHAR(30) 옵
+용 적 률 산 정
+연면적(㎡)
+용적률(%)
+주용도코드
+주 용 도 코 드
+명
+기타용도
+세대수(세대)
+가구수(가구)
+주건축물수
+부 속 건 축 물
+수
+부 속 건 축 물
+면적(㎡)
+총주차수
+옥 내 기 계 식
+대수(대)
+옥 내 기 계 식
+면적(㎡)
+옥 외 기 계 식
+대수(대)
+옥 외 기 계 식
+면적(㎡)
+옥 내 자 주 식
+대수(대)
+옥 내 자 주 식
+면적(㎡)
+옥 외 자 주 식
+대수(대)
+옥 외 자 주 식
+면적(㎡)
+허가일
+착공일
+사용승인일
+허가번호년
+허 가 번 호 기
+pmsnoKikCdNm
+pmsnoGbCd
+pmsnoGbCdNm
+hoCnt
+engrGrade
+코드
+허 가 번 호 기 관
+코드명
+허 가 번 호 구 분
+코드
+허 가 번 호 구 분
+코드명
+호수(호)
+에 너 지 효 율 등
+급
+VARCHAR(1000) 옵
+  VARCHAR(30) 옵
+VARCHAR(1000) 옵
+  NUMBER(10) 옵
+  VARCHAR(100) 옵
+engrRat
+에너지절감율
+  NUMBER(22,9) 옵
+engrEpi
+EPI점수
+  NUMBER(22,9) 옵
+gnBldGrade
+gnBldCert
+rnum
+친 환 경 건 축 물
+등급
+친 환 경 건 축 물
+인증점수
+순번
+  VARCHAR(100) 옵
+  NUMBER(22,9) 옵
+NUMBER(8) 옵
+platPlc
+대지위치
+VARCHAR(1000) 필
+0
+0
+0
+0
+1
+서울특별시 강남
+구 개포동 12번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0012
+0000
+mgmBldrgstPk
+관 리 건 축 물 대
+장PK
+VARCHAR(30) 필
+10241103
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵
+2
+regstrGbCdNm
+대 장 구 분 코 드
+명
+VARCHAR(1000) 옵
+집합
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵
+1
+regstrKindCdN
+대 장 종 류 코 드
+m
+newOldRegstrG
+명
+신 구 대 장 구 분
+bCd
+코드
+VARCHAR(1000) 옵
+총괄표제부
+  VARCHAR(30) 옵
+0
+newOldRegstrG 신 구 대 장 구 분 VARCHAR(1000) 옵
+구대장
+관코드
+허 가 번 호 기
+관코드명
+허 가 번 호 구
+분코드
+허 가 번 호 구
+분코드명
+호수(호)
+에 너 지 효 율
+등급
+에 너 지 절 감
+율
+EPI점수
+친 환 경 건 축
+물등급
+친 환 경 건 축
+물인증점수
+순번
+대지위치
+행 정 표 준 코
+드
+행 정 표 준 코
+드
+0:대지 1:산
+2:블록
+번
+지
+관 리 건 축 물
+대장PK
+대 장 구 분 코
+드
+대 장 구 분 코
+드명
+대 장 종 류 코
+드
+대 장 종 류 코
+드명
+신 구 대 장 구
+분코드
+신 구 대 장 구
+-  14  -
+-  15  -
+ 
+ 
+　
+　
+　
+　
+　
+　
+　
+　
+　
+　
+ 
+
+--- Page 10 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+bCdNm
+코드명
+newPlatPlc
+도 로 명 대 지 위
+치
+VARCHAR(1000) 옵
+  서울특별시 강남
+구 개포로109길 (개
+포동)
+분코드명
+도 로 명 대 지
+위치
+bldNm
+건물명
+  VARCHAR(200) 옵
+대치,대청 아파트 건물명
+splotNm
+특수지명
+VARCHAR(1000) 옵
+block
+lot
+블록
+로트
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+bylotCnt
+외필지수
+  NUMBER(10) 옵
+0
+naRoadCd
+새 주 소 도 로 코
+드
+  VARCHAR(30) 옵
+116804166040
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+특수지명
+블록
+로트
+외필지수
+새 주 소 도 로
+코드
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrRecapTitleInfo?sigunguCd=11680&bjdongCd=10
+300&bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241103</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>1</regstrKindCd>
+<regstrKindCdNm>총괄표제부</regstrKindCdNm>
+<newOldRegstrGbCd>0</newOldRegstrGbCd>
+<newOldRegstrGbCdNm>구대장</newOldRegstrGbCdNm>
+<newPlatPlc>서울특별시 강남구 개포로109길 5  (개포동)</newPlatPlc>
+<bldNm>대치,대청 아파트</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<bylotCnt>0</bylotCnt>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>5</naMainBun>
+<naSubBun>0</naSubBun>
+<platArea>0</platArea>
+<archArea>15403.97</archArea>
+<bcRat>0</bcRat>
+<totArea>224217.01</totArea>
+<vlRatEstmTotArea>21833.55</vlRatEstmTotArea>
+<vlRat>0</vlRat>
+<mainPurpsCd>02000</mainPurpsCd>
+<mainPurpsCdNm>공동주택</mainPurpsCdNm>
+<etcPurps>주거시설 근린생활시설</etcPurps>
+<hhldCnt>4199</hhldCnt>
+<fmlyCnt>0</fmlyCnt>
+<mainBldCnt>27</mainBldCnt>
+<atchBldCnt>3</atchBldCnt>f
+<atchBldArea>64.26</atchBldArea>
+<totPkngCnt>0</totPkngCnt>
+<indrMechUtcnt>0</indrMechUtcnt>
+<indrMechArea>0</indrMechArea>
+<oudrMechUtcnt>0</oudrMechUtcnt>
+<oudrMechArea>0</oudrMechArea>
+<indrAutoUtcnt>0</indrAutoUtcnt>
+<indrAutoArea>0</indrAutoArea>
+<oudrAutoUtcnt>0</oudrAutoUtcnt>
+-  16  -
+-  17  -
+　
+　
+　
+
+--- Page 11 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+<oudrAutoArea>0</oudrAutoArea>
+<pmsDay>  </pmsDay>
+<stcnsDay>  </stcnsDay>
+<useAprDay>  </useAprDay>
+<pmsnoYear>  </pmsnoYear>
+<pmsnoKikCd>  </pmsnoKikCd>
+<pmsnoKikCdNm>  </pmsnoKikCdNm>
+<pmsnoGbCd>  </pmsnoGbCd>
+<pmsnoGbCdNm>  </pmsnoGbCdNm>
+<hoCnt>0</hoCnt>
+<engrGrade>  </engrGrade>
+<engrRat>0</engrRat>
+<engrEpi>0</engrEpi>
+<gnBldGrade>  </gnBldGrade>
+<gnBldCert>0</gnBldCert>
+<itgBldGrade>  </itgBldGrade>
+<itgBldCert>0</itgBldCert>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>1</totalCount>
+    </body>
+</response>
+3)  건축물대장 표제부 조회 오퍼레이션 명세
+오퍼레이션 번호
+3
+오퍼레이션명(국문)
+건축물대장 표제부 조
+회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrTitleInfo
+오퍼레이션 설명
+장 표제부의 지번주소 및 새주소,  주/부속구분,  대지면적,  건축면적,  건
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+        -  요청메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+필
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+mainPurpsCdN
+m
+1..n
+주용도코드명 VARCHAR(1000) 옵션
+노유자시설
+주용도코드명
+etcPurps
+기타용도
+VARCHAR(4000) 옵션
+경로당
+roofCd
+지붕코드
+  VARCHAR(30) 옵션
+10
+용도정보(건
+축물대장
+주용도 정보)
+지붕코드
+roofCdNm
+지붕코드명
+VARCHAR(1000) 옵션
+(철근)콘크리트
+지붕코드명
+지붕정보(건
+폐율,  용적율,  구조,  용도,  지붕구조,  주차대수 등의 정보를 제공한다.
+etcRoof
+기타지붕
+VARCHAR(2000) 옵션
+(철근)콘크리트
+축물대장
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+hhldCnt
+세대수(세대)
+  NUMBER(10) 옵션
+fmlyCnt
+가구수(가구)
+  NUMBER(10) 옵션
+0
+0
+지붕 정보)
+세대수(세대)
+가구수(가구)
+-  18  -
+-  19  -
+
+--- Page 12 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+heit
+높이(m)
+  NUMBER(22,9) 옵션
+grndFlrCnt
+지상층수
+  NUMBER(3) 옵션
+ugrndFlrCnt
+지하층수
+  NUMBER(3) 옵션
+rideUseElvtCnt 승용승강기수
+  NUMBER(10) 옵션
+emgenUseElvtC
+비상용승강기
+nt
+수
+  NUMBER(10) 옵션
+atchBldCnt
+부속건축물수
+  NUMBER(10) 옵션
+atchBldArea
+부속건축물면
+적(㎡)
+  NUMBER(30,9) 옵션
+0
+0
+0
+0
+0
+0
+0
+totDongTotArea 총동연면적(㎡)
+  NUMBER(30,9) 옵션
+278.01
+0
+0
+0
+0
+0
+0
+0
+0
+indrMechUtcnt
+indrMechArea
+oudrMechUtcnt
+oudrMechArea
+indrAutoUtcnt
+indrAutoArea
+oudrAutoUtcnt
+oudrAutoArea
+pmsDay
+stcnsDay
+옥내기계식대
+수(대)
+옥내기계식면
+적(㎡)
+옥외기계식대
+수(대)
+옥외기계식면
+적(㎡)
+옥내자주식대
+수(대)
+옥내자주식면
+적(㎡)
+옥외자주식대
+수(대)
+옥외자주식면
+적(㎡)
+허가일
+착공일
+  NUMBER(10) 옵션
+  NUMBER(30,9) 옵션
+  NUMBER(10) 옵션
+  NUMBER(30,9) 옵션
+  NUMBER(10) 옵션
+  NUMBER(30,9) 옵션
+  NUMBER(10) 옵션
+  NUMBER(30,9) 옵션
+  VARCHAR(8) 옵션
+  VARCHAR(8) 옵션
+useAprDay
+사용승인일
+  VARCHAR(8) 옵션
+pmsnoYear
+허가번호년
+  VARCHAR(4) 옵션
+pmsnoKikCd
+pmsnoKikCdNm
+pmsnoGbCd
+허가번호기관
+코드
+허가번호기관
+코드명
+허가번호구분
+코드
+  VARCHAR(30) 옵션
+VARCHAR(1000) 옵션
+  VARCHAR(30) 옵션
+pmsnoGbCdNm 허가번호구분
+VARCHAR(1000) 옵션
+높이(m)
+지상층수
+지하층수
+승용승강기수
+비상용승강기
+수
+부속건축물수
+부속건축물면
+적(㎡)
+총동연면적(
+㎡)
+옥내기계식대
+수(대)
+옥내기계식면
+적(㎡)
+옥외기계식대
+수(대)
+옥외기계식면
+적(㎡)
+옥내자주식대
+수(대)
+옥내자주식면
+적(㎡)
+옥외자주식대
+수(대)
+옥외자주식면
+적(㎡)
+허가일
+착공일
+사용승인일
+허가번호년
+허가번호기관
+코드
+허가번호기관
+코드명
+허가번호구분
+코드
+허가번호구분
+hoCnt
+engrGrade
+engrRat
+engrEpi
+gnBldGrade
+gnBldCert
+itgBldGrade
+itgBldCert
+crtnDay
+rnum
+코드명
+호수(호)
+에너지효율등
+급
+  NUMBER(10) 옵션
+  VARCHAR(100) 옵션
+에너지절감율
+  NUMBER(22,9) 옵션
+EPI점수
+  NUMBER(22,9) 옵션
+  VARCHAR(100) 옵션
+  NUMBER(22,9) 옵션
+  VARCHAR(100) 옵션
+NUMBER(22,9) 옵션
+친환경건축물
+등급
+친환경건축물
+인증점수
+지능형건축물
+등급
+지능형건축물
+인증점수
+생성일자
+순번
+0
+0
+0
+0
+0
+  VARCHAR(30) 필수
+20220813
+NUMBER(8) 옵션
+1
+서울특별시
+코드명
+호수(호)
+에너지효율등
+급
+에너지절감율
+EPI점수
+친환경건축물
+등급
+친환경건축물
+인증점수
+지능형건축물
+등급
+지능형건축물
+인증점수
+생성일자
+순번
+platPlc
+대지위치
+VARCHAR(1000) 필수
+강남구 개포동
+대지위치
+sigunguCd
+시군구코드
+  VARCHAR(30) 필수
+bjdongCd
+법정동코드
+  VARCHAR(30) 필수
+12번지
+11680
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵션
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵션
+  VARCHAR(20) 옵션
+0012
+0000
+mgmBldrgstPk
+관리건축물대
+장PK
+  VARCHAR(30) 필수
+10241100287543
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵션
+2
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵션
+집합
+regstrKindCd 대장종류코드
+VARCHAR(30) 옵션
+3
+regstrKindCdN
+대장종류코드
+m
+newPlatPlc
+bldNm
+명
+도로명대지위
+치
+건물명
+VARCHAR(1000) 옵션
+표제부
+VARCHAR(1000) 옵션
+VARCHAR(200) 옵션
+경로당
+splotNm
+특수지명
+VARCHAR(1000) 옵션
+행정표준코드
+행정표준코드
+0:대지 1:산
+2:블록
+번
+지
+관리건축물대
+장PK
+대장구분코드
+대장구분코드
+명
+대장종류코드
+대장종류코드
+명
+도로명대지위
+치
+건물명
+특수지명
+-  20  -
+-  21  -
+　
+　
+　
+ 
+　
+　
+ 
+　
+　
+　
+　
+　
+　
+
+--- Page 13 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+block
+lot
+블록
+로트
+VARCHAR(500) 옵션
+  VARCHAR(500) 옵션
+bylotCnt
+외필지수
+  NUMBER(10) 옵션
+0
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵션
+  VARCHAR(30) 옵션
+  VARCHAR(30) 옵션
+naMainBun
+새주소본번
+  VARCHAR(20) 옵션
+naSubBun
+새주소부번
+  VARCHAR(20) 옵션
+0
+0
+0
+dongNm
+동명칭
+VARCHAR(1000) 옵션
+경로당
+mainAtchGbCd
+mainAtchGbCd
+주부속구분코
+드
+주부속구분코
+Nm
+드명
+  VARCHAR(30) 옵션
+1
+VARCHAR(1000) 옵션
+부속건축물
+platArea
+대지면적(㎡)
+  NUMBER(30,9) 옵션
+0
+블록
+로트
+외필지수
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+새주소본번
+새주소부번
+동명칭
+주부속구분코
+드
+주부속구분코
+드명
+대지면적(㎡)
+archArea
+건축면적(㎡)
+  NUMBER(30,9) 옵션
+235.55
+건축면적(㎡)
+bcRat
+건폐율(%)
+  NUMBER(22,9) 옵션
+0
+totArea
+연면적(㎡)
+  NUMBER(30,9) 옵션
+278.01
+vlRatEstmTotAr
+용적률산정연
+면적(㎡)
+ea
+vlRat
+용적률(%)
+  NUMBER(22,9) 옵션
+  NUMBER(30,9) 옵션
+strctCd
+구조코드
+  VARCHAR(2) 옵션
+0
+0
+41
+strctCdNm
+구조코드명
+VARCHAR(1000) 옵션
+벽돌구조
+건폐율(%)
+연면적(㎡)
+용적률산정연
+면적(㎡)
+용적률(%)
+구조코드
+구조코드명
+구조정보(건
+etcStrct
+기타구조
+VARCHAR(2000) 옵션
+철골콘크리트구조
+축물대장
+mainPurpsCd 주용도코드
+  VARCHAR(5) 옵션
+11000
+rserthqkDsgnA
+내진설계적용
+pplyYn
+여부
+  VARCHAR(1) 옵션
+0
+rserthqkAblty 내진능력
+VARCHAR(4000) 옵션
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+주구조 정보)
+주용도코드
+내진 설계
+적용
+여부(0,1)
+내진 능력
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo?sigunguCd=11680&bjdongCd=10300&b
+un=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241100287543</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>3</regstrKindCd>
+<regstrKindCdNm>표제부</regstrKindCdNm>
+<newPlatPlc>  </newPlatPlc>
+<bldNm>경로당</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<bylotCnt>0</bylotCnt>
+<naRoadCd>  </naRoadCd>
+<naBjdongCd>  </naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>0</naMainBun>
+-  22  -
+-  23  -
+　
+　
+　
+　
+ 
+ 
+ 
+ 
+ 
+
+--- Page 14 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+<naSubBun>0</naSubBun>
+<dongNm>경로당</dongNm>
+<mainAtchGbCd>1</mainAtchGbCd>
+<mainAtchGbCdNm>부속건축물</mainAtchGbCdNm>
+<platArea>0</platArea>
+<archArea>235.55</archArea>
+<bcRat>0</bcRat>
+<totArea>278.01</totArea>
+<vlRatEstmTotArea>0</vlRatEstmTotArea>
+<vlRat>0</vlRat>
+<strctCd>41</strctCd>
+<strctCdNm>철골콘크리트구조</strctCdNm>
+<etcStrct>철골콘크리트구조</etcStrct>
+<mainPurpsCd>11000</mainPurpsCd>
+<mainPurpsCdNm>노유자시설</mainPurpsCdNm>
+<etcPurps>경로당</etcPurps>
+<roofCd>10</roofCd>
+<roofCdNm>(철근)콘크리트</roofCdNm>
+<etcRoof>(철근)콘크리트</etcRoof>
+<hhldCnt>0</hhldCnt>
+<fmlyCnt>0</fmlyCnt>
+<heit>0</heit>
+<grndFlrCnt>2</grndFlrCnt>
+<ugrndFlrCnt>0</ugrndFlrCnt>
+<rideUseElvtCnt>0</rideUseElvtCnt>
+<emgenUseElvtCnt>0</emgenUseElvtCnt>
+<atchBldCnt>0</atchBldCnt>
+<atchBldArea>0</atchBldArea>
+<totDongTotArea>278.01</totDongTotArea>
+<indrMechUtcnt>0</indrMechUtcnt>
+<indrMechArea>0</indrMechArea>
+<oudrMechUtcnt>0</oudrMechUtcnt>
+<oudrMechArea>0</oudrMechArea>
+<indrAutoUtcnt>0</indrAutoUtcnt>
+<indrAutoArea>0</indrAutoArea>
+<oudrAutoUtcnt>0</oudrAutoUtcnt>
+<oudrAutoArea>0</oudrAutoArea>
+<pmsDay>  </pmsDay>
+<stcnsDay>  </stcnsDay>
+<useAprDay>  </useAprDay>
+<pmsnoYear>  </pmsnoYear>
+<pmsnoKikCd>  </pmsnoKikCd>
+<pmsnoKikCdNm>  </pmsnoKikCdNm>
+<pmsnoGbCd>  </pmsnoGbCd>
+<pmsnoGbCdNm>  </pmsnoGbCdNm>
+<hoCnt>0</hoCnt>
+<engrGrade>  </engrGrade>
+<engrRat>0</engrRat>
+<engrEpi>0</engrEpi>
+<gnBldGrade>  </gnBldGrade>
+<gnBldCert>0</gnBldCert>
+<itgBldGrade>  </itgBldGrade>
+<itgBldCert>0</itgBldCert>
+<crtnDay>20220813</crtnDay>
+<rserthqkDsgnApplyYn>0</rserthqkDsgnApplyYn>
+<rserthqkAblty>  </rserthqkAblty>
+            </item>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>31/totalCount>
+    </body>
+</response>
+4)  건축물대장 층별개요 조회 오퍼레이션 명세
+오퍼레이션 번호
+4
+오퍼레이션명(국문)
+건축물대장 층별개요
+조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrFlrOulnInfo
+오퍼레이션 설명
+장의 층구분,  층번호,  층의 구조,  용도,  면적 등의 층별 정보를 제공한
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+다.
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+-  24  -
+-  25  -
+
+--- Page 15 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+        -  요청메시지 명세
+newPlatPlc
+도로명대지위
+치
+VARCHAR(1000) 옵션
+　서울특별시 강남구
+개포로109길 5 
+(개포동)
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+bldNm
+건물명
+  VARCHAR(200) 옵션
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+sigunguCd
+시군구코드
+  VARCHAR(30)
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+필
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+11680
+행정표준코드
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+rnum
+1..n
+순번
+NUMBER(8) 옵션
+1
+platPlc
+대지위치
+VARCHAR(1000) 필수
+서울특별시 강남구
+개포동 12번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필수
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필수
+10300
+platGbCd
+대지구분코드   VARCHAR(30) 옵션
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵션
+  VARCHAR(20) 옵션
+0012
+0000
+mgmBldrgstPk
+관리건축물대
+장PK
+VARCHAR(30) 필수
+102417005
+순번
+대지위치
+행정표준
+코드
+행정표준
+코드
+0:대지
+1:산
+2:블록
+번
+지
+관리건축
+물대장PK
+0
+5
+0
+splotNm
+특수지명
+block
+lot
+블록
+로트
+VARCHAR(1000) 옵션
+  VARCHAR(500) 옵션
+  VARCHAR(500) 옵션
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵션
+16804166040
+  VARCHAR(30) 옵션
+10301
+  VARCHAR(30) 옵션
+naMainBun
+새주소본번
+  VARCHAR(20) 옵션
+naSubBun
+새주소부번
+  VARCHAR(20) 옵션
+dongNm
+동명칭
+VARCHAR(1000) 옵션
+flrGbCd
+층구분코드
+  VARCHAR(30) 옵션
+20
+flrGbCdNm
+층구분코드명 VARCHAR(1000) 옵션
+지상
+flrNo
+층번호
+NUMBER(5)
+옵션
+flrNoNm
+층번호명
+VARCHAR(1000) 옵션
+strctCd
+구조코드
+  VARCHAR(2)
+옵션
+3
+3층
+31
+strctCdNm
+구조코드명
+VARCHAR(1000) 옵션
+일반철골구조
+etcStrct
+기타구조
+VARCHAR(2000) 옵션
+일반철골구조
+mainPurpsCd 주용도코드
+  VARCHAR(5)
+옵션
+11999
+mainPurpsCdN
+m
+주용도코드명 VARCHAR(1000) 옵션
+기타노유자시설
+도로명대
+지위치
+건물명
+특수지명
+블록
+로트
+새주소도
+로코드
+새주소법
+정동코드
+새주소지
+상지하코
+드
+새주소본
+번
+새주소부
+번
+동명칭
+층구분코
+드
+층구분코
+드명
+층번호
+층번호명
+구조코드
+구조코드
+명
+구조정보(
+건축물대
+장 구조)
+주용도코
+드
+주용도코
+드명
+용도정보(
+-  26  -
+-  27  -
+etcPurps
+기타용도
+VARCHAR(4000) 옵션
+노유자시설(승강기)
+건축물대
+mainAtchGbCd 주부속구분코   VARCHAR(30) 옵션
+0
+장 용도)
+주부속구
+ 
+　
+ 
+　
+　
+　
+ 
+　
+ 
+
+--- Page 16 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+mainAtchGbCd
+Nm
+area
+드
+주부속구분코
+드명
+VARCHAR(1000) 옵션
+주건축물
+면적(㎡)
+  NUMBER(30,9) 옵션
+6.89
+areaExctYn
+면적제외여부   VARCHAR(1)
+옵션
+0
+분코드
+주부속구
+분코드명
+면적(㎡)
+0:  N 1: Y
+crtnDay
+생성일자
+  VARCHAR(30) 필수
+20220813
+생성일자
+※ 항목구분 : 필수(1), 옵션(0), 1건 이상 복수건(1..n), 0건 또는 복수건(0..n)
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrFlrOulnInfo?sigunguCd=11680&bjdongCd=10300
+&bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>102417005</mgmBldrgstPk>
+<newPlatPlc>서울특별시 강남구 개포로109길 5  (개포동)</newPlatPlc>
+<bldNm>  </bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>5</naMainBun>
+<naSubBun>0</naSubBun>
+<dongNm>  </dongNm>
+<flrGbCd>20</flrGbCd>
+<flrGbCdNm>지상</flrGbCdNm>
+<flrNo>3</flrNo>
+<flrNoNm>3층</flrNoNm>
+<strctCd>31</strctCd>
+<strctCdNm>일반철골구조</strctCdNm>
+<etcStrct>일반철골구조</etcStrct>
+<mainPurpsCd>11999</mainPurpsCd>
+<mainPurpsCdNm>기타노유자시설</mainPurpsCdNm>
+<etcPurps>노유자시설(승강기)</etcPurps>
+<mainAtchGbCd>0</mainAtchGbCd>
+<mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+<area>6.89</area>
+<areaExctYn>0</areaExctYn>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>434otalCount>
+    </body>
+</response>
+5)  건축물대장 부속지번 조회 오퍼레이션 명세
+오퍼레이션 번호
+5
+오퍼레이션명(국문)
+건축물대장 부속지번
+조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrAtchJibunInfo
+오퍼레이션 설명
+장과 관련된 부속지번의 지번주소 및 새주소,  부속대장구분 등의 정보
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+를 제공한다.
+Call  Back  URL
+-  28  -
+-  29  -
+
+--- Page 17 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+        -  요청메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+옵
+옵
+옵
+옵
+필
+필
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0005
+번
+지
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+1..n
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+bun
+ji
+번
+지
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0 
+0012
+0005
+mgmBldrgstPk
+관리건축물대
+장PK
+VARCHAR(30) 필
+1024119200
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵
+1
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵
+일반
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵
+2
+regstrKindCdN 대장종류코드 VARCHAR(1000) 옵
+일반건축물
+0:대지 1:산
+2:블록
+번
+지
+관리건축물
+대장PK
+대장구분코
+드
+대장구분코
+드명
+대장종류코
+드
+대장종류코
+m
+newPlatPlc
+bldNm
+명
+도로명대지위
+치
+건물명
+splotNm
+특수지명
+block
+lot
+naRoadCd
+naBjdongCd
+naUgrndCd
+블록
+로트
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  서울특별시 강남구
+개포로 613
+VARCHAR(1000) 옵
+  VARCHAR(200) 옵
+VARCHAR(1000) 옵
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+  VARCHAR(30) 옵
+116803122001
+  VARCHAR(30) 옵
+10301
+  VARCHAR(30) 옵
+0
+613
+0
+1
+naMainBun
+새주소본번
+  VARCHAR(20) 옵
+naSubBun
+새주소부번
+  VARCHAR(20) 옵
+atchRegstrGbC
+부속대장구분
+d
+atchRegstrGbC
+코드
+부속대장구분
+dNm
+atchSigunguCd
+atchBjdongCd
+atchPlatGbCd
+atchBun
+atchJi
+코드명
+부속시군구코
+드
+부속법정동코
+드
+부속대지구분
+코드
+부속번
+부속지
+  VARCHAR(30) 옵
+VARCHAR(1000) 옵
+일반
+  VARCHAR(30) 옵
+11680
+  VARCHAR(30) 옵
+10300
+  VARCHAR(30) 옵
+0
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0012
+0048
+atchSplotNm 부속특수지명 VARCHAR(1000) 옵
+atchBlock
+부속블록
+  VARCHAR(500) 옵
+atchLot
+부속로트
+  VARCHAR(500) 옵
+atchEtcJibunN
+부속기타지번
+명
+VARCHAR(1000) 옵
+m
+crtnDay
+rnum
+platPlc
+생성일자
+VARCHAR(30) 필
+20220813
+순번
+NUMBER(8) 옵
+1
+대지위치
+VARCHAR(1000) 필
+서울특별시 강남구
+개포동 12-5번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필
+11680
+드명
+도로명대지
+위치
+건물명
+특수지명
+블록
+로트
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+새주소부번
+부속대장구
+분코드
+부속대장구
+분코드명
+부속시군구
+코드
+부속법정동
+코드
+부속대지구
+분코드
+부속번
+부속지
+부속특수지
+명
+부속블록
+부속로트
+부속기타지
+번명
+생성일자
+순번
+대지위치
+행정표준코
+드
+-  30  -
+-  31  -
+　
+ 
+　
+　
+　
+　
+　
+　
+　
+
+--- Page 18 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+행정표준코
+드
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrAtchJibunInfo?sigunguCd=11680&bjdongCd=103
+00&bun=0012&ji=0005&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12-5번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0005</ji>
+<mgmBldrgstPk>1024119200</mgmBldrgstPk>
+<regstrGbCd>1</regstrGbCd>
+<regstrGbCdNm>일반</regstrGbCdNm>
+<regstrKindCd>2</regstrKindCd>
+<regstrKindCdNm>일반건축물</regstrKindCdNm>
+<newPlatPlc>서울특별시 강남구 개포로 613  (개포동)</newPlatPlc>
+<bldNm>  </bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<naRoadCd>116803122001</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>613</naMainBun>
+<naSubBun>0</naSubBun>
+<atchRegstrGbCd>1</atchRegstrGbCd>
+<atchRegstrGbCdNm>일반</atchRegstrGbCdNm>
+<atchSigunguCd>11680</atchSigunguCd>
+<atchBjdongCd>10300</atchBjdongCd>
+<atchPlatGbCd>0</atchPlatGbCd>
+<atchBun>0012</atchBun>
+<atchJi>0048</atchJi>
+<atchSplotNm>  </atchSplotNm>
+<atchBlock>  </atchBlock>
+<atchLot>  </atchLot>
+<atchEtcJibunNm>  </atchEtcJibunNm>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>1</totalCount>
+    </body>
+</response>
+6)  건축물대장 전유공용면적 조회 오퍼레이션 명세
+오퍼레이션 번호
+6
+오퍼레이션명(국문)
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+건축물대장 전유공용
+면적 조회
+getBrExposPubuseAreaI
+nfo
+오퍼레이션 설명
+장과 관련된 전유/공용면적의 층구분,  층번호,  전유/공용구분,  구조,  용
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+도 등의 정보를 제공한다.
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+-  32  -
+-  33  -
+
+--- Page 19 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+    -  요청메시지 명세
+항목명
+(영문)
+항목명
+(국문)
+항목크기
+항목
+구분
+샘플
+데이터
+항목설명
+비고
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호
+VARCHAR(3)
+sigunguCd 시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd 대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+옵
+옵
+필
+필
+옵
+옵
+옵
+dongNm
+동명칭
+  VARCHAR(1000) 옵
+hoNm
+호명칭
+  VARCHAR(1000) 옵
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+10
+1
+페이지당 목록 수
+페이지번호
+11680 행정표준코드
+10300 행정표준코드
+0
+0:대지 1:산 2:블록
+0012 번
+0000 지
+동명칭
+호명칭
+YYYYMMDD
+YYYYMMDD
+    -  응답메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+1..n
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵
+2
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵
+집합
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵
+4
+regstrKindCdN
+대장종류코드
+m
+명
+newPlatPlc
+도로명대지위
+치
+VARCHAR(1000) 옵
+전유부
+VARCHAR(1000) 옵
+개포로109길 21 
+서울특별시 강남구
+(개포동)
+대장구분코
+드
+대장구분코
+드명
+대장종류코
+드
+대장종류코
+드명
+도로명대지
+위치
+block
+lot
+블록
+로트
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵
+116804166040
+  VARCHAR(30) 옵
+10301
+  VARCHAR(30) 옵
+naMainBun
+새주소본번
+  VARCHAR(20) 옵
+naSubBun
+새주소부번
+  VARCHAR(20) 옵
+dongNm
+hoNm
+동명칭
+호명칭
+VARCHAR(1000) 옵
+VARCHAR(1000) 옵
+flrGbCd
+층구분코드
+  VARCHAR(30) 옵
+flrGbCdNm
+층구분코드명
+VARCHAR(1000) 옵
+flrNo
+층번호
+  NUMBER(5) 옵
+flrNoNm
+층번호명
+VARCHAR(1000) 옵
+0
+21
+0
+302
+407호
+20
+지상
+4
+4층
+1
+exposPubuseG
+전유공용구분
+bCd
+exposPubuseG
+코드
+전유공용구분
+bCdNm
+mainAtchGbCd
+mainAtchGbCd
+Nm
+strctCd
+코드명
+주부속구분코
+드
+주부속구분코
+드명
+  VARCHAR(30) 옵
+VARCHAR(1000) 옵
+전유
+  VARCHAR(30) 옵
+0
+VARCHAR(1000) 옵
+주건축물
+구조코드
+  VARCHAR(2) 옵
+21
+strctCdNm
+구조코드명
+VARCHAR(1000) 옵
+철근콘크리트구조 구조코드명
+etcStrct
+기타구조
+VARCHAR(2000) 옵
+철근콘크리트조
+기타구조
+mainPurpsCd 주용도코드
+  VARCHAR(5) 옵
+02001
+mainPurpsCdN
+m
+주용도코드명 VARCHAR(1000) 옵
+아파트
+etcPurps
+기타용도
+VARCHAR(4000) 옵
+아파트(일부공유면
+적포함)
+39.53
+블록
+로트
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+새주소부번
+동명칭
+호명칭
+층구분코드
+층구분코드
+명
+층번호
+층번호명
+전유공용구
+분코드
+전유공용구
+분코드명
+주부속구분
+코드
+주부속구분
+코드명
+구조코드
+주용도코드
+주용도코드
+명
+기타용도
+면적(㎡)
+생성일자
+bldNm
+건물명
+  VARCHAR(200) 옵
+대치아파트302동
+건물명
+area
+면적(㎡)
+  NUMBER(30,9) 옵
+splotNm
+특수지명
+VARCHAR(1000) 옵
+특수지명
+crtnDay
+생성일자
+  VARCHAR(30) 필
+20220813
+-  34  -
+-  35  -
+ 
+ 
+　
+　
+　
+ 
+ 
+ 
+ 
+ 
+
+--- Page 20 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+rnum
+순번
+NUMBER(8) 옵
+1
+순번
+platPlc
+대지위치
+VARCHAR(1000) 필
+강남구 개포동
+대지위치
+서울특별시
+sigunguCd
+시군구코드
+VARCHAR(30) 필
+12번지
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0012
+0000
+관리건축물대
+mgmBldrgstPk
+장PK
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+VARCHAR(30) 필
+10241116049
+행정표준코
+드
+행정표준코
+드
+0:대지 1:산
+2:블록
+번
+지
+관리건축물
+대장PK
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrExposPubuseAreaInfo?sigunguCd=11680&bjdon
+gCd=10300&bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241195364</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>4</regstrKindCd>
+<regstrKindCdNm>전유부</regstrKindCdNm>
+<newPlatPlc>서울특별시 강남구 개포로109길 21  (개포동)</newPlatPlc>
+<bldNm>대청아파트302동</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>21</naMainBun>
+<naSubBun>0</naSubBun>
+<dongNm>302</dongNm>
+<hoNm>407호</hoNm>
+<flrGbCd>20</flrGbCd>
+<flrGbCdNm>지상</flrGbCdNm>
+<flrNo>4</flrNo>
+<flrNoNm>4층</flrNoNm>
+<exposPubuseGbCd>1</exposPubuseGbCd>
+<exposPubuseGbCdNm>전유</exposPubuseGbCdNm>
+<mainAtchGbCd>0</mainAtchGbCd>
+<mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+<strctCd>21</strctCd>
+<strctCdNm>철근콘크리트구조</strctCdNm>
+<etcStrct>철근콘크리트조</etcStrct>
+<mainPurpsCd>02001</mainPurpsCd>
+<mainPurpsCdNm>아파트</mainPurpsCdNm>
+<etcPurps>아파트(일부공유면적포함)</etcPurps>
+<area>39.53</area>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+        <numOfRows>2</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>13446</totalCount>
+-  36  -
+-  37  -
+
+--- Page 21 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+    </body>
+</response>
+7)  건축물대장 오수정화시설 조회 오퍼레이션 명세
+오퍼레이션 번호
+7
+오퍼레이션명(국문)
+건축물대장 오수정화
+시설 조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrWclfInfo
+오퍼레이션 설명
+장과 관련된 오수정화시설의 오수정화형식,  용량,  용량단위 등의 정보
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+를 제공한다.
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+    -  요청메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+numOfRows
+리스트수
+VARCHAR2(3)
+pageNo
+페이지번호 VARCHAR2(3)
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+옵
+옵
+필
+필
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+10
+1
+11680
+10300
+0
+0012
+0000
+페이지당 목록 수
+페이지번호
+행정표준코드
+행정표준코드
+0:대지 1:산 2:블록
+번
+지
+YYYYMMDD
+YYYYMMDD
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+ji
+1..n
+지
+VARCHAR(500) 옵
+0000
+지
+mgmBldrgstPk
+관리건축물대
+장PK
+VARCHAR(30) 필
+10241103
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵
+2
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵
+집합
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵
+1
+regstrKindCdN
+대장종류코드
+m
+명
+newPlatPlc
+도로명대지위
+치
+VARCHAR(1000) 옵
+총괄표제부
+VARCHAR(1000) 옵
+  서울특별시 강남구
+개포로109길 5 
+(개포동)
+관리건축물
+대장PK
+대장구분코
+드
+대장구분코
+드명
+대장종류코
+드
+대장종류코
+드명
+도로명대지
+위치
+bldNm
+건물명
+  VARCHAR(200) 옵
+대치,대청 아파트 건물명
+splotNm
+특수지명
+block
+lot
+블록
+로트
+VARCHAR(1000) 옵
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵
+116804166040
+  VARCHAR(30) 옵
+10301
+  VARCHAR(30) 옵
+naMainBun
+새주소본번
+  VARCHAR(20) 옵
+naSubBun
+새주소부번
+  VARCHAR(20) 옵
+modeCd
+형식코드
+  VARCHAR(30) 옵
+299
+0
+5
+0
+특수지명
+블록
+로트
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+새주소부번
+형식코드
+modeCdNm
+형식코드명
+VARCHAR(1000) 옵
+기타단독정화조
+형식코드명
+etcMode
+기타형식
+VARCHAR(1000) 옵
+unitGbCd
+단위구분코드
+  VARCHAR(30) 옵
+unitGbCdNm
+capaPsper
+단위구분코드
+명
+용량(인용)
+VARCHAR(1000) 옵
+  NUMBER(22,9) 옵
+300
+기타형식
+단위구분코
+드
+단위구분코
+드명
+용량(인용)
+-  38  -
+-  39  -
+   
+   
+ 
+ 
+ 
+ 
+　
+　
+　
+　
+　
+　
+
+--- Page 22 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+capaLube
+용량(루베)
+  NUMBER(22,9) 옵
+0
+용량(루베)
+crtnDay
+생성일자
+VARCHAR(30) 필
+20220813
+생성일자
+rnum
+platPlc
+순번
+NUMBER(8) 옵
+1
+순번
+대지위치
+VARCHAR(1000) 필
+서울특별시 강남구
+개포동 12번지
+sigunguCd
+시군구코드
+VARCHAR(30) 필
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+0
+bun
+번
+  VARCHAR(20) 옵
+0012
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  요청/응답 메시지 명세
+REST(URI)
+대지위치
+행정표준코
+드
+행정표준코
+드
+0:대지 1:산
+2:블록
+번
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrWclfInfo?sigunguCd=11680&bjdongCd=10300&b
+un=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241103</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>1</regstrKindCd>
+<regstrKindCdNm>총괄표제부</regstrKindCdNm>
+<newPlatPlc>서울특별시 강남구 개포로109길 5  (개포동)</newPlatPlc>
+<bldNm>대치,대청 아파트</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>5</naMainBun>
+<naSubBun>0</naSubBun>
+<modeCd>299</modeCd>
+<modeCdNm>기타단독정화조</modeCdNm>
+<etcMode>  </etcMode>
+<unitGbCd>  </unitGbCd>
+<unitGbCdNm>  </unitGbCdNm>
+<capaPsper>300</capaPsper>
+<capaLube>0</capaLube>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+        <numOfRows>10</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>1</totalCount>
+    </body>
+</response>
+-  40  -
+-  41  -
+
+--- Page 23 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+8)  건축물대장 주택가격 조회 오퍼레이션 명세
+splotNm
+특수지명
+VARCHAR(1000) 옵션
+특수지명
+오퍼레이션 번호
+8
+오퍼레이션명(국문)
+건축물대장 주택가격
+조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrHsprcInfo
+오퍼레이션 설명
+Call  Back  URL
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+장 대상 주택의 가격정보를 제공한다.
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+block
+lot
+블록
+로트
+  VARCHAR(500) 옵션
+  VARCHAR(500) 옵션
+bylotCnt
+외필지수
+  NUMBER(10) 옵션
+0
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵션
+116804166040
+  VARCHAR(30) 옵션
+10301
+  VARCHAR(30) 옵션
+0
+9
+0
+블록
+로트
+외필지수
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+새주소부번
+    -  요청메시지 명세
+naMainBun
+새주소본번
+  VARCHAR(20) 옵션
+naSubBun
+새주소부번
+  VARCHAR(20) 옵션
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+hsprc
+주택가격
+  NUMBER(30,9) 옵션
+621000000
+주택가격
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+필
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+1
+1
+페이지당 목록 수
+페이지번호
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+1..n
+crtnDay
+생성일자
+  VARCHAR(30) 필수
+20220813
+생성일자
+rnum
+순번
+NUMBER(8) 옵션
+1
+순번
+platPlc
+대지위치
+VARCHAR(1000) 필수
+서울특별시 강남구
+개포동 12번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필수
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필수
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵션
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵션
+  VARCHAR(20) 옵션
+0012
+0000
+mgmBldrgstPk
+관리건축물대
+장PK
+VARCHAR(30) 필수
+1024136633
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵션
+2
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵션
+집합
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵션
+4
+대지위치
+행정표준코
+드
+행정표준코
+드
+0:대지
+1:산 2:블록
+번
+지
+관리건축물
+대장PK
+대장구분코
+드
+대장구분코
+드명
+대장종류코
+드
+-  42  -
+-  43  -
+   
+　
+　
+　
+ 
+ 
+
+--- Page 24 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+regstrKindCdN
+대장종류코드
+m
+newPlatPlc
+bldNm
+stdDay
+명
+도로명대지위
+치
+건물명
+VARCHAR(1000) 옵션
+전유부
+VARCHAR(1000) 옵션
+  서울특별시 강남구
+개포로109길 9(개포동)
+위치
+  VARCHAR(200) 옵션
+대치아파트 제214동 건물명
+대장종류코
+드명
+도로명대지
+기준일자
+  VARCHAR(8) 옵션
+20200101
+기준일자
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrHsprcInfo?sigunguCd=11680&bjdongCd=10300&
+bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>1024136633</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>4</regstrKindCd>
+<regstrKindCdNm>전유부</regstrKindCdNm>
+<bylotCnt>0</bylotCnt>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>9</naMainBun>
+<naSubBun>0</naSubBun>
+<hsprc>621000000</hsprc>
+<crtnDay>20220813</crtnDay>
+<stdDay>20200101</stdDay>
+            </item>
+        </items>
+        <numOfRows>10</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>71288</totalCount>
+    </body>
+</response>
+9)  건축물대장 전유부 조회 오퍼레이션 명세
+오퍼레이션 번호
+9
+오퍼레이션명(국문)
+건축물대장 전유부 조
+회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrExposInfo
+오퍼레이션 설명
+Call  Back  URL
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+장 전유부의 지번주소 및 새주소,  동/호명칭 등의 정보를 제공한다.
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+<newPlatPlc>서울특별시 강남구 개포로109길 9  (개포동)</newPlatPlc>
+<bldNm>대치아파트 제214동</bldNm>
+    -  요청메시지 명세
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+-  44  -
+-  45  -
+ 
+ 
+   
+
+--- Page 25 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+sigunguCd
+시군구코드
+  VARCHAR(30)
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+필
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+11680
+행정표준코드
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+Items
+rnum
+platPlc
+1..n
+순번
+NUMBER(8) 옵
+대지위치
+VARCHAR(1000) 필
+1
+서울특별시 강남구
+개포동 12번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0012
+0000
+mgmBldrgstPk
+관리건축물대
+장PK
+  VARCHAR(30) 필
+1024195889
+regstrGbCd
+대장구분코드
+  VARCHAR(30) 옵
+2
+regstrGbCdNm
+대장구분코드
+명
+VARCHAR(1000) 옵
+집합
+순번
+대지위치
+행정표준코
+드
+행정표준코
+드
+0:대지
+1:산 2:블록
+번
+지
+관리건축물
+대장PK
+대장구분코
+드
+대장구분코
+드명
+regstrKindCd 대장종류코드
+  VARCHAR(30) 옵
+4
+regstrKindCdN
+대장종류코드
+m
+명
+newPlatPlc
+도로명대지위
+치
+VARCHAR(1000) 옵
+전유부
+VARCHAR(1000) 옵
+  서울특별시 강남구
+개포로109길 9 
+(개포동)
+대장종류코
+드
+대장종류코
+드명
+도로명대지
+위치
+bldNm
+건물명
+  VARCHAR(200) 옵
+대치아파트 212동
+건물명
+splotNm
+특수지명
+block
+lot
+블록
+로트
+VARCHAR(1000) 옵
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+naRoadCd
+naBjdongCd
+naUgrndCd
+새주소도로코
+드
+새주소법정동
+코드
+새주소지상지
+하코드
+  VARCHAR(30) 옵
+116804166040
+  VARCHAR(30) 옵
+10301
+  VARCHAR(30) 옵
+naMainBun
+새주소본번
+  VARCHAR(20) 옵
+naSubBun
+새주소부번
+  VARCHAR(20) 옵
+dongNm
+hoNm
+동명칭
+호명칭
+VARCHAR(1000) 옵
+VARCHAR(1000) 옵
+flrGbCd
+층구분코드
+  VARCHAR(30) 옵
+flrGbCdNm
+층구분코드명 VARCHAR(1000) 옵
+flrNo
+층번호
+  NUMBER(5) 옵
+0
+9
+0
+212
+505호
+20
+지상
+8
+특수지명
+블록
+로트
+새주소도로
+코드
+새주소법정
+동코드
+새주소지상
+지하코드
+새주소본번
+새주소부번
+동명칭
+호명칭
+층구분코드
+층구분코드
+명
+층번호
+crtnDay
+생성일자
+  VARCHAR(30) 필
+20220813
+생성일자
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  요청/응답 메시지 명세
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrExposInfo?sigunguCd=11680&bjdongCd=10300
+&bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+-  46  -
+-  47  -
+ 
+ 
+　
+　
+　
+
+--- Page 26 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>4304</totalCount>
+    </body>
+</response>
+10)  건축물대장 지역지구구역 조회 오퍼레이션 명세
+오퍼레이션 번호
+10
+오퍼레이션명(국문)
+건축물대장 지역지구
+구역 조회
+오퍼레이션 유형
+조회(목록)
+오퍼레이션명(영문)
+getBrJijiguInfo
+오퍼레이션 설명
+장과 관련된 지역/지구/구역의 구분 및 명칭,  대표여부 등의 정보를 제
+전국 자치단체의 건축행정정보시스템(세움터)를 통해 생성된 건축물대
+공한다.
+Call  Back  URL
+최대 메시지 사이즈 [      bytes]
+평균응답시간
+[    500  ms]
+초당 최대 트랜잭션 [    30  tps]
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+            <item>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>1024195889</mgmBldrgstPk>
+<regstrGbCd>2</regstrGbCd>
+<regstrGbCdNm>집합</regstrGbCdNm>
+<regstrKindCd>4</regstrKindCd>
+<regstrKindCdNm>전유부</regstrKindCdNm>
+<newPlatPlc>서울특별시 강남구 개포로109길 9  (개포동)</newPlatPlc>
+<bldNm>대치아파트212동</bldNm>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<naRoadCd>116804166040</naRoadCd>
+<naBjdongCd>10301</naBjdongCd>
+<naUgrndCd>0</naUgrndCd>
+<naMainBun>9</naMainBun>
+<naSubBun>0</naSubBun>
+<dongNm>212</dongNm>
+<hoNm>505호</hoNm>
+<flrGbCd>20</flrGbCd>
+<flrGbCdNm>지상</flrGbCdNm>
+<flrNo>5</flrNo>
+<crtnDay>20220813</crtnDay>
+            </item>
+        </items>
+-  48  -
+-  49  -
+   
+
+--- Page 27 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+    -  요청메시지 명세
+항목명(영문) 항목명(국문)
+항목크기
+항목구분 샘플데이터
+항목설명
+bjdongCd
+법정동코드
+  VARCHAR(30)
+platGbCd
+대지구분코드   VARCHAR(30)
+bun
+ji
+번
+지
+  VARCHAR(20)
+  VARCHAR(20)
+startDate
+검색시작일
+  VARCHAR(30)
+endDate
+검색종료일
+  VARCHAR(30)
+numOfRows
+리스트수
+VARCHAR(3)
+pageNo
+페이지번호 VARCHAR(3)
+sigunguCd
+시군구코드
+  VARCHAR(30)
+필
+옵
+옵
+옵
+옵
+옵
+옵
+옵
+필
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+    -  응답메시지 명세
+10300
+행정표준코드
+0
+0:대지 1:산 2:블록
+0012
+0000
+번
+지
+YYYYMMDD
+YYYYMMDD
+10
+1
+페이지당 목록 수
+페이지번호
+11680
+행정표준코드
+치
+개포로109길 9 
+(개포동)
+splotNm
+특수지명
+VARCHAR(1000) 옵
+block
+lot
+jijiguGbCd
+jijiguGbCdNm
+jijiguCd
+jijiguCdNm
+블록
+로트
+지역지구구역
+구분코드
+지역지구구역
+구분코드명
+지역지구구역
+코드
+지역지구구역
+코드명
+  VARCHAR(500) 옵
+  VARCHAR(500) 옵
+  VARCHAR(30) 옵
+1
+VARCHAR(1000) 옵
+용도지역코드
+  VARCHAR(30) 옵
+1020
+VARCHAR(1000) 옵
+일반주거지역
+reprYn
+대표여부
+  VARCHAR(1) 옵
+1
+etcJijigu
+기타지역지구
+구역
+VARCHAR(1000) 옵
+일반주거지역
+crtnDay
+생성일자
+  VARCHAR(30) 필
+20220813
+※ 항목구분 : 필수(필), 옵션(옵), 복수건(복)
+위치
+특수지명
+블록
+로트
+지역지구구
+역구분코드
+지역지구구
+역구분코드
+명
+지역지구구
+역코드
+지역지구구
+역코드명
+0:    일반 1: 
+대표
+기타지역지
+구구역
+생성일자
+항목명(영문) 항목명(국문)
+항목크기
+항목구분
+샘플데이터
+항목설명
+    -  요청/응답 메시지 명세
+Items
+rnum
+1..n
+순번
+NUMBER(8) 옵
+1
+순번
+platPlc
+대지위치
+VARCHAR(1000) 필
+서울특별시 강남구
+개포동 12번지
+sigunguCd
+시군구코드
+  VARCHAR(30) 필
+11680
+bjdongCd
+법정동코드
+  VARCHAR(30) 필
+10300
+platGbCd
+대지구분코드
+  VARCHAR(30) 옵
+0
+bun
+ji
+번
+지
+  VARCHAR(20) 옵
+  VARCHAR(20) 옵
+0012
+0000
+mgmBldrgstPk
+관리건축물대
+장PK
+VARCHAR(30) 필
+10241915
+대지위치
+행정표준코
+드
+행정표준코
+드
+0:대지
+1:산 2:블록
+번
+지
+관리건축물
+대장PK
+newPlatPlc
+도로명대지위 VARCHAR(1000) 옵
+서울특별시 강남구
+도로명대지
+REST(URI)
+http://apis.data.go.kr/1613000/BldRgstHubService/getBrJijiguInfo?sigunguCd=11680&bjdongCd=10300&
+bun=0012&ji=0000&serviceKey=인증키
+(단,  익스플로러에서 확인시 파라메터 입력이 한글인 경우 utf-8로 인코딩 필요)
+응답 메시지
+<response>
+    <header>
+        <resultCode>00</resultCode>
+        <resultMsg>NORMAL  SERVICE</resultMsg>
+    </header>
+    <body>
+        <items>
+<item>
+-  50  -
+-  51  -
+　
+　
+　
+
+--- Page 28 ---
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+OpenAPI  활용가이드
+2024년 건축서비스산업 정보체계 유지관리 사업
+</item>
+        </items>
+        <numOfRows>1</numOfRows>
+        <pageNo>1</pageNo>
+        <totalCount>57</totalCount>
+    </body>
+</response>
+<rnum>1</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241915</mgmBldrgstPk>
+<newPlatPlc>서울특별시 강남구 개포로109길 9  (개포동)</newPlatPlc>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<jijiguGbCd>1</jijiguGbCd>
+<jijiguGbCdNm>용도지역코드</jijiguGbCdNm>
+<jijiguCd>1020</jijiguCd>
+<jijiguCdNm>일반주거지역</jijiguCdNm>
+<reprYn>1</reprYn>
+<etcJijigu>일반주거지역</etcJijigu>
+<crtnDay>20220813</crtnDay>
+</item>
+<item>
+<rnum>2</rnum>
+<platPlc>서울특별시 강남구 개포동 12번지</platPlc>
+<sigunguCd>11680</sigunguCd>
+<bjdongCd>10300</bjdongCd>
+<platGbCd>0</platGbCd>
+<bun>0012</bun>
+<ji>0000</ji>
+<mgmBldrgstPk>10241915</mgmBldrgstPk>
+<newPlatPlc>서울특별시 강남구 개포로109길 9  (개포동)</newPlatPlc>
+<splotNm>  </splotNm>
+<block>  </block>
+<lot>  </lot>
+<jijiguGbCd>3</jijiguGbCd>
+<jijiguGbCdNm>용도구역코드</jijiguGbCdNm>
+<jijiguCd>300</jijiguCd>
+<jijiguCdNm>지구단위계획구역</jijiguCdNm>
+<reprYn>1</reprYn>
+<etcJijigu>지구단위계획구역</etcJijigu>
+<crtnDay>20220813</crtnDay>
+-  52  -
+-  53  -
+
+
+================================================================================
+FILE: PK전환규칙 (첨부1.+기존+건축데이터+PK전환+규칙+안내.pdf)
+================================================================================
+ERROR: FileNotFoundError: [Errno 2] No such file or directory: 'E:\\real_estate_AI\\docs\\첨부1.+기존+건축데이터+PK전환+규칙+안내.pdf'
+
+================================================================================
+FILE: 시군구코드 (첨부2.+시군구코드에+따른+통합분류코드+목록.pdf)
+================================================================================
+ERROR: FileNotFoundError: [Errno 2] No such file or directory: 'E:\\real_estate_AI\\docs\\첨부2.+시군구코드에+따른+통합분류코드+목록.pdf'
+

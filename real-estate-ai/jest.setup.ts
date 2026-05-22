@@ -1,4 +1,5 @@
 import '@testing-library/jest-dom'
+import { jest } from '@jest/globals'
 import { TextEncoder, TextDecoder } from 'util'
 import vm from 'vm'
 
@@ -7,7 +8,9 @@ Object.defineProperty(global, 'TextEncoder', { value: TextEncoder })
 Object.defineProperty(global, 'TextDecoder', { value: TextDecoder })
 
 // JSDOM은 scrollIntoView를 구현하지 않으므로 no-op mock 추가
-Element.prototype.scrollIntoView = jest.fn()
+if (typeof Element !== 'undefined') {
+  Element.prototype.scrollIntoView = jest.fn()
+}
 
 // GitHub Models / OpenAI SDK: 테스트 환경에서 빈 API 키로 throw하지 않도록 더미 값 설정
 process.env.GITHUB_TOKEN = process.env.GITHUB_TOKEN ?? 'test-github-token'

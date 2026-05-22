@@ -4,7 +4,7 @@
 // U2-6: A~G 섹션 카드 레이아웃
 // 리포트 한계 고지 필수
 
-import { Suspense, useEffect, useState } from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import QuickCheck, { type QuickCheckResult } from '@/components/report/QuickCheck'
@@ -15,6 +15,7 @@ import type { VWorldResult } from '@/lib/apis/vworld'
 import type { RealPriceDeal } from '@/lib/apis/realPrice'
 import { checkRegulations, type RegulationResult } from '@/lib/regulations'
 import { saveDiagnostics } from '@/lib/supabase/diagnostics'
+import { listReportHistory, saveReportHistory, type ReportHistoryRow } from '@/lib/supabase/reportHistory'
 
 // ─── 스타일 ────────────────────────────────────────────────
 const S = {
@@ -117,6 +118,29 @@ const S = {
     fontSize: 14,
     color: 'rgba(0,0,0,0.4)',
   },
+  historyList: {
+    display: 'grid' as const,
+    gap: 8,
+  },
+  historyButton: {
+    width: '100%',
+    padding: '12px 14px',
+    border: '1px solid rgba(0,0,0,0.08)',
+    borderRadius: 10,
+    background: '#ffffff',
+    textAlign: 'left' as const,
+    cursor: 'pointer',
+  },
+  historyAddress: {
+    fontSize: 14,
+    fontWeight: 600,
+    color: '#1d1d1f',
+    marginBottom: 4,
+  },
+  historyMeta: {
+    fontSize: 12,
+    color: 'rgba(0,0,0,0.5)',
+  },
 }
 
 // ─── 유틸 ────────────────────────────────────────────────
@@ -156,6 +180,11 @@ function SectionHead({ label, title }: { label: string; title: string }) {
   )
 }
 
+function summarizeQuickCheck(result: QuickCheckResult | null): string {
+  if (!result?.items?.length) return '특이사항 없음'
+  return result.items.map((item) => item.label).join(', ')
+}
+
 // ─── 페이지 ──────────────────────────────────────────────
 export default function ReportPage() {
   return (
@@ -193,6 +222,33 @@ function ReportContent() {
   const [quickCheck, setQuickCheck] = useState<QuickCheckResult | null>(null)
   const [aiOpinion,  setAiOpinion]  = useState<string | null>(null)
   const [aiLoading,  setAiLoading]  = useState(false)
+  const [history, setHistory] = useState<ReportHistoryRow[]>([])
+  const savedHistoryKey = useRef<string | null>(null)
+
+  const loadHistory = useCallback(async () => {
+    try {
+      setHistory(await listReportHistory(20))
+    } catch {
+      setHistory([])
+    }
+  }, [])
+
+  useEffect(() => {
+    loadHistory()
+  }, [loadHistory])
+
+  function restoreHistory(row: ReportHistoryRow) {
+    const data = row.report_data
+    setBuilding((data.building ?? null) as BuildingResult | null)
+    setRegistry((data.registry ?? null) as RegistryResult | null)
+    setVworld((data.vworld ?? null) as VWorldResult | null)
+    setDeals((data.deals ?? []) as RealPriceDeal[])
+    setRegs((data.regs ?? null) as RegulationResult | null)
+    setQuickCheck((data.quickCheck ?? null) as QuickCheckResult | null)
+    setAiOpinion((data.aiOpinion ?? null) as string | null)
+    setAiLoading(false)
+    setIsLoading(false)
+  }
 
   useEffect(() => {
     if (!hasAddr) return
@@ -239,7 +295,8 @@ function ReportContent() {
       if (reg.isAdjustmentZone)      riskItems.push({ label: '조정대상지역',       level: 'warning' })
 
       const today = new Date().toISOString().slice(0, 10)
-      setQuickCheck({ items: riskItems, checkedAt: today })
+      const quick = { items: riskItems, checkedAt: today }
+      setQuickCheck(quick)
 
       saveDiagnostics({
         bdMgtSn: bdMgtSn || admCd, roadAddr,
@@ -273,8 +330,32 @@ function ReportContent() {
         body:    JSON.stringify({ address: roadAddr, riskItems, buildingSummary, regulationSummary }),
       })
         .then((res) => res.json())
-        .then(({ opinion }) => setAiOpinion(opinion ?? null))
-        .catch(() => setAiOpinion(null))
+        .then(({ opinion }) => opinion ?? null)
+        .catch(() => null)
+        .then((opinion) => {
+          setAiOpinion(opinion)
+
+          const historyKey = `${bdMgtSn || admCd}:${roadAddr}`
+          if (savedHistoryKey.current === historyKey) return
+          savedHistoryKey.current = historyKey
+
+          saveReportHistory({
+            road_address: roadAddr,
+            bd_mgt_sn: bdMgtSn || admCd,
+            report_data: {
+              building: b,
+              registry: r,
+              vworld: v,
+              deals: d,
+              regs: reg,
+              quickCheck: quick,
+              aiOpinion: opinion,
+            },
+            quick_check_summary: summarizeQuickCheck(quick),
+          })
+            .then(() => loadHistory())
+            .catch(() => {})
+        })
         .finally(() => setAiLoading(false))
     }).finally(() => setIsLoading(false))
   }, [bdMgtSn, admCd]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -300,6 +381,27 @@ function ReportContent() {
           {roadAddr}
           <div style={S.addrSub}>{new Date().toISOString().slice(0, 10)} 기준</div>
         </div>
+
+        {history.length > 0 && (
+          <div style={S.section}>
+            <SectionHead label="H" title="리포트 이력" />
+            <div style={S.historyList}>
+              {history.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  style={S.historyButton}
+                  onClick={() => restoreHistory(item)}
+                >
+                  <div style={S.historyAddress}>{item.road_address}</div>
+                  <div style={S.historyMeta}>
+                    {new Date(item.created_at).toLocaleString('ko-KR')} · {item.quick_check_summary ?? '요약 없음'}
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
 
         {isLoading ? (
           <div style={S.loading}>데이터를 불러오는 중…</div>

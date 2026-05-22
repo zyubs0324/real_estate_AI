@@ -4,3 +4,8 @@
 # docs binaries and scripts
 docs/*.pptx
 docs/*.py
+
+# 커밋 불필요 자료
+*.csv
+*.xlsx
+*.pdf

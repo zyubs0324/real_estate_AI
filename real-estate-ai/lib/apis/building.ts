@@ -81,9 +81,11 @@ interface XmlPage {
 }
 
 async function fetchXmlPage(url: string, revalidate = 3600): Promise<XmlPage> {
-  // Next.js 서버사이드 캐시: 같은 URL은 revalidate 초 동안 캐싱
-  // 건축물대장 데이터는 자주 바뀌지 않으므로 1시간(3600s) 캐시 적용
-  const res = await fetch(url, { next: { revalidate } })
+  // Next.js 서버사이드 캐시: 프로덕션에서만 캐싱, 개발 중에는 no-store로 즉시 반영
+  const fetchOpts = process.env.NODE_ENV === 'production'
+    ? { next: { revalidate } }
+    : { cache: 'no-store' as const }
+  const res = await fetch(url, fetchOpts)
   const txt = await res.text()
   if (!res.ok) throw new Error(`[building] HTTP ${res.status}`)
 
@@ -215,32 +217,47 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
     .map((it) => {
       const row = it as Record<string, unknown>
       // API 응답 필드:
-      //   dongNm = "302"   (숫자만, "동" suffix 없음) → "302동"으로 정규화
-      //   hoNm   = "407호" (suffix 있음) — 필드명이 ho 가 아닌 hoNm 임에 주의
+      //   dongNm          = "302"   (숫자만, "동" suffix 없음) → "302동"으로 정규화
+      //   hoNm            = "407호" (suffix 있음) — 필드명이 ho 가 아닌 hoNm 임에 주의
+      //   exposPubuseGbCd = "1"(전유부) / "2"(공용부) — 공용부 항목 필터링에 사용
       const rawDong = String(row.dongNm ?? '').trim()
       const dong    = rawDong && /^\d+$/.test(rawDong) ? `${rawDong}동` : rawDong
       const rawHo   = String(row.hoNm ?? row.ho ?? '').trim() // hoNm 우선, mock 호환용 ho 폴백
+      const exposGb = String(row.exposPubuseGbCd ?? '').trim() // "1"=전유, "2"=공용
       return {
-        dongNm: dong,
-        flrNo:  String(row.flrNo  ?? '').trim(),
-        ho:     rawHo,
-        area:   Number(row.area   ?? 0),
+        dongNm:   dong,
+        flrNo:    String(row.flrNo ?? '').trim(),
+        ho:       rawHo,
+        area:     Number(row.area  ?? 0),
+        exposGb,  // 필터링 후 제거 (BuildingUnit 타입에는 없음)
       }
     })
     .filter((u) => {
+      // 호 번호 없는 항목 제거
       if (!u.ho) return false
+      // 공용부(2) 제거 — exposPubuseGbCd 값이 있을 때만 적용. 없으면 통과(호환성)
+      if (u.exposGb && u.exposGb !== '1') return false
+      // 층 번호가 없거나 0 이하인 항목 제거 (공용부 혼입 방어)
+      const flr = Number(u.flrNo)
+      if (u.flrNo === '' || isNaN(flr) || flr <= 0) return false
+      // 동+호 조합 중복 제거
       const key = `${u.dongNm}|${u.ho}`
       if (seen.has(key)) return false
       seen.add(key)
       return true
     })
+    .map(({ exposGb: _exposGb, ...unit }) => unit) // exposGb 임시 필드 제거
     .sort((a, b) => {
-      // 동 → 층 → 호 순 정렬
+      // 동 → 층 → 호(숫자) 순 정렬
       const dongCmp = a.dongNm.localeCompare(b.dongNm, 'ko')
       if (dongCmp !== 0) return dongCmp
       const af = Number(a.flrNo) || 0
       const bf = Number(b.flrNo) || 0
-      return af !== bf ? af - bf : a.ho.localeCompare(b.ho, 'ko')
+      if (af !== bf) return af - bf
+      // 호 번호에서 숫자 추출 후 비교 ("101호" → 101, "1003호" → 1003)
+      const ah = parseInt(a.ho, 10) || 0
+      const bh = parseInt(b.ho, 10) || 0
+      return ah !== bh ? ah - bh : a.ho.localeCompare(b.ho, 'ko')
     })
 }
 

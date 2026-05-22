@@ -22,6 +22,7 @@ jest.mock('@/components/layout/Header', () => {
 jest.mock('@/lib/supabase/people', () => ({
   getPerson: jest.fn(),
   getPersonRelations:  jest.fn().mockResolvedValue([]),
+  getPersonOwnedPropertyGroups: jest.fn().mockResolvedValue([]),
   getPersonMemos:      jest.fn().mockResolvedValue([]),
   addPersonMemo:       jest.fn().mockResolvedValue({ id: 'm-new' }),
   listPeople: jest.fn().mockResolvedValue([

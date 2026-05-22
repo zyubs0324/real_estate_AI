@@ -32,21 +32,25 @@ export interface JusoResult {
 const USE_MOCK = process.env.NEXT_PUBLIC_USE_MOCK_API === 'true'
 const MIN_QUERY_LENGTH = 2
 
+async function getMockJuso(query: string): Promise<JusoResult[]> {
+  const mockData = await import('./__mocks__/juso.json')
+  const results = mockData.default as JusoResult[]
+  const keyword = query.trim()
+  return results.filter(
+    (item) =>
+      item.roadAddr.includes(keyword) ||
+      item.jibunAddr.includes(keyword) ||
+      item.bdNm.includes(keyword),
+  )
+}
+
 export async function fetchJuso(query: string): Promise<JusoResult[]> {
   if (!query || query.trim().length < MIN_QUERY_LENGTH) {
     return []
   }
 
   if (USE_MOCK) {
-    const mockData = await import('./__mocks__/juso.json')
-    const results = mockData.default as JusoResult[]
-    // 쿼리 포함 여부로 필터링 (실제 API 동작 시뮬레이션)
-    return results.filter(
-      (item) =>
-        item.roadAddr.includes(query) ||
-        item.jibunAddr.includes(query) ||
-        item.bdNm.includes(query),
-    )
+    return getMockJuso(query)
   }
 
   // 브라우저(클라이언트)에서 호출 시 → 서버사이드 프록시 경유
@@ -61,8 +65,7 @@ export async function fetchJuso(query: string): Promise<JusoResult[]> {
   const apiKey = process.env.JUSO_API_KEY
   if (!apiKey) {
     console.warn('[juso] JUSO_API_KEY 미설정 — Mock 모드로 폴백')
-    const mockData = await import('./__mocks__/juso.json')
-    return mockData.default as JusoResult[]
+    return getMockJuso(query)
   }
 
   const params = new URLSearchParams({
@@ -94,6 +97,9 @@ export async function fetchJuso(query: string): Promise<JusoResult[]> {
   const errorCode = json?.results?.common?.errorCode
   if (errorCode && errorCode !== '0') {
     console.warn(`[juso] API 오류 코드: ${errorCode} — ${json?.results?.common?.errorMessage}`)
+    if (process.env.NODE_ENV !== 'production') {
+      return getMockJuso(query)
+    }
     return []
   }
 

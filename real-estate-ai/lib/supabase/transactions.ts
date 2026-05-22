@@ -196,3 +196,26 @@ export async function deleteTransactionMemo(memoId: string): Promise<void> {
 
 // ─── 납부 단계 로직 단위 테스트용 export ─────────────────
 export { buildDefaultPayments }
+
+export async function updateTransaction(
+  id: string,
+  payload: Record<string, unknown>
+): Promise<void> {
+  const supabase = createBrowserSupabaseClient()
+  const { error } = await supabase
+    .from('transactions')
+    .update(payload)
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function deleteTransaction(id: string): Promise<void> {
+  const supabase = createBrowserSupabaseClient()
+  const { error } = await supabase
+    .from('transactions')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}

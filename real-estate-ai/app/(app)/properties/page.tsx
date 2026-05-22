@@ -9,13 +9,23 @@ import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import AddressSearch from '@/components/address/AddressSearch'
+import SearchInput from '@/components/common/SearchInput'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
 import type { JusoResult } from '@/lib/apis/juso'
 import { fetchBuilding, fetchBuildingUnits, buildingQueryFromJuso, type BuildingUnit } from '@/lib/apis/building'
-import { saveProperty, listProperties, updatePropertyLabels, getPropertyMemos, addPropertyMemo, deletePropertyMemo, type PropertyRow, type SavePropertyPayload, type PropertyMemoRow } from '@/lib/supabase/properties'
+import { saveProperty, listProperties, updateProperty, deleteProperty, updatePropertyLabels, getPropertyMemos, addPropertyMemo, deletePropertyMemo, type PropertyRow, type SavePropertyPayload, type PropertyMemoRow } from '@/lib/supabase/properties'
+import { listPropertyCoBrokers, addPropertyCoBroker, removePropertyCoBroker, type PropertyAgencyRow } from '@/lib/supabase/propertyAgencies'
+import { searchAgencies, type AgencyRow } from '@/lib/supabase/agencies'
+import PropertyPhotoUploader from '@/components/properties/PropertyPhotoUploader'
+import { createBrowserSupabaseClient } from '@/lib/supabase/client'
+import type { PhotoMeta } from '@/lib/supabase/propertyPhotos'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import MemoSection, { type MemoSavePayload } from '@/components/common/MemoSection'
+import { isRegisteredDateInRange, normalizeRegisteredDate, registeredDateInputValue } from '@/lib/property/dateNormalizer'
+import { findDuplicatePropertyIds } from '@/lib/property/propertyDuplicate'
 
 // ─── 타입 ─────────────────────────────────────────────────
-type TabKey = 'all' | 'ours' | 'interest' | 'focus'
+type TabKey = 'all' | 'ours' | 'interest' | 'focus' | 'exclusive' | 'strategic'
 
 interface Tab {
   key: TabKey
@@ -28,6 +38,8 @@ const TABS: Tab[] = [
   { key: 'ours',     label: '우리매물' },
   { key: 'interest', label: '관심매물' },
   { key: 'focus',    label: '집중관리' },
+  { key: 'exclusive', label: '전속매물' },
+  { key: 'strategic', label: '전략매물' },
 ]
 
 // 건물유형은 건축물대장 API 원문 저장 — 상수 목록 미사용
@@ -205,19 +217,33 @@ const S = {
   },
   // 테이블
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: 13 },
+  tableScroll: {
+    overflow: 'auto' as const,
+    width: '100%',
+    maxHeight: 'calc(100vh - 300px)',
+    scrollbarGutter: 'stable' as const,
+  },
   th: {
+    position: 'sticky' as const,
+    top: 0,
+    zIndex: 2,
     padding: '8px 12px',
     textAlign: 'left' as const,
     fontSize: 11,
     fontWeight: 600,
     color: 'rgba(0,0,0,0.4)',
+    background: '#ffffff',
     borderBottom: '1px solid rgba(0,0,0,0.06)',
     whiteSpace: 'nowrap' as const,
   },
   td: {
-    padding: '12px 12px',
+    padding: '10px 12px',
     borderBottom: '1px solid rgba(0,0,0,0.04)',
     color: '#1d1d1f',
+    whiteSpace: 'nowrap' as const,
+    maxWidth: 220,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
   },
   warningBadge: {
     display: 'inline-block', fontSize: 11, fontWeight: 700,
@@ -316,6 +342,8 @@ const EMPTY_MSG: Record<TabKey, { title: string; desc: string }> = {
   ours:     { title: '등록된 매물이 없습니다',   desc: '우리 사무소가 직접 등록한 매물이 없습니다.' },
   interest: { title: '관심 매물이 없습니다',     desc: '관심 표시한 매물이 여기에 표시됩니다.' },
   focus:    { title: '집중관리 매물이 없습니다', desc: '집중관리로 지정한 매물이 여기에 표시됩니다.' },
+  exclusive: { title: '전속매물이 없습니다', desc: '전속 플래그가 지정된 매물이 여기에 표시됩니다.' },
+  strategic: { title: '전략매물이 없습니다', desc: '전략매물 플래그가 지정된 매물이 여기에 표시됩니다.' },
 }
 
 // ─── 매물 등록 폼 ────────────────────────────────────────
@@ -334,27 +362,62 @@ export interface PropertyFormPrefill {
   propertyType?: string
 }
 
+interface ParsedUrlProperty {
+  source_platform: SavePropertyPayload['source_platform']
+  source_url: string
+  source_external_id?: string
+  source_complex_id?: string
+  road_address?: string
+  building_name?: string
+  deal_type?: string
+  price_text?: string
+  area_text?: string
+  description?: string
+}
+
 interface PropertyFormProps {
   onClose:   () => void
   onSaved:   () => void
   prefill?:  PropertyFormPrefill
+  editData?: PropertyRow
 }
 
 type BldTypeSource = 'idle' | 'loading' | 'api' | 'manual'
 type UnitSource    = 'idle' | 'loading' | 'list' | 'text'
 
-function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
+const ACTUAL_DONG_RE = new RegExp(`^(?:\\d+|[A-Za-z])\\s*\\uB3D9$`, 'i')
+const HO_SUFFIX = '\uD638'
+
+function parseDongNames(detBdNmList: string): string[] {
+  return [...new Set(
+    detBdNmList
+      .split(/[,，、]/)
+      .map((name) => name.trim())
+      .filter((name) => ACTUAL_DONG_RE.test(name))
+  )].sort((a, b) => a.localeCompare(b, 'ko'))
+}
+
+function unitLabel(ho: string): string {
+  const value = ho.trim()
+  return value.endsWith(HO_SUFFIX) ? value : `${value}${HO_SUFFIX}`
+}
+
+function unitValue(unit: BuildingUnit): string {
+  return `${unit.dongNm}|${unit.ho}`
+}
+
+function PropertyForm({ onClose, onSaved, prefill, editData }: PropertyFormProps) {
   // prefill이 있으면 JusoResult와 유사한 구조로 초기화
-  const initAddr: JusoResult | null = prefill ? {
-    roadAddr:      prefill.roadAddr,
-    roadAddrPart1: prefill.roadAddr,
-    jibunAddr:     '',
+  const initAddr: JusoResult | null = prefill || editData ? {
+    roadAddr:      prefill?.roadAddr ?? editData?.road_address ?? '',
+    roadAddrPart1: prefill?.roadAddr ?? editData?.road_address ?? '',
+    jibunAddr:     editData?.jibun_address ?? '',
     zipNo:         '',
-    admCd:         prefill.admCd,
+    admCd:         prefill?.admCd ?? '',
     rnMgtSn:       '',
-    bdMgtSn:       prefill.bdMgtSn,
-    detBdNmList:   prefill.dong ?? '',
-    bdNm:          prefill.bdNm ?? '',
+    bdMgtSn:       prefill?.bdMgtSn ?? '',
+    detBdNmList:   prefill?.dong ?? editData?.building_dong ?? '',
+    bdNm:          prefill?.bdNm ?? editData?.building_name ?? '',
     bdKdcd:        '',
     siNm:          '',
     sggNm:         '',
@@ -364,28 +427,35 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
     udrtYn:        '',
     buldMnnm:      0,
     buldSlno:      0,
-    mtYn:          prefill.mtYn,
-    lnbrMnnm:      Number(prefill.lnbrMnnm),
-    lnbrSlno:      Number(prefill.lnbrSlno),
+    mtYn:          prefill?.mtYn ?? '0',
+    lnbrMnnm:      Number(prefill?.lnbrMnnm ?? 0),
+    lnbrSlno:      Number(prefill?.lnbrSlno ?? 0),
     emdNo:         '',
   } : null
 
   const [addr,          setAddr]          = useState<JusoResult | null>(initAddr)
-  const [bldType,       setBldType]       = useState(prefill?.propertyType ?? '')
+  const [bldType,       setBldType]       = useState(prefill?.propertyType ?? editData?.building_type ?? '')
   const [bldTypeSource, setBldTypeSource] = useState<BldTypeSource>(prefill?.propertyType ? 'api' : 'idle')
-  const [dong,          setDong]          = useState(prefill?.dong ?? '')
+  const [dong,          setDong]          = useState(prefill?.dong ?? editData?.building_dong ?? '')
   const [units,         setUnits]         = useState<BuildingUnit[]>([])
   const [unitSource,    setUnitSource]    = useState<UnitSource>(prefill?.ho ? 'text' : 'idle')
-  const [unit,          setUnit]          = useState(prefill?.ho ? `${prefill.ho}호` : '')
-  const [deal,          setDeal]          = useState('')
-  const [status,        setStatus]        = useState('공실')
+  const [unit,          setUnit]          = useState(prefill?.ho ? `${prefill.ho}호` : editData?.unit_number ?? '')
+  const [deal,          setDeal]          = useState(editData?.deal_type ?? '')
+  const [status,        setStatus]        = useState(editData?.status ?? '공실')
   const [saving,        setSaving]        = useState(false)
   const [error,         setError]         = useState('')
+  const unitDongNames = [...new Set(units.map((u) => u.dongNm).filter((name) => ACTUAL_DONG_RE.test(name)))]
+    .sort((a, b) => a.localeCompare(b, 'ko'))
+  const filteredUnits = dong ? units.filter((u) => u.dongNm === dong) : units
+  const selectedUnitValue = (() => {
+    if (!unit) return ''
+    const found = filteredUnits.find((u) => unitLabel(u.ho) === unit)
+    return found ? unitValue(found) : ''
+  })()
 
   async function handleAddressSelect(r: JusoResult) {
     setAddr(r)
-    // 동 — detBdNmList 자동 적용 (예: "101동")
-    setDong(r.detBdNmList ?? '')
+    setDong('')
     // 호수 초기화
     setUnit('')
     setUnits([])
@@ -413,8 +483,12 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
       // 호수 목록
       if (unitList.length > 0) {
         setUnits(unitList)
+        const dongNames = [...new Set(unitList.map((u) => u.dongNm).filter((name) => ACTUAL_DONG_RE.test(name)))]
+        if (dongNames.length === 1) setDong(dongNames[0])
         setUnitSource('list')
       } else {
+        const jusoDongNames = parseDongNames(r.detBdNmList ?? '')
+        if (jusoDongNames.length === 1) setDong(jusoDongNames[0])
         setUnitSource('text')
       }
     } catch {
@@ -439,10 +513,11 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
         status,
         is_our_property: true,
       }
-      await saveProperty(payload)
+      if (editData) await updateProperty(editData.id, payload)
+      else await saveProperty(payload)
 
       // U3-3: Quick Check 백그라운드 자동 실행 (실패해도 저장에 영향 없음)
-      fetch('/api/quick-check', {
+      if (!editData) fetch('/api/quick-check', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -469,7 +544,7 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
   return (
     <div style={S.overlay}>
       <div style={S.modal} data-testid="property-form">
-        <div style={S.modalTitle}>매물 등록</div>
+        <div style={S.modalTitle}>{editData ? '매물 수정' : '매물 등록'}</div>
 
         {/* 주소 검색 */}
         <div style={S.formField}>
@@ -523,8 +598,29 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
           )}
         </div>
 
-        {/* 동 — Juso API detBdNmList 자동 저장 */}
-        {dong && (
+        {/* 동 — 전유부 목록이 있으면 실제 동만 선택 */}
+        {unitSource === 'list' && unitDongNames.length > 1 && (
+          <div style={S.formField}>
+            <label htmlFor="building-dong" style={S.label}>동</label>
+            <select
+              id="building-dong"
+              aria-label="동"
+              style={S.formSelect}
+              value={dong}
+              onChange={(e) => {
+                setDong(e.target.value)
+                setUnit('')
+              }}
+            >
+              <option value="">전체</option>
+              {unitDongNames.map((name) => (
+                <option key={name} value={name}>{name}</option>
+              ))}
+            </select>
+          </div>
+        )}
+
+        {dong && !(unitSource === 'list' && unitDongNames.length > 1) && (
           <div style={S.formField}>
             <label style={S.label}>동</label>
             <div style={{ ...S.addrDisplay, fontWeight: 600 }}>
@@ -567,13 +663,25 @@ function PropertyForm({ onClose, onSaved, prefill }: PropertyFormProps) {
                 id="unit-number"
                 aria-label="호수"
                 style={S.formSelect}
-                value={unit}
-                onChange={(e) => setUnit(e.target.value)}
+                value={selectedUnitValue}
+                onChange={(e) => {
+                  const value = e.target.value
+                  if (!value) {
+                    setUnit('')
+                    return
+                  }
+                  const [nextDong, nextHo] = value.split('|')
+                  const found = units.find((u) => u.dongNm === nextDong && u.ho === nextHo)
+                  if (found) {
+                    setDong(found.dongNm)
+                    setUnit(unitLabel(found.ho))
+                  }
+                }}
               >
                 <option value="">선택</option>
-                {units.map((u) => (
-                  <option key={u.ho} value={`${u.ho}호`}>
-                    {u.ho}호 ({u.area}㎡ · {u.flrNo}층)
+                {filteredUnits.map((u) => (
+                  <option key={unitValue(u)} value={unitValue(u)}>
+                    {unitLabel(u.ho)} ({u.area}㎡ · {u.flrNo}층)
                   </option>
                 ))}
               </select>
@@ -634,19 +742,105 @@ function shortAddr(addr: string): string {
   return parts.length > 2 ? parts.slice(-2).join(' ') : addr
 }
 
+function blank(value: string | null | undefined): string {
+  return value?.trim() || '-'
+}
+
+function propertyOwners(row: PropertyRow) {
+  return (row.co_ownership ?? [])
+    .map((owner) => owner.people)
+    .filter(Boolean) as NonNullable<NonNullable<PropertyRow['co_ownership']>[number]['people']>[]
+}
+
+function ownerNames(row: PropertyRow): string {
+  const names = propertyOwners(row).map((owner) => owner.name).filter(Boolean)
+  return names.length > 0 ? names.join(', ') : '-'
+}
+
+function ownerPhones(row: PropertyRow): string {
+  const phones = propertyOwners(row).map((owner) => owner.phone).filter(Boolean)
+  return phones.length > 0 ? phones.join(', ') : '-'
+}
+
+function ownerCarriers(row: PropertyRow): string {
+  const carriers = propertyOwners(row)
+    .map((owner) => owner.carrier || owner.carrier_note)
+    .filter(Boolean)
+  return carriers.length > 0 ? carriers.join(', ') : '-'
+}
+
 // ─── 매물 테이블 행 ──────────────────────────────────────
-function PropertyTableRow({ row, onClick }: { row: PropertyRow; onClick: (r: PropertyRow) => void }) {
+function PropertyTableRow({
+  row,
+  onClick,
+  selected,
+  onToggleSelected,
+}: {
+  row: PropertyRow
+  onClick: (r: PropertyRow) => void
+  selected: boolean
+  onToggleSelected: (id: string) => void
+}) {
+  const registeredDate = normalizeRegisteredDate(row.registered_date) || new Date(row.created_at).toLocaleDateString('ko-KR')
   return (
     <tr style={{ cursor: 'pointer' }} onClick={() => onClick(row)}>
+      <td style={{ ...S.td, width: 36, position: 'sticky', left: 0, background: '#fff', zIndex: 1 }}>
+        <input
+          aria-label={`select-property-${row.id}`}
+          type="checkbox"
+          checked={selected}
+          onClick={(event) => event.stopPropagation()}
+          onChange={() => onToggleSelected(row.id)}
+        />
+      </td>
+      <td style={S.td} title={registeredDate}>{registeredDate}</td>
+      <td style={S.td} title={blank(row.handling_name)}>{blank(row.handling_name)}</td>
+      <td style={S.td} title={blank(row.neighborhood || shortAddr(row.road_address))}>{blank(row.neighborhood || shortAddr(row.road_address))}</td>
+      <td style={S.td} title={blank(row.category)}>{blank(row.category)}</td>
+      <td style={S.td} title={blank(row.alias)}>{blank(row.alias)}</td>
+      <td style={S.td} title={blank(row.building_dong)}>{blank(row.building_dong)}</td>
+      <td style={S.td} title={blank(row.unit_number)}>{blank(row.unit_number)}</td>
+      <td style={S.td} title={blank(row.ad_level)}>{blank(row.ad_level)}</td>
+      <td style={S.td} title={blank(row.deal_type)}>{blank(row.deal_type)}</td>
+      <td style={S.td} title={blank(row.price_text)}>{blank(row.price_text)}</td>
+      <td style={S.td} title={blank(row.area_text)}>{blank(row.area_text)}</td>
+      <td style={S.td} title={ownerNames(row)}>{ownerNames(row)}</td>
+      <td style={S.td} title={ownerPhones(row)}>{ownerPhones(row)}</td>
+      <td style={S.td} title={ownerCarriers(row)}>{ownerCarriers(row)}</td>
+      <td style={S.td} title={blank(row.hanjari_date)}>{blank(row.hanjari_date)}</td>
+      <td style={S.td} title={blank(row.deohill_date)}>{blank(row.deohill_date)}</td>
+      <td style={S.td} title={blank(row.move_in_date)}>{blank(row.move_in_date)}</td>
+      <td style={S.td} title={blank(row.direction)}>{blank(row.direction)}</td>
+      <td style={S.td} title={blank(row.maintenance_fee)}>{blank(row.maintenance_fee)}</td>
+      <td style={{ ...S.td, maxWidth: 360 }} title={blank(row.notes)}>{blank(row.notes)}</td>
+    </tr>
+  )
+  return (
+    <tr style={{ cursor: 'pointer' }} onClick={() => onClick(row)}>
+      <td style={{ ...S.td, width: 36 }}>
+        <input
+          aria-label={`select-property-${row.id}`}
+          type="checkbox"
+          checked={selected}
+          onClick={(event) => event.stopPropagation()}
+          onChange={() => onToggleSelected(row.id)}
+        />
+      </td>
       <td style={S.td}>
-        {shortAddr(row.road_address)}
-        {row.warning && <span style={{ ...S.warningBadge, marginLeft: 6 }}>경고</span>}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexWrap: 'wrap' as const }}>
+          <span>{shortAddr(row.road_address)}</span>
+          {row.alias && <span style={{ fontSize: 12, color: '#636366' }}>{row.alias}</span>}
+          {row.warning && <span style={{ ...S.warningBadge }}>경고</span>}
+        </div>
+        {row.price_text && (
+          <div style={{ fontSize: 11, color: 'rgba(0,0,0,0.4)', marginTop: 2 }}>{row.price_text}</div>
+        )}
       </td>
       <td style={S.td}>{row.building_type || '—'}</td>
       <td style={S.td}>{row.deal_type || '—'}</td>
       <td style={S.td}>{row.unit_number || '—'}</td>
       <td style={S.td}>{row.status}</td>
-      <td style={S.td}>{new Date(row.created_at).toLocaleDateString('ko-KR')}</td>
+      <td style={S.td}>{normalizeRegisteredDate(row.registered_date) || new Date(row.created_at).toLocaleDateString('ko-KR')}</td>
     </tr>
   )
 }
@@ -655,17 +849,42 @@ function PropertyTableRow({ row, onClick }: { row: PropertyRow; onClick: (r: Pro
 interface PropertyPanelProps {
   row: PropertyRow
   onClose: () => void
+  onEdit: (row: PropertyRow) => void
+  onDelete: (row: PropertyRow) => void
   onLabelChange: (id: string, labels: { is_our_property?: boolean; is_watchlist?: boolean; is_priority?: boolean }) => Promise<void>
 }
 
-function PropertyPanel({ row, onClose, onLabelChange }: PropertyPanelProps) {
+function PropertyPanel({ row, onClose, onEdit, onDelete, onLabelChange }: PropertyPanelProps) {
   const router = useRouter()
   const [isOurs,  setIsOurs]  = useState(row.is_our_property)
   const [isWatch, setIsWatch] = useState(row.is_watchlist)
   const [isFocus, setIsFocus] = useState(row.is_priority)
 
+  // ── 공동 중개 ──────────────────────────────────────────
+  const [coBrokers,       setCoBrokers]       = useState<PropertyAgencyRow[]>([])
+  const [coBrokerLoading, setCoBrokerLoading] = useState(false)
+  const [coBrokerSearch, setCoBrokerSearch] = useState('')
+  const [coBrokerResults, setCoBrokerResults] = useState<AgencyRow[]>([])
+  const [coBrokerSearchLoading, setCoBrokerSearchLoading] = useState(false)
+
+  // ── 사진 ──────────────────────────────────────────────
+  const [photoMetas,  setPhotoMetas]  = useState<PhotoMeta[]>(row.photo_urls ?? [])
+  const [currentUser, setCurrentUser] = useState<string>('')
+
   // ── 메모 ──────────────────────────────────────────────
   const [memos, setMemos] = useState<PropertyMemoRow[]>([])
+
+  const loadCoBrokers = useCallback(async () => {
+    setCoBrokerLoading(true)
+    try {
+      const data = await listPropertyCoBrokers(row.id)
+      setCoBrokers(data)
+    } catch {
+      // 공동중개 목록 조회 실패 무시 (migration 010 미실행 시)
+    } finally {
+      setCoBrokerLoading(false)
+    }
+  }, [row.id])
 
   const loadMemos = useCallback(async () => {
     try {
@@ -676,7 +895,57 @@ function PropertyPanel({ row, onClose, onLabelChange }: PropertyPanelProps) {
     }
   }, [row.id])
 
+  useEffect(() => { loadCoBrokers() }, [loadCoBrokers])
   useEffect(() => { loadMemos() }, [loadMemos])
+  useEffect(() => {
+    try {
+      createBrowserSupabaseClient().auth.getUser().then(({ data }) => {
+        setCurrentUser(data.user?.id ?? '')
+      }).catch(() => setCurrentUser(''))
+    } catch {
+      setCurrentUser('')
+    }
+  }, [])
+
+  async function handleRemoveCoBroker(agencyId: string) {
+    try {
+      await removePropertyCoBroker(row.id, agencyId)
+      await loadCoBrokers()
+    } catch {
+      // 무시
+    }
+  }
+
+  async function handleCoBrokerSearch(value: string) {
+    setCoBrokerSearch(value)
+    const term = value.trim()
+    if (!term) {
+      setCoBrokerResults([])
+      return
+    }
+
+    setCoBrokerSearchLoading(true)
+    try {
+      const results = await searchAgencies(term)
+      const linkedIds = new Set(coBrokers.map((broker) => broker.agency_id))
+      setCoBrokerResults(results.filter((agency) => !linkedIds.has(agency.id)))
+    } catch {
+      setCoBrokerResults([])
+    } finally {
+      setCoBrokerSearchLoading(false)
+    }
+  }
+
+  async function handleAddCoBroker(agencyId: string) {
+    try {
+      await addPropertyCoBroker(row.id, agencyId)
+      setCoBrokerSearch('')
+      setCoBrokerResults([])
+      await loadCoBrokers()
+    } catch {
+      // 무시
+    }
+  }
 
   async function handleSaveMemo(payload: MemoSavePayload) {
     await addPropertyMemo(row.id, payload)
@@ -768,6 +1037,79 @@ function PropertyPanel({ row, onClose, onLabelChange }: PropertyPanelProps) {
           </div>
         </div>
 
+        {/* 공동 중개 섹션 */}
+        <div style={S.panelSection}>
+          <div style={S.panelLabel}>공동 중개</div>
+          <label htmlFor={`co-broker-search-${row.id}`} style={{ ...S.panelLabel, display: 'block', marginTop: 8 }}>
+            공동 중개 부동산 검색
+          </label>
+          <input
+            id={`co-broker-search-${row.id}`}
+            aria-label="공동 중개 부동산 검색"
+            style={S.input}
+            type="search"
+            placeholder="부동산명 또는 별칭"
+            value={coBrokerSearch}
+            onChange={(event) => handleCoBrokerSearch(event.target.value)}
+          />
+          {coBrokerSearchLoading && (
+            <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.4)', marginTop: 6 }}>검색 중…</div>
+          )}
+          {coBrokerResults.length > 0 && (
+            <div style={{ marginTop: 6, display: 'grid', gap: 6 }}>
+              {coBrokerResults.map((agency) => {
+                const label = agency.alias || agency.name
+                return (
+                  <button
+                    key={agency.id}
+                    type="button"
+                    style={{ border: '1px solid rgba(0,0,0,0.1)', background: '#fff', borderRadius: 8, padding: '7px 10px', textAlign: 'left', cursor: 'pointer', fontSize: 13, color: '#1d1d1f', fontFamily: 'inherit' }}
+                    onClick={() => handleAddCoBroker(agency.id)}
+                  >
+                    {label} 추가
+                  </button>
+                )
+              })}
+            </div>
+          )}
+          {coBrokerLoading ? (
+            <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.4)', marginTop: 6 }}>불러오는 중…</div>
+          ) : coBrokers.length === 0 ? (
+            <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.4)', marginTop: 6 }}>공동 중개 없음</div>
+          ) : (
+            <div style={{ marginTop: 6 }}>
+              {coBrokers.map((cb) => {
+                const agencyData = (cb as unknown as Record<string, unknown>)['agencies'] as Record<string, unknown> | undefined
+                const agencyName = agencyData?.['name'] as string | undefined
+                return (
+                  <div key={cb.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid rgba(0,0,0,0.04)', fontSize: 13 }}>
+                    <span style={{ color: '#1d1d1f' }}>{agencyName ?? cb.agency_id}</span>
+                    <button
+                      style={{ border: 'none', background: 'transparent', color: '#ff3b30', cursor: 'pointer', fontSize: 12, fontFamily: 'inherit' }}
+                      onClick={() => handleRemoveCoBroker(cb.agency_id)}
+                    >
+                      제거
+                    </button>
+                  </div>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* 사진 섹션 */}
+        {currentUser && (
+          <div style={S.panelSection}>
+            <div style={S.panelLabel}>사진</div>
+            <PropertyPhotoUploader
+              propertyId={row.id}
+              photoMetas={photoMetas}
+              uploadedBy={currentUser}
+              onUpdate={setPhotoMetas}
+            />
+          </div>
+        )}
+
         {/* 메모 섹션 */}
         <div style={S.panelSection}>
           <div style={S.panelLabel}>메모</div>
@@ -781,6 +1123,12 @@ function PropertyPanel({ row, onClose, onLabelChange }: PropertyPanelProps) {
 
       {/* 푸터 */}
       <div style={S.panelFooter}>
+        <button style={S.reportBtn} onClick={() => onEdit(row)}>
+          수정
+        </button>
+        <button style={{ ...S.reportBtn, borderColor: '#ff3b30', color: '#ff3b30' }} onClick={() => onDelete(row)}>
+          삭제
+        </button>
         <button style={S.reportBtn} onClick={handleDiagReport}>
           진단 리포트 보기 →
         </button>
@@ -796,16 +1144,40 @@ function safeIntParam(searchParams: ReturnType<typeof useSearchParams>, key: str
   return Number.isFinite(n) ? String(Math.floor(n)) : fallback
 }
 
+function safeTabParam(value: string | null): TabKey {
+  return TABS.some((tab) => tab.key === value) ? (value as TabKey) : 'all'
+}
+
 // ─── 페이지 내부 (useSearchParams → Suspense 필수) ────────
 function PropertiesPageInner() {
   const searchParams = useSearchParams()
-  const [activeTab,    setActiveTab]    = useState<TabKey>('all')
-  const [dealType,     setDealType]     = useState('')
+  const handlingPersonId  = searchParams.get('handlingPersonId')  || undefined
+  const ownerPersonId     = searchParams.get('ownerPersonId')     || undefined
+  const handlingAgencyId  = searchParams.get('handlingAgencyId')  || undefined
+  const coBrokerAgencyId  = searchParams.get('coBrokerAgencyId')  || undefined
+  const [activeTab,    setActiveTab]    = useState<TabKey>(() => safeTabParam(searchParams.get('tab')))
+  const [dealType,     setDealType]     = useState(() => searchParams.get('dealType') ?? '')
   const [showForm,     setShowForm]     = useState(false)
+  const [showUrlModal, setShowUrlModal] = useState(false)
   const [formPrefill,  setFormPrefill]  = useState<PropertyFormPrefill | undefined>()
   const [rows,         setRows]         = useState<PropertyRow[]>([])
   const [loading,      setLoading]      = useState(false)
   const [selectedRow,  setSelectedRow]  = useState<PropertyRow | null>(null)
+  const [editingRow,   setEditingRow]   = useState<PropertyRow | null>(null)
+  const [deletingRow,  setDeletingRow]  = useState<PropertyRow | null>(null)
+  const [selectedIds,  setSelectedIds]  = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [search,       setSearch]       = useState(() => searchParams.get('q') ?? '')
+  const [duplicateOnly, setDuplicateOnly] = useState(() => searchParams.get('duplicateOnly') === '1')
+  const [registeredDateFrom, setRegisteredDateFrom] = useState(() => registeredDateInputValue(searchParams.get('registeredDateFrom')) ?? '')
+  const [registeredDateTo,   setRegisteredDateTo]   = useState(() => registeredDateInputValue(searchParams.get('registeredDateTo')) ?? '')
+  const [urlInput,     setUrlInput]     = useState('')
+  const [urlParsing,   setUrlParsing]   = useState(false)
+  const [urlError,     setUrlError]     = useState('')
+  const [urlProperty,  setUrlProperty]  = useState<ParsedUrlProperty | null>(null)
+  const [sheetSyncing, setSheetSyncing] = useState(false)
+  const [sheetMessage, setSheetMessage] = useState('')
+  const debouncedSearch = useDebounce(search)
   const prefillApplied = useRef(false)
 
   // 빠른 주소 검색의 "매물로 등록" 버튼에서 redirect 시 폼 자동 오픈
@@ -838,18 +1210,220 @@ function PropertiesPageInner() {
   const loadList = useCallback(async () => {
     setLoading(true)
     try {
-      const data = await listProperties({ tab: activeTab, dealType: dealType || undefined })
+      const data = await listProperties({
+        tab: activeTab,
+        dealType: dealType || undefined,
+        handlingPersonId,
+        ownerPersonId,
+        handlingAgencyId,
+        coBrokerAgencyId,
+      })
       setRows(data)
     } catch {
       // 조회 실패 시 빈 목록 유지
     } finally {
       setLoading(false)
     }
-  }, [activeTab, dealType])
+  }, [activeTab, dealType, handlingPersonId, ownerPersonId, handlingAgencyId, coBrokerAgencyId])
 
   useEffect(() => { loadList() }, [loadList])
 
+  async function handleParseUrl() {
+    const url = urlInput.trim()
+    if (!url) {
+      setUrlError('URL을 입력해 주세요.')
+      return
+    }
+    setUrlParsing(true)
+    setUrlError('')
+    setUrlProperty(null)
+    try {
+      const response = await fetch('/api/parse-url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ url }),
+      })
+      const result = await response.json()
+      if (!response.ok || !result.ok || !result.property) {
+        setUrlError(result.error ?? 'URL 파싱에 실패했습니다.')
+        return
+      }
+      setUrlProperty(result.property as ParsedUrlProperty)
+    } catch {
+      setUrlError('URL 파싱에 실패했습니다.')
+    } finally {
+      setUrlParsing(false)
+    }
+  }
+
+  async function handleSaveUrlDraft() {
+    if (!urlProperty?.source_platform || !urlProperty.source_url) return
+    await saveProperty({
+      road_address: urlProperty.road_address || urlProperty.source_url,
+      building_name: urlProperty.building_name,
+      deal_type: urlProperty.deal_type,
+      price_text: urlProperty.price_text,
+      area_text: urlProperty.area_text,
+      description: urlProperty.description || [
+        urlProperty.source_external_id ? `외부 매물 ID: ${urlProperty.source_external_id}` : '',
+        urlProperty.source_complex_id ? `외부 단지 ID: ${urlProperty.source_complex_id}` : '',
+      ].filter(Boolean).join('\n') || undefined,
+      source_platform: urlProperty.source_platform,
+      source_url: urlProperty.source_url,
+      status: '공실',
+      is_our_property: true,
+    })
+    setShowUrlModal(false)
+    setUrlInput('')
+    setUrlProperty(null)
+    await loadList()
+  }
+
+  async function handleSheetSync() {
+    setSheetSyncing(true)
+    setSheetMessage('')
+    try {
+      const response = await fetch('/api/sheets-sync', { method: 'POST' })
+      const result = await response.json()
+      if (!response.ok || !result.ok) {
+        setSheetMessage(`시트 동기화 실패: ${result.error ?? '알 수 없는 오류'}`)
+        return
+      }
+      setSheetMessage(`시트 동기화 완료: ${result.synced ?? 0}건`)
+      await loadList()
+    } catch {
+      setSheetMessage('시트 동기화 실패: 네트워크 오류')
+    } finally {
+      setSheetSyncing(false)
+    }
+  }
+
+  function updateRegisteredDateUrl(from: string, to: string) {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    if (from) params.set('registeredDateFrom', from)
+    else params.delete('registeredDateFrom')
+    if (to) params.set('registeredDateTo', to)
+    else params.delete('registeredDateTo')
+    const query = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
+  }
+
+  function setRegisteredDateRange(from: string, to: string) {
+    setRegisteredDateFrom(from)
+    setRegisteredDateTo(to)
+    setSelectedIds(new Set())
+    updateRegisteredDateUrl(from, to)
+  }
+
+  function updateListFilterUrl(updates: Record<string, string | null>) {
+    if (typeof window === 'undefined') return
+    const params = new URLSearchParams(window.location.search)
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value) params.set(key, value)
+      else params.delete(key)
+    })
+    const query = params.toString()
+    window.history.replaceState(null, '', `${window.location.pathname}${query ? `?${query}` : ''}`)
+  }
+
+  function setTabFilter(next: TabKey) {
+    setActiveTab(next)
+    setSelectedIds(new Set())
+    updateListFilterUrl({ tab: next === 'all' ? null : next })
+  }
+
+  function setDealTypeFilter(next: string) {
+    setDealType(next)
+    setSelectedIds(new Set())
+    updateListFilterUrl({ dealType: next || null })
+  }
+
+  function setSearchFilter(next: string) {
+    setSearch(next)
+    setSelectedIds(new Set())
+    updateListFilterUrl({ q: next.trim() || null })
+  }
+
+  function setDuplicateFilter(next: boolean) {
+    setDuplicateOnly(next)
+    setSelectedIds(new Set())
+    updateListFilterUrl({ duplicateOnly: next ? '1' : null })
+  }
+
+  function setMonthRange(offset: number) {
+    const now = new Date()
+    const first = new Date(now.getFullYear(), now.getMonth() + offset, 1)
+    const last = new Date(now.getFullYear(), now.getMonth() + offset + 1, 0)
+    const from = `${first.getFullYear()}-${String(first.getMonth() + 1).padStart(2, '0')}-01`
+    const to = `${last.getFullYear()}-${String(last.getMonth() + 1).padStart(2, '0')}-${String(last.getDate()).padStart(2, '0')}`
+    setRegisteredDateRange(from, to)
+  }
+
   const empty = EMPTY_MSG[activeTab]
+  const duplicateIds = findDuplicatePropertyIds(rows)
+  const filteredRows = rows.filter((row) => {
+    if (duplicateOnly && !duplicateIds.has(row.id)) return false
+
+    if ((registeredDateFrom || registeredDateTo) && !isRegisteredDateInRange(row.registered_date, registeredDateFrom, registeredDateTo)) {
+      return false
+    }
+
+    const q = debouncedSearch.trim().toLowerCase()
+    if (!q) return true
+    return [
+      row.road_address,
+      row.building_name ?? '',
+      row.building_dong ?? '',
+      row.unit_number ?? '',
+      row.building_type ?? '',
+      row.deal_type ?? '',
+      row.status,
+    ].some((value) => value.toLowerCase().includes(q))
+  })
+  const visibleIds = filteredRows.map((row) => row.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+  const hasActiveFilters = Boolean(search.trim() || dealType || registeredDateFrom || registeredDateTo || duplicateOnly || activeTab !== 'all')
+  const filterSummary = [
+    activeTab !== 'all' ? TABS.find((tab) => tab.key === activeTab)?.label : '',
+    dealType ? `거래유형 ${dealType}` : '',
+    duplicateOnly ? `중복 의심 ${duplicateIds.size}건` : '',
+    registeredDateFrom || registeredDateTo
+      ? `등록일 ${normalizeRegisteredDate(registeredDateFrom) ?? '처음'} ~ ${normalizeRegisteredDate(registeredDateTo) ?? '끝'}`
+      : '',
+    search.trim() ? `검색 "${search.trim()}"` : '',
+  ].filter(Boolean).join(' · ')
+
+  useEffect(() => {
+    setSelectedIds(new Set())
+  }, [activeTab, dealType, debouncedSearch, duplicateOnly, registeredDateFrom, registeredDateTo])
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAllVisible() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id))
+      else visibleIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    await Promise.all(ids.map((id) => deleteProperty(id)))
+    setBulkDeleting(false)
+    setSelectedIds(new Set())
+    setSelectedRow((prev) => (prev && ids.includes(prev.id) ? null : prev))
+    await loadList()
+  }
 
   return (
     <>
@@ -865,7 +1439,7 @@ function PropertiesPageInner() {
                 role="button"
                 data-active={activeTab === key}
                 style={S.tab(activeTab === key)}
-                onClick={() => setActiveTab(key)}
+                onClick={() => setTabFilter(key)}
               >
                 {label}
               </button>
@@ -873,6 +1447,7 @@ function PropertiesPageInner() {
           </div>
 
           <div style={S.actions}>
+            <SearchInput value={search} onChange={setSearchFilter} placeholder="주소, 동호수 검색" label="매물 검색" />
             <label htmlFor="deal-type-filter" style={{ display: 'none' }}>거래유형 필터</label>
             <select
               id="deal-type-filter"
@@ -880,11 +1455,69 @@ function PropertiesPageInner() {
               role="combobox"
               style={S.select}
               value={dealType}
-              onChange={(e) => setDealType(e.target.value)}
+              onChange={(e) => setDealTypeFilter(e.target.value)}
             >
               <option value="">거래유형 전체</option>
               {DEAL_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
             </select>
+
+            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#636366' }}>
+              등록일
+              <input
+                aria-label="registered-date-from"
+                type="date"
+                value={registeredDateFrom}
+                onChange={(event) => setRegisteredDateRange(event.target.value, registeredDateTo)}
+                style={{ ...S.input, width: 128, padding: '7px 10px', fontSize: 12 }}
+              />
+            </label>
+            <span style={{ fontSize: 12, color: '#86868b' }}>~</span>
+            <input
+              aria-label="registered-date-to"
+              type="date"
+              value={registeredDateTo}
+              onChange={(event) => setRegisteredDateRange(registeredDateFrom, event.target.value)}
+              style={{ ...S.input, width: 128, padding: '7px 10px', fontSize: 12 }}
+            />
+            <button
+              type="button"
+              style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13 }}
+              onClick={() => setMonthRange(0)}
+            >
+              이번 달
+            </button>
+            <button
+              type="button"
+              style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13 }}
+              onClick={() => setMonthRange(-1)}
+            >
+              지난 달
+            </button>
+            {(registeredDateFrom || registeredDateTo) && (
+              <button
+                type="button"
+                style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13 }}
+              onClick={() => setRegisteredDateRange('', '')}
+              >
+                기간 해제
+              </button>
+            )}
+
+            <button
+              type="button"
+              aria-pressed={duplicateOnly}
+              style={{
+                ...S.cancelBtn,
+                padding: '7px 12px',
+                fontSize: 13,
+                opacity: duplicateIds.size > 0 || duplicateOnly ? 1 : 0.5,
+                ...(duplicateOnly ? { background: '#1d1d1f', color: '#ffffff', borderColor: '#1d1d1f' } : {}),
+              }}
+              disabled={duplicateIds.size === 0 && !duplicateOnly}
+              onClick={() => setDuplicateFilter(!duplicateOnly)}
+            >
+              중복 의심 {duplicateIds.size}
+            </button>
 
             <button
               style={S.addBtn}
@@ -893,16 +1526,67 @@ function PropertiesPageInner() {
             >
               + 매물 등록
             </button>
+
+            <button
+              style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13 }}
+              type="button"
+              onClick={() => setShowUrlModal(true)}
+            >
+              URL로 매물 등록
+            </button>
+
+            <button
+              style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13, opacity: sheetSyncing ? 0.65 : 1 }}
+              type="button"
+              disabled={sheetSyncing}
+              onClick={handleSheetSync}
+            >
+              {sheetSyncing ? '동기화 중' : '시트 동기화'}
+            </button>
+            {selectedIds.size > 0 && (
+              <>
+                <button
+                  style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13 }}
+                  type="button"
+                  onClick={() => setSelectedIds(new Set())}
+                >
+                  선택 해제
+                </button>
+                <button
+                  style={{ ...S.cancelBtn, padding: '7px 12px', fontSize: 13, color: '#ff3b30' }}
+                  type="button"
+                  onClick={() => setBulkDeleting(true)}
+                >
+                  선택 {selectedIds.size}개 삭제
+                </button>
+              </>
+            )}
           </div>
         </div>
 
+        {sheetMessage && (
+          <div style={{ fontSize: 12, color: sheetMessage.includes('실패') ? '#ff3b30' : '#34c759', margin: '-8px 0 12px', textAlign: 'right' }}>
+            {sheetMessage}
+          </div>
+        )}
+
         {/* 리스트 카드 */}
+        {hasActiveFilters && (
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 12, margin: '-6px 0 12px', fontSize: 12, color: '#636366' }}>
+            <span>
+              필터 결과 {filteredRows.length}건
+              {filterSummary ? ` · ${filterSummary}` : ''}
+            </span>
+            {selectedIds.size > 0 && <span style={{ color: '#ff3b30', fontWeight: 700 }}>선택 {selectedIds.size}건</span>}
+          </div>
+        )}
+
         <div style={S.card}>
           {loading ? (
             <div style={{ ...S.empty, padding: '40px 0' }}>
               <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.4)' }}>불러오는 중…</div>
             </div>
-          ) : rows.length === 0 ? (
+          ) : filteredRows.length === 0 ? (
             <div style={S.empty}>
               <div style={S.emptyIcon}>🏠</div>
               <div style={S.emptyTitle}>{empty.title}</div>
@@ -910,9 +1594,50 @@ function PropertiesPageInner() {
               <button style={S.emptyBtn} onClick={() => setShowForm(true)}>+ 매물 등록</button>
             </div>
           ) : (
-            <table style={S.table}>
+            <div style={S.tableScroll}>
+            <table style={{ ...S.table, minWidth: 2200 }}>
               <thead>
                 <tr>
+                  <th style={{ ...S.th, width: 36, position: 'sticky', left: 0, background: '#fff', zIndex: 2 }}>
+                    <input
+                      aria-label="select-all-properties"
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                    />
+                  </th>
+                  <th style={S.th}>등록일</th>
+                  <th style={S.th}>핸들링</th>
+                  <th style={S.th}>대표주소</th>
+                  <th style={S.th}>카테고리</th>
+                  <th style={S.th}>별칭</th>
+                  <th style={S.th}>동</th>
+                  <th style={S.th}>호수</th>
+                  <th style={S.th}>랜덤광고</th>
+                  <th style={S.th}>종류</th>
+                  <th style={S.th}>가격</th>
+                  <th style={S.th}>면적</th>
+                  <th style={S.th}>소유자</th>
+                  <th style={S.th}>연락처</th>
+                  <th style={S.th}>통신사</th>
+                  <th style={S.th}>한자리</th>
+                  <th style={S.th}>더힐</th>
+                  <th style={S.th}>입주시기</th>
+                  <th style={S.th}>방향</th>
+                  <th style={S.th}>관리비</th>
+                  <th style={S.th}>기타사항</th>
+                </tr>
+              </thead>
+              <thead style={{ display: 'none' }}>
+                <tr>
+                  <th style={{ ...S.th, width: 36 }}>
+                    <input
+                      aria-label="select-all-properties-hidden"
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                    />
+                  </th>
                   <th style={S.th}>주소</th>
                   <th style={S.th}>건물유형</th>
                   <th style={S.th}>거래유형</th>
@@ -922,9 +1647,18 @@ function PropertiesPageInner() {
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => <PropertyTableRow key={r.id} row={r} onClick={setSelectedRow} />)}
+                {filteredRows.map((r) => (
+                  <PropertyTableRow
+                    key={r.id}
+                    row={r}
+                    onClick={setSelectedRow}
+                    selected={selectedIds.has(r.id)}
+                    onToggleSelected={toggleSelected}
+                  />
+                ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
@@ -939,6 +1673,73 @@ function PropertiesPageInner() {
         />
       )}
 
+      {showUrlModal && (
+        <div style={S.overlay}>
+          <div style={S.modal} role="dialog" aria-modal="true" aria-label="URL로 매물 등록">
+            <div style={S.modalTitle}>URL로 매물 등록</div>
+            <div style={S.formField}>
+              <label htmlFor="external-property-url" style={S.label}>외부 매물 URL</label>
+              <input
+                id="external-property-url"
+                aria-label="외부 매물 URL"
+                style={S.input}
+                type="url"
+                placeholder="네이버, 직방, 피터팬, 다방 URL"
+                value={urlInput}
+                onChange={(event) => setUrlInput(event.target.value)}
+              />
+            </div>
+
+            {urlError && <div style={{ fontSize: 12, color: '#ff3b30', marginBottom: 10 }}>{urlError}</div>}
+
+            {urlProperty && (
+              <div style={{ border: '1px solid rgba(0,0,0,0.08)', borderRadius: 8, padding: 12, marginBottom: 12, background: '#f5f5f7' }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#1d1d1f' }}>출처: {urlProperty.source_platform}</div>
+                <div style={{ fontSize: 12, color: 'rgba(0,0,0,0.55)', marginTop: 6 }}>
+                  {[
+                    urlProperty.road_address,
+                    urlProperty.building_name,
+                    urlProperty.deal_type,
+                    urlProperty.price_text,
+                    urlProperty.source_external_id ? `ID ${urlProperty.source_external_id}` : '',
+                  ].filter(Boolean).join(' · ') || urlProperty.source_url}
+                </div>
+              </div>
+            )}
+
+            <div style={S.modalFooter}>
+              <button
+                style={S.cancelBtn}
+                type="button"
+                onClick={() => {
+                  setShowUrlModal(false)
+                  setUrlError('')
+                  setUrlProperty(null)
+                }}
+              >
+                취소
+              </button>
+              <button
+                style={S.cancelBtn}
+                type="button"
+                disabled={urlParsing}
+                onClick={handleParseUrl}
+              >
+                {urlParsing ? '파싱 중' : 'URL 파싱'}
+              </button>
+              <button
+                style={{ ...S.saveBtn, opacity: urlProperty ? 1 : 0.5 }}
+                type="button"
+                disabled={!urlProperty}
+                onClick={handleSaveUrlDraft}
+              >
+                매물 초안 등록
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* 매물 상세 슬라이드 패널 (U3-4) */}
       {selectedRow && (
         <>
@@ -947,12 +1748,47 @@ function PropertiesPageInner() {
           <PropertyPanel
             row={selectedRow}
             onClose={() => setSelectedRow(null)}
+            onEdit={(row) => {
+              setSelectedRow(null)
+              setEditingRow(row)
+            }}
+            onDelete={(row) => setDeletingRow(row)}
             onLabelChange={async (id, labels) => {
               await updatePropertyLabels(id, labels)
               await loadList()
             }}
           />
         </>
+      )}
+      {editingRow && (
+        <PropertyForm
+          editData={editingRow}
+          onClose={() => setEditingRow(null)}
+          onSaved={() => { setEditingRow(null); loadList() }}
+        />
+      )}
+      {deletingRow && (
+        <ConfirmDialog
+          title="매물을 삭제할까요?"
+          description={`${deletingRow.road_address} 매물이 삭제됩니다.`}
+          onCancel={() => setDeletingRow(null)}
+          onConfirm={async () => {
+            await deleteProperty(deletingRow.id)
+            setDeletingRow(null)
+            setSelectedRow(null)
+            await loadList()
+          }}
+        />
+      )}
+      {bulkDeleting && (
+        <ConfirmDialog
+          title="선택 매물을 삭제할까요?"
+          description={`${selectedIds.size}개 매물이 삭제됩니다.${filterSummary ? ` 현재 필터: ${filterSummary}` : ''}`}
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
+        />
       )}
     </>
   )

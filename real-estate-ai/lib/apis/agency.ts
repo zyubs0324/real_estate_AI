@@ -1,6 +1,6 @@
 /**
  * 부동산중개업 정보 서비스 API
- * U3-10 — 타부동산 자동 조회
+ * U3-10 — 부동산 자동 조회
  *
  * data.go.kr (국토교통부) — DATA_GO_KR_API_KEY 사용
  * NEXT_PUBLIC_USE_MOCK_API=true → lib/apis/__mocks__/agency.json 반환

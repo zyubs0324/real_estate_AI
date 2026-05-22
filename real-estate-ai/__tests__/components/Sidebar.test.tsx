@@ -26,7 +26,7 @@ describe('Sidebar — apple.md §12', () => {
     expect(screen.getByText('진단 리포트')).toBeInTheDocument()
     expect(screen.getByText('AI 질의응답')).toBeInTheDocument()
     expect(screen.getByText('인물')).toBeInTheDocument()
-    expect(screen.getByText('타부동산')).toBeInTheDocument()
+    expect(screen.getByText('부동산')).toBeInTheDocument()
   })
 
   it('renders section labels (CRM, AI 도구)', () => {

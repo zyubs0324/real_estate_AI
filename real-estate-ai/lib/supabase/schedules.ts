@@ -53,3 +53,26 @@ export async function listSchedules(): Promise<ScheduleRow[]> {
   if (error) throw error
   return (data ?? []) as ScheduleRow[]
 }
+
+export async function updateSchedule(
+  id: string,
+  payload: Partial<SaveSchedulePayload> & { is_done?: boolean }
+): Promise<void> {
+  const supabase = createBrowserSupabaseClient()
+  const { error } = await supabase
+    .from('schedules')
+    .update(payload)
+    .eq('id', id)
+
+  if (error) throw error
+}
+
+export async function deleteSchedule(id: string): Promise<void> {
+  const supabase = createBrowserSupabaseClient()
+  const { error } = await supabase
+    .from('schedules')
+    .delete()
+    .eq('id', id)
+
+  if (error) throw error
+}

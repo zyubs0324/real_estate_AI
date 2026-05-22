@@ -8,7 +8,8 @@ import { useParams, useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import {
   getPerson, getPersonRelations, getPersonMemos, addPersonMemo, deletePersonMemo,
-  type PersonRow, type RelationRow, type MemoRow,
+  getPersonOwnedPropertyGroups,
+  type PersonRow, type RelationRow, type MemoRow, type OwnedPropertyGroup,
 } from '@/lib/supabase/people'
 import MemoSection, { type MemoSavePayload } from '@/components/common/MemoSection'
 
@@ -94,6 +95,24 @@ const S = {
   },
   // 관심매물 섹션
   interestEmpty: { fontSize: 13, color: 'rgba(0,0,0,0.35)', padding: '12px 0' },
+  ownedUnit: { padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' },
+  ownedHeader: {
+    display: 'flex' as const,
+    justifyContent: 'space-between' as const,
+    gap: 12,
+    alignItems: 'center' as const,
+    marginBottom: 6,
+  },
+  ownedTitle: { fontSize: 13, fontWeight: 700, color: '#1d1d1f' },
+  ownedMeta: { fontSize: 11, color: 'rgba(0,0,0,0.4)' },
+  listingRow: {
+    display: 'flex' as const,
+    gap: 8,
+    flexWrap: 'wrap' as const,
+    fontSize: 12,
+    color: 'rgba(0,0,0,0.58)',
+    padding: '3px 0',
+  },
 }
 
 // ─── 헬퍼 ────────────────────────────────────────────────
@@ -114,6 +133,7 @@ export default function PersonProfilePage() {
 
   const [person,    setPerson]    = useState<PersonRow | null>(null)
   const [relations, setRelations] = useState<RelationRow[]>([])
+  const [ownedGroups, setOwnedGroups] = useState<OwnedPropertyGroup[]>([])
   const [memos,     setMemos]     = useState<MemoRow[]>([])
   const [loading,   setLoading]   = useState(true)
 
@@ -121,13 +141,15 @@ export default function PersonProfilePage() {
   const load = useCallback(async () => {
     setLoading(true)
     try {
-      const [p, rels, mms] = await Promise.all([
+      const [p, rels, owned, mms] = await Promise.all([
         getPerson(id),
         getPersonRelations(id),
+        getPersonOwnedPropertyGroups(id),
         getPersonMemos(id),
       ])
       setPerson(p)
       setRelations(rels)
+      setOwnedGroups(owned)
       setMemos(mms)
     } catch {
       // 로드 실패 시 빈 상태 유지
@@ -197,8 +219,37 @@ export default function PersonProfilePage() {
               </div>
               <div style={S.infoRow}>
                 <span style={S.infoLabel}>역할</span>
-                <span style={S.infoValue}>{person.role || '—'}</span>
+                <span style={S.infoValue}>{person.role || '-'}</span>
               </div>
+              <div style={S.infoRow}>
+                <span style={S.infoLabel}>통신사</span>
+                <span style={S.infoValue}>{person.carrier || person.carrier_note || '-'}</span>
+              </div>
+              {person.display_name && (
+                <div style={S.infoRow}>
+                  <span style={S.infoLabel}>별칭/호칭</span>
+                  <span style={S.infoValue}>{person.display_name}</span>
+                </div>
+              )}
+              {person.address && (
+                <div style={S.infoRow}>
+                  <span style={S.infoLabel}>주소</span>
+                  <span style={S.infoValue}>{person.address}</span>
+                </div>
+              )}
+              <div style={S.infoRow}>
+                <span style={S.infoLabel}>법인</span>
+                {person.is_corporate
+                  ? <span style={{ ...S.infoValue, color: '#0071e3', background: 'rgba(0,113,227,0.10)', borderRadius: 6, padding: '1px 8px', fontSize: 12 }}>예</span>
+                  : <span style={S.infoValue}>아니오</span>
+                }
+              </div>
+              {person.notes && (
+                <div style={S.infoRow}>
+                  <span style={S.infoLabel}>메모</span>
+                  <span style={{ ...S.infoValue, whiteSpace: 'pre-wrap' as const }}>{person.notes}</span>
+                </div>
+              )}
               <div style={{ ...S.infoRow, borderBottom: 'none' }}>
                 <span style={S.infoLabel}>등록일</span>
                 <span style={S.infoValue}>{new Date(person.created_at).toLocaleDateString('ko-KR')}</span>
@@ -208,9 +259,56 @@ export default function PersonProfilePage() {
             {/* 관심 매물 */}
             <div style={S.card} data-testid="interest-section">
               <div style={S.cardTitle}>관심 매물</div>
-              <div style={S.interestEmpty}>
-                등록된 관심 매물이 없습니다.
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' as const }}>
+                <button
+                  style={{ border: '1px solid #0071e3', color: '#0071e3', borderRadius: 8, padding: '7px 14px', background: '#fff', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                  onClick={() => router.push(`/properties?ownerPersonId=${person.id}`)}
+                >
+                  소유 매물 보기
+                </button>
+                <button
+                  style={{ border: '1px solid #0071e3', color: '#0071e3', borderRadius: 8, padding: '7px 14px', background: '#fff', cursor: 'pointer', fontSize: 13, fontFamily: 'inherit' }}
+                  onClick={() => router.push(`/properties?handlingPersonId=${person.id}`)}
+                >
+                  핸들링 매물 보기
+                </button>
               </div>
+            </div>
+
+            <div style={S.card} data-testid="owned-properties-section">
+              <div style={S.cardTitle}>소유 매물</div>
+              {ownedGroups.length === 0 ? (
+                <div style={S.interestEmpty}>연결된 소유 매물이 없습니다.</div>
+              ) : (
+                <div>
+                  {ownedGroups.map((group) => (
+                    <div key={group.unit_key} style={S.ownedUnit}>
+                      <div style={S.ownedHeader}>
+                        <button
+                          style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit' }}
+                          onClick={() => router.push(`/properties?ownerPersonId=${person.id}`)}
+                        >
+                          <div style={S.ownedTitle}>
+                            {[group.road_address, group.building_dong, group.unit_number].filter(Boolean).join(' ')}
+                          </div>
+                        </button>
+                        <span style={S.ownedMeta}>
+                          {group.share_ratio ?? '-'} · 등록 {group.listings.length}건
+                        </span>
+                      </div>
+                      {group.listings.map((listing) => (
+                        <div key={listing.id} style={S.listingRow}>
+                          <span>{listing.handling_name || '-'}</span>
+                          <span>{listing.alias || listing.neighborhood || '-'}</span>
+                          <span>{listing.deal_type || '-'}</span>
+                          <span>{listing.price_text || '-'}</span>
+                          <span>{listing.area_text || '-'}</span>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
 
@@ -231,9 +329,25 @@ export default function PersonProfilePage() {
                         <div style={S.dot(isActive)} />
                         <div style={S.timelineBody}>
                           <div style={S.timelineRole}>{r.role}</div>
-                          <div style={S.timelineAddr}>
-                            {r.property ? shortAddr(r.property.road_address) : '—'}
-                          </div>
+                          <button
+                            style={{ border: 'none', background: 'transparent', padding: 0, textAlign: 'left', cursor: r.property ? 'pointer' : 'default' }}
+                            onClick={() => {
+                              if (r.property) router.push(`/properties?ownerPersonId=${person.id}`)
+                            }}
+                          >
+                            <div style={S.timelineAddr}>
+                              {r.property
+                                ? [
+                                  r.property.handling_name,
+                                  r.property.neighborhood || shortAddr(r.property.road_address),
+                                  r.property.alias,
+                                  r.property.deal_type,
+                                  r.property.price_text,
+                                  r.property.area_text,
+                                ].filter(Boolean).join(' · ')
+                                : '-'}
+                            </div>
+                          </button>
                           <div style={S.timelineDate}>
                             {formatDate(r.started_at)} ~ {formatDate(r.ended_at)}
                           </div>

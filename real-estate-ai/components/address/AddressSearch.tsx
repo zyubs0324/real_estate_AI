@@ -120,6 +120,42 @@ const S = {
   },
 }
 
+const ACTUAL_DONG_RE = new RegExp(`^(?:\\d+|[A-Za-z])\\s*\\uB3D9$`, 'i')
+const NON_RESIDENTIAL_RE = /(?:\uC0C1\uAC00|\uAD00\uB9AC\uC0AC\uBB34\uC2E4|\uB178\uC778\uC815|\uC720\uCE58\uC6D0|\uC9C0\uD558)/
+
+function residentialDongCount(detBdNmList: string): number {
+  return detBdNmList
+    .split(/[,，、]/)
+    .map((name) => name.trim())
+    .filter((name) => ACTUAL_DONG_RE.test(name))
+    .length
+}
+
+function rankAddressResult(item: JusoResult, query: string): number {
+  const keyword = query.replace(/\s+/g, '').toLowerCase()
+  const searchable = [item.bdNm, item.roadAddr, item.jibunAddr]
+    .filter(Boolean)
+    .join(' ')
+    .replace(/\s+/g, '')
+    .toLowerCase()
+  const dongCount = residentialDongCount(item.detBdNmList ?? '')
+  const detailText = `${item.detBdNmList ?? ''} ${item.bdNm ?? ''}`
+
+  let score = 0
+  if (keyword && searchable.includes(keyword)) score += 30
+  if (item.bdKdcd === '1') score += 8
+  score += Math.min(dongCount, 20) * 10
+  if (NON_RESIDENTIAL_RE.test(detailText) && dongCount === 0) score -= 40
+  return score
+}
+
+function sortAddressResults(results: JusoResult[], query: string): JusoResult[] {
+  return results
+    .map((item, index) => ({ item, index, score: rankAddressResult(item, query) }))
+    .sort((a, b) => b.score - a.score || a.index - b.index)
+    .map(({ item }) => item)
+}
+
 export default function AddressSearch({
   onSelect,
   placeholder = '도로명 또는 지번 주소 입력 (예: 성동구 옥수)',
@@ -161,7 +197,7 @@ export default function AddressSearch({
       const filtered = bdKdcdFilter
         ? data.filter((item) => item.bdKdcd === bdKdcdFilter)
         : data
-      setResults(filtered)
+      setResults(sortAddressResults(filtered.length > 0 ? filtered : data, q))
       setIsOpen(true)
     } catch {
       setResults([])

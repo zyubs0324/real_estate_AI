@@ -46,6 +46,27 @@ jest.mock('@/lib/supabase/properties', () => ({
     },
   ]),
   updatePropertyLabels: jest.fn().mockResolvedValue(undefined),
+  getPropertyMemos: jest.fn().mockResolvedValue([]),
+  addPropertyMemo: jest.fn().mockResolvedValue({ id: 'memo-id' }),
+  deletePropertyMemo: jest.fn().mockResolvedValue(undefined),
+}))
+
+jest.mock('@/lib/supabase/propertyAgencies', () => ({
+  listPropertyCoBrokers: jest.fn().mockResolvedValue([]),
+  addPropertyCoBroker: jest.fn().mockResolvedValue({ id: 'pa-001' }),
+  removePropertyCoBroker: jest.fn().mockResolvedValue(undefined),
+}))
+
+jest.mock('@/lib/supabase/agencies', () => ({
+  searchAgencies: jest.fn().mockResolvedValue([
+    { id: 'agency-001', name: '경희', alias: '경희' },
+  ]),
+}))
+
+jest.mock('@/lib/supabase/client', () => ({
+  createBrowserSupabaseClient: () => ({
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user: { id: 'user-001' } } }) },
+  }),
 }))
 
 global.fetch = jest.fn().mockResolvedValue({ ok: true, json: async () => ({}) })
@@ -108,6 +129,19 @@ describe('PropertiesPage 슬라이드 패널 (U3-4)', () => {
     fireEvent.click(screen.getByText(/옥수로 100/))
     const panel = screen.getByTestId('property-panel')
     expect(panel).toHaveTextContent('진단 리포트')
+  })
+
+  it('공동 중개 검색 후 추가할 수 있다', async () => {
+    const { searchAgencies } = require('@/lib/supabase/agencies')
+    const { addPropertyCoBroker } = require('@/lib/supabase/propertyAgencies')
+    render(<PropertiesPage />)
+    await waitFor(() => screen.getByText(/옥수로 100/))
+    fireEvent.click(screen.getByText(/옥수로 100/))
+
+    fireEvent.change(screen.getByLabelText('공동 중개 부동산 검색'), { target: { value: '경희' } })
+    await waitFor(() => expect(searchAgencies).toHaveBeenCalledWith('경희'))
+    fireEvent.click(await screen.findByRole('button', { name: /경희 추가/ }))
+    await waitFor(() => expect(addPropertyCoBroker).toHaveBeenCalledWith('prop-001', 'agency-001'))
   })
 
   it('마지막 활성 라벨은 해제할 수 없다', async () => {

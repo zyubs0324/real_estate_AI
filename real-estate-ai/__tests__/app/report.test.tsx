@@ -2,7 +2,7 @@
  * U2-6: 진단 리포트 페이지 테스트
  * /report?bdMgtSn=...&admCd=...&roadAddr=...&siNm=...&sggNm=...&emdNm=...
  */
-import { render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 
 // next/navigation 모킹
 const mockSearchParams = new URLSearchParams({
@@ -15,6 +15,37 @@ const mockSearchParams = new URLSearchParams({
   siNm:     '서울특별시',
   sggNm:    '성동구',
   emdNm:    '옥수동',
+})
+
+describe('ReportPage report history', () => {
+  beforeEach(() => {
+    jest.clearAllMocks()
+    fetchMockOpinion = AI_OPINION
+  })
+
+  it('리포트 생성 완료 후 이력을 저장한다', async () => {
+    render(<ReportPage />)
+
+    await waitFor(() =>
+      expect(saveReportHistory).toHaveBeenCalledWith(
+        expect.objectContaining({
+          bd_mgt_sn: '1120010200100010000000000',
+          report_data: expect.objectContaining({
+            aiOpinion: AI_OPINION,
+          }),
+        })
+      )
+    )
+  })
+
+  it('리포트 이력을 클릭하면 저장된 리포트를 재표시한다', async () => {
+    render(<ReportPage />)
+
+    await waitFor(() => expect(screen.getByText('리포트 이력')).toBeInTheDocument())
+    fireEvent.click(screen.getByRole('button', { name: /서울특별시 성동구 과거로 10/ }))
+
+    expect(screen.getByText('저장된 리포트 의견')).toBeInTheDocument()
+  })
 })
 
 jest.mock('next/navigation', () => ({
@@ -65,6 +96,31 @@ jest.mock('@/lib/supabase/diagnostics', () => ({
   saveDiagnostics: jest.fn().mockResolvedValue(undefined),
 }))
 
+jest.mock('@/lib/supabase/reportHistory', () => ({
+  listReportHistory: jest.fn().mockResolvedValue([
+    {
+      id: 'history-1',
+      road_address: '서울특별시 성동구 과거로 10',
+      building_dong: null,
+      unit_number: null,
+      floor_info: null,
+      bd_mgt_sn: 'history-bd',
+      report_data: {
+        building: null,
+        registry: null,
+        vworld: null,
+        deals: [],
+        regs: null,
+        quickCheck: { items: [], checkedAt: '2026-05-20' },
+        aiOpinion: '저장된 리포트 의견',
+      },
+      quick_check_summary: '특이사항 없음',
+      created_at: '2026-05-20T09:00:00.000Z',
+    },
+  ]),
+  saveReportHistory: jest.fn().mockResolvedValue({ id: 'history-new' }),
+}))
+
 // fetch mock — /api/property-data 및 /api/diagnosis/opinion 시뮬레이션
 const AI_OPINION = '이 매물은 근저당이 설정되어 있어 주의가 필요합니다. 본 의견은 참고용이며 법적 효력이 없습니다.'
 let fetchMockOpinion: string | null = AI_OPINION
@@ -97,6 +153,7 @@ jest.mock('@/components/layout/Header', () => {
 })
 
 import ReportPage from '@/app/(app)/report/page'
+import { saveReportHistory } from '@/lib/supabase/reportHistory'
 
 // 모든 섹션은 비동기 로딩 후 표시 → waitFor/findBy 사용
 describe('ReportPage (U2-6)', () => {

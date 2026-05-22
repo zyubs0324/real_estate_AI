@@ -5,9 +5,13 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
+import SearchInput from '@/components/common/SearchInput'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
+import { useDebounce } from '@/lib/hooks/useDebounce'
 import {
   listTransactions, saveTransaction, createDefaultPayments,
   getTransactionMemos, addTransactionMemo, deleteTransactionMemo,
+  updateTransaction, deleteTransaction,
   type TransactionRow, type SaveTransactionPayload, type TransactionMemoRow,
 } from '@/lib/supabase/transactions'
 import { listProperties, type PropertyRow } from '@/lib/supabase/properties'
@@ -45,9 +49,16 @@ const S = {
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)', padding: '20px 24px',
   },
   table: { width: '100%', borderCollapse: 'collapse' as const, fontSize: 13 },
+  tableScroll: {
+    overflow: 'auto' as const,
+    width: '100%',
+    maxHeight: 'calc(100vh - 300px)',
+    scrollbarGutter: 'stable' as const,
+  },
   th: {
+    position: 'sticky' as const, top: 0, zIndex: 2,
     padding: '8px 12px', textAlign: 'left' as const, fontSize: 11,
-    fontWeight: 600, color: 'rgba(0,0,0,0.4)',
+    fontWeight: 600, color: 'rgba(0,0,0,0.4)', background: '#ffffff',
     borderBottom: '1px solid rgba(0,0,0,0.06)', whiteSpace: 'nowrap' as const,
   },
   td: {
@@ -449,10 +460,14 @@ interface TransactionPanelProps {
   row: TransactionRow
   onClose: () => void
   onWarningChange: (id: string) => void
+  onUpdated: () => void
+  onDelete: (row: TransactionRow) => void
 }
 
-function TransactionPanel({ row, onClose, onWarningChange }: TransactionPanelProps) {
+function TransactionPanel({ row, onClose, onWarningChange, onUpdated, onDelete }: TransactionPanelProps) {
   const [memos, setMemos] = useState<TransactionMemoRow[]>([])
+  const [status, setStatus] = useState(row.status)
+  const [saving, setSaving] = useState(false)
 
   const loadMemos = useCallback(async () => {
     try { setMemos(await getTransactionMemos(row.id)) } catch { /* 무시 */ }
@@ -471,6 +486,16 @@ function TransactionPanel({ row, onClose, onWarningChange }: TransactionPanelPro
   async function handleDeleteMemo(memoId: string) {
     await deleteTransactionMemo(memoId)
     await loadMemos()
+  }
+
+  async function handleSaveStatus() {
+    setSaving(true)
+    try {
+      await updateTransaction(row.id, { status })
+      onUpdated()
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -494,7 +519,14 @@ function TransactionPanel({ row, onClose, onWarningChange }: TransactionPanelPro
           </div>
           <div>
             <div style={S.panelLabel}>상태</div>
-            <div style={S.panelValue}>{row.status}</div>
+            <select
+              style={S.formSelect}
+              value={status}
+              onChange={(event) => setStatus(event.target.value)}
+              aria-label="거래 상태"
+            >
+              {STATUS_OPTIONS.map((option) => <option key={option} value={option}>{option}</option>)}
+            </select>
           </div>
           <div>
             <div style={S.panelLabel}>금액</div>
@@ -504,6 +536,14 @@ function TransactionPanel({ row, onClose, onWarningChange }: TransactionPanelPro
             <div style={S.panelLabel}>계약일</div>
             <div style={S.panelValue}>{row.contract_date ?? '—'}</div>
           </div>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 8, marginBottom: 20 }}>
+          <button style={S.saveBtn} disabled={saving} onClick={handleSaveStatus}>
+            {saving ? '저장 중...' : '상태 저장'}
+          </button>
+          <button style={{ ...S.cancelBtn, color: '#ff3b30' }} onClick={() => onDelete(row)}>
+            삭제
+          </button>
         </div>
         <div style={S.panelSection}>
           <div style={S.panelLabel}>메모</div>
@@ -525,6 +565,11 @@ export default function TransactionsPage() {
   const [loading,     setLoading]     = useState(false)
   const [showForm,    setShowForm]    = useState(false)
   const [selectedRow, setSelectedRow] = useState<TransactionRow | null>(null)
+  const [deleting,    setDeleting]    = useState<TransactionRow | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [search,      setSearch]      = useState('')
+  const debouncedSearch = useDebounce(search)
 
   const loadList = useCallback(async () => {
     setLoading(true)
@@ -541,6 +586,42 @@ export default function TransactionsPage() {
 
   useEffect(() => { loadList() }, [loadList])
 
+  const filteredRows = rows.filter((row) => {
+    const q = debouncedSearch.trim().toLowerCase()
+    if (!q) return true
+    return [row.property_road_address, row.status, row.deal_type]
+      .some((value) => value.toLowerCase().includes(q))
+  })
+  const visibleIds = filteredRows.map((row) => row.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAllVisible() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id))
+      else visibleIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    await Promise.all(ids.map((id) => deleteTransaction(id)))
+    setBulkDeleting(false)
+    setSelectedIds(new Set())
+    setSelectedRow((prev) => (prev && ids.includes(prev.id) ? null : prev))
+    await loadList()
+  }
+
   return (
     <>
       <Header title="거래 관리" />
@@ -549,15 +630,28 @@ export default function TransactionsPage() {
         {/* 툴바 */}
         <div style={S.toolbar}>
           <div style={{ fontSize: 15, fontWeight: 700, color: '#1d1d1f' }}>
-            거래 현황 {rows.length > 0 ? `(${rows.length})` : ''}
+            거래 현황 {filteredRows.length > 0 ? `(${filteredRows.length})` : ''}
           </div>
-          <button
-            style={S.addBtn}
-            aria-label="거래 등록"
-            onClick={() => setShowForm(true)}
-          >
-            + 거래 등록
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SearchInput value={search} onChange={setSearch} placeholder="주소, 상태 검색" label="거래 검색" />
+            <button
+              style={S.addBtn}
+              aria-label="거래 등록"
+              onClick={() => setShowForm(true)}
+            >
+              + 거래 등록
+            </button>
+            {selectedIds.size > 0 && (
+              <>
+                <button style={S.cancelBtn} type="button" onClick={() => setSelectedIds(new Set())}>
+                  선택 해제
+                </button>
+                <button style={{ ...S.cancelBtn, color: '#ff3b30' }} type="button" onClick={() => setBulkDeleting(true)}>
+                  선택 {selectedIds.size}개 삭제
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 리스트 */}
@@ -566,27 +660,46 @@ export default function TransactionsPage() {
             <div style={{ ...S.empty, padding: '40px 0' }}>
               <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.4)' }}>불러오는 중…</div>
             </div>
-          ) : rows.length === 0 ? (
+          ) : filteredRows.length === 0 ? (
             <div style={S.empty}>
               <div style={S.emptyIcon}>🤝</div>
               <div style={S.emptyTitle}>등록된 거래가 없습니다</div>
               <div style={S.emptyDesc}>새 거래를 등록하면 납부 단계가 자동으로 생성됩니다.</div>
             </div>
           ) : (
-            <table style={S.table}>
+            <div style={S.tableScroll}>
+            <table style={{ ...S.table, minWidth: 920 }}>
               <thead>
                 <tr>
+                  <th style={{ ...S.th, width: 36, left: 0, zIndex: 3 }}>
+                    <input
+                      aria-label="select-all-transactions"
+                      type="checkbox"
+                      checked={allVisibleSelected}
+                      onChange={toggleAllVisible}
+                    />
+                  </th>
                   <th style={S.th}>매물</th>
                   <th style={S.th}>거래유형</th>
                   <th style={S.th}>상태</th>
                   <th style={S.th}>금액</th>
                   <th style={S.th}>계약일</th>
                   <th style={S.th}>종료일</th>
+                  <th style={S.th}>관리</th>
                 </tr>
               </thead>
               <tbody>
-                {rows.map((r) => (
+                {filteredRows.map((r) => (
                   <tr key={r.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedRow(r)}>
+                    <td style={{ ...S.td, width: 36, position: 'sticky', left: 0, background: '#fff', zIndex: 1 }}>
+                      <input
+                        aria-label={`select-transaction-${r.id}`}
+                        type="checkbox"
+                        checked={selectedIds.has(r.id)}
+                        onClick={(event) => event.stopPropagation()}
+                        onChange={() => toggleSelected(r.id)}
+                      />
+                    </td>
                     <td style={S.td}>
                       {shortAddr(r.property_road_address)}
                       {r.warning && <span style={{ ...S.warningBadge, marginLeft: 6 }}>경고</span>}
@@ -596,12 +709,24 @@ export default function TransactionsPage() {
                       <span style={S.statusBadge(r.status)}>{r.status}</span>
                     </td>
                     <td style={S.td}>{fmtPrice(r.price)}</td>
-                    <td style={S.td}>{r.contract_date ?? '—'}</td>
-                    <td style={S.td}>{r.end_date ?? '—'}</td>
+                    <td style={S.td}>{r.contract_date ?? '-'}</td>
+                    <td style={S.td}>{r.end_date ?? '-'}</td>
+                    <td style={S.td}>
+                      <button
+                        style={S.cancelBtn}
+                        onClick={(event) => {
+                          event.stopPropagation()
+                          setSelectedRow(r)
+                        }}
+                      >
+                        수정
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+            </div>
           )}
         </div>
 
@@ -621,6 +746,11 @@ export default function TransactionsPage() {
         <TransactionPanel
           row={selectedRow}
           onClose={() => setSelectedRow(null)}
+          onUpdated={() => {
+            setSelectedRow(null)
+            loadList()
+          }}
+          onDelete={(row) => setDeleting(row)}
           onWarningChange={(id) => {
             // 목록의 warning 플래그를 낙관적으로 업데이트
             setRows((prev) =>
@@ -629,6 +759,29 @@ export default function TransactionsPage() {
             // selectedRow도 갱신
             setSelectedRow((prev) => prev ? { ...prev, warning: true } : prev)
           }}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="거래를 삭제할까요?"
+          description={`${deleting.property_road_address} 거래가 삭제됩니다.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={async () => {
+            await deleteTransaction(deleting.id)
+            setDeleting(null)
+            setSelectedRow(null)
+            await loadList()
+          }}
+        />
+      )}
+      {bulkDeleting && (
+        <ConfirmDialog
+          title="선택 거래를 삭제할까요?"
+          description={`${selectedIds.size}개 거래가 삭제됩니다.`}
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
         />
       )}
     </>

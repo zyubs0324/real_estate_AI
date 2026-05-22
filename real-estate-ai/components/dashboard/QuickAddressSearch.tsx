@@ -216,12 +216,14 @@ function formatDealPrice(deal: RealPriceDeal): string {
   return formatWon(deal.dealAmount)
 }
 
+const ACTUAL_DONG_RE = new RegExp(`^(?:\\d+|[A-Za-z])\\s*\\uB3D9$`, 'i')
+
 function parseDongNames(detBdNmList: string): string[] {
   return [...new Set(
     detBdNmList
       .split(/[,，、]/)
       .map((name) => name.trim())
-      .filter((name) => name.length > 0 && name.includes('동'))
+      .filter((name) => ACTUAL_DONG_RE.test(name))
   )].sort((a, b) => a.localeCompare(b, 'ko'))
 }
 
@@ -383,12 +385,14 @@ export default function QuickAddressSearch() {
   }
 
   // 현재 선택된 동의 호 목록
+  const actualDongUnits = units.filter((u) => ACTUAL_DONG_RE.test(u.dongNm))
+  const selectableUnits = actualDongUnits.length > 0 ? actualDongUnits : units
   const matchingDongUnits = selectedDong
-    ? units.filter((u) => u.dongNm === selectedDong)
-    : units
+    ? selectableUnits.filter((u) => u.dongNm === selectedDong)
+    : selectableUnits
   const hoList = selectedDong && matchingDongUnits.length > 0
     ? matchingDongUnits
-    : units
+    : selectableUnits
 
   // ── 데이터 조회 ───────────────────────────────────────
   async function fetchData(addr: JusoResult, unit: BuildingUnit | null) {
@@ -539,7 +543,7 @@ export default function QuickAddressSearch() {
 
           {!isLoadingUnits && units.length > 0 && (() => {
             // 동 목록 추출 (빈 문자열 = 단동, 값 있으면 멀티동)
-            const unitDongList = [...new Set(units.map((u) => u.dongNm))].filter(Boolean).sort((a, b) => a.localeCompare(b, 'ko'))
+            const unitDongList = [...new Set(selectableUnits.map((u) => u.dongNm))].filter(Boolean).sort((a, b) => a.localeCompare(b, 'ko'))
             const jusoDongList = selectedAddr ? parseDongNames(selectedAddr.detBdNmList ?? '') : []
             const dongList = unitDongList.length > 0 ? unitDongList : jusoDongList
             const isMultiDong = dongList.length > 1
@@ -548,7 +552,7 @@ export default function QuickAddressSearch() {
             return (
               <div style={{ ...S.sectionCard, marginTop: 10 }}>
                 <div style={S.sectionLabel}>
-                  호 선택 — 건축물대장 기준 ({units.length}개)
+                  호 선택 — 건축물대장 기준 ({selectableUnits.length}개)
                 </div>
 
                 {/* 동 선택/표시 */}

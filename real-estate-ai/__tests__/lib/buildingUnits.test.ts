@@ -2,8 +2,9 @@
  * fetchBuildingUnits — API 응답 파싱 단위 테스트
  *
  * 건축HUB API 실제 필드명:
- *   dongNm = "302"   (숫자만, "동" suffix 없음)
- *   hoNm   = "407호" ("ho" 필드 아님에 주의)
+ *   dongNm          = "302"   (숫자만, "동" suffix 없음)
+ *   hoNm            = "407호" ("ho" 필드 아님에 주의)
+ *   exposPubuseGbCd = "1"(전유부) / "2"(공용부)
  */
 describe('fetchBuildingUnits', () => {
   const originalEnv = process.env
@@ -161,7 +162,7 @@ describe('fetchBuildingUnits', () => {
     expect(units.map((u) => u.ho)).toEqual(['101호', '202호'])
   })
 
-  // ── 정렬: 동 → 층 → 호 ────────────────────────────────────────
+  // ── 정렬: 동 → 층 → 호(숫자) 순 ────────────────────────────────
   it('동 → 층 → 호 순으로 정렬된다', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(
       makeResponse(
@@ -178,5 +179,95 @@ describe('fetchBuildingUnits', () => {
     expect(units[0]).toMatchObject({ dongNm: '101동', flrNo: '1', ho: '101호' })
     expect(units[1]).toMatchObject({ dongNm: '101동', flrNo: '2', ho: '201호' })
     expect(units[2]).toMatchObject({ dongNm: '102동', flrNo: '2', ho: '201호' })
+  })
+
+  // ── 호수 숫자 오름차순: 층 → 호(숫자) 순 ────────────────────────
+  it('층 기준 정렬 후 호수를 숫자 기준으로 오름차순 정렬한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm>101</dongNm><hoNm>1003호</hoNm><flrNo>10</flrNo><area>84.9</area></item>' +
+        '<item><dongNm>101</dongNm><hoNm>101호</hoNm><flrNo>1</flrNo><area>84.9</area></item>' +
+        '<item><dongNm>101</dongNm><hoNm>201호</hoNm><flrNo>2</flrNo><area>84.9</area></item>',
+        3,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11170', bjdongCd: '10700' })
+
+    // 층 기준 먼저: 1층(101호) → 2층(201호) → 10층(1003호)
+    expect(units.map((u) => u.ho)).toEqual(['101호', '201호', '1003호'])
+  })
+
+  // ── 같은 층에서 호수 숫자 오름차순: 101 < 901 < 1001 ─────────────
+  it('같은 층 안에서 101호 → 901호 → 1001호 순으로 정렬한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm>101</dongNm><hoNm>1001호</hoNm><flrNo>10</flrNo><area>84.9</area></item>' +
+        '<item><dongNm>101</dongNm><hoNm>101호</hoNm><flrNo>1</flrNo><area>84.9</area></item>' +
+        '<item><dongNm>101</dongNm><hoNm>901호</hoNm><flrNo>9</flrNo><area>84.9</area></item>',
+        3,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11170', bjdongCd: '10700' })
+
+    // 1층 101호 → 9층 901호 → 10층 1001호
+    expect(units.map((u) => u.ho)).toEqual(['101호', '901호', '1001호'])
+  })
+
+  // ── suffix 없는 순수 숫자 호: 1 → 9 → 10 ────────────────────────
+  it('호수에 "호" suffix가 없어도 1 → 9 → 10 순으로 정렬한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm></dongNm><hoNm>10</hoNm><flrNo>3</flrNo><area>84.9</area></item>' +
+        '<item><dongNm></dongNm><hoNm>1</hoNm><flrNo>1</flrNo><area>84.9</area></item>' +
+        '<item><dongNm></dongNm><hoNm>9</hoNm><flrNo>2</flrNo><area>84.9</area></item>',
+        3,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11200', bjdongCd: '10200' })
+
+    // 층 기준: 1층(1호) → 2층(9호) → 3층(10호)
+    expect(units.map((u) => u.ho)).toEqual(['1', '9', '10'])
+  })
+
+  // ── flrNo가 0이거나 없는 항목(공용부 혼입) 필터링 ─────────────
+  it('flrNo가 0이거나 비어있는 항목(공용부)을 제외한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm>101</dongNm><hoNm>1003호</hoNm><flrNo>0</flrNo><area>2.3</area></item>' +  // 0층 → 제거
+        '<item><dongNm>101</dongNm><hoNm>105호</hoNm><flrNo></flrNo><area>32.5</area></item>' +    // 층 없음 → 제거
+        '<item><dongNm>101</dongNm><hoNm>101호</hoNm><flrNo>1</flrNo><area>84.9</area></item>',   // 정상
+        3,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11170', bjdongCd: '10700' })
+
+    expect(units).toHaveLength(1)
+    expect(units[0].ho).toBe('101호')
+  })
+
+  // ── exposPubuseGbCd='2'(공용부) 항목 필터링 ────────────────────
+  it('exposPubuseGbCd가 2인 공용부 항목을 제외한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm>101</dongNm><hoNm>공용부</hoNm><flrNo>1</flrNo><area>12.5</area><exposPubuseGbCd>2</exposPubuseGbCd></item>' +
+        '<item><dongNm>101</dongNm><hoNm>101호</hoNm><flrNo>1</flrNo><area>84.9</area><exposPubuseGbCd>1</exposPubuseGbCd></item>' +
+        '<item><dongNm>101</dongNm><hoNm>102호</hoNm><flrNo>1</flrNo><area>59.8</area><exposPubuseGbCd>1</exposPubuseGbCd></item>',
+        3,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11170', bjdongCd: '10700' })
+
+    expect(units).toHaveLength(2)
+    expect(units.map((u) => u.ho)).toEqual(['101호', '102호'])
   })
 })

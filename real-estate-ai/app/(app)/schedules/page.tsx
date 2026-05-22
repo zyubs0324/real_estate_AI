@@ -5,7 +5,10 @@
 
 import { useCallback, useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
-import { listSchedules, saveSchedule, type ScheduleRow, type SaveSchedulePayload } from '@/lib/supabase/schedules'
+import SearchInput from '@/components/common/SearchInput'
+import ConfirmDialog from '@/components/common/ConfirmDialog'
+import { useDebounce } from '@/lib/hooks/useDebounce'
+import { deleteSchedule, listSchedules, saveSchedule, updateSchedule, type ScheduleRow, type SaveSchedulePayload } from '@/lib/supabase/schedules'
 
 // ─── 상수 ─────────────────────────────────────────────────
 const SCHEDULE_TYPES = ['계약', '잔금', '현장미팅', '서류', '기타']
@@ -36,6 +39,12 @@ const S = {
   card: {
     background: '#ffffff', borderRadius: 12,
     boxShadow: '0 1px 4px rgba(0,0,0,0.06)', padding: '20px 24px',
+  },
+  listScroll: {
+    overflow: 'auto' as const,
+    width: '100%',
+    maxHeight: 'calc(100vh - 300px)',
+    scrollbarGutter: 'stable' as const,
   },
   empty: {
     display: 'flex' as const, flexDirection: 'column' as const,
@@ -145,15 +154,22 @@ function dDay(iso: string): string {
 
 // ─── 일정 등록 폼 ─────────────────────────────────────────
 interface ScheduleFormProps {
+  editData?: ScheduleRow
   onClose: () => void
   onSaved: () => void
 }
 
-function ScheduleForm({ onClose, onSaved }: ScheduleFormProps) {
-  const [title,  setTitle]  = useState('')
-  const [type,   setType]   = useState('계약')
-  const [dueDate,setDueDate]= useState('')
-  const [memo,   setMemo]   = useState('')
+function toDatetimeLocal(iso: string): string {
+  const d = new Date(iso)
+  const offset = d.getTimezoneOffset() * 60000
+  return new Date(d.getTime() - offset).toISOString().slice(0, 16)
+}
+
+function ScheduleForm({ editData, onClose, onSaved }: ScheduleFormProps) {
+  const [title,  setTitle]  = useState(editData?.title ?? '')
+  const [type,   setType]   = useState(editData?.schedule_type ?? '계약')
+  const [dueDate,setDueDate]= useState(editData ? toDatetimeLocal(editData.due_date) : '')
+  const [memo,   setMemo]   = useState(editData?.memo ?? '')
   const [saving, setSaving] = useState(false)
   const [error,  setError]  = useState('')
 
@@ -168,7 +184,8 @@ function ScheduleForm({ onClose, onSaved }: ScheduleFormProps) {
         due_date:      new Date(dueDate).toISOString(),
         memo:          memo.trim() || undefined,
       }
-      await saveSchedule(payload)
+      if (editData) await updateSchedule(editData.id, payload)
+      else await saveSchedule(payload)
       onSaved()
     } catch {
       setError('저장에 실패했습니다. 다시 시도해 주세요.')
@@ -180,7 +197,7 @@ function ScheduleForm({ onClose, onSaved }: ScheduleFormProps) {
   return (
     <div style={S.overlay}>
       <div style={S.modal} data-testid="schedule-form">
-        <div style={S.modalTitle}>일정 등록</div>
+        <div style={S.modalTitle}>{editData ? '일정 수정' : '일정 등록'}</div>
 
         {/* 제목 */}
         <div style={S.formField}>
@@ -266,6 +283,12 @@ export default function SchedulesPage() {
   const [rows,    setRows]    = useState<ScheduleRow[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm,setShowForm]= useState(false)
+  const [editing, setEditing] = useState<ScheduleRow | null>(null)
+  const [deleting,setDeleting]= useState<ScheduleRow | null>(null)
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
+  const [bulkDeleting, setBulkDeleting] = useState(false)
+  const [search,  setSearch]  = useState('')
+  const debouncedSearch = useDebounce(search)
 
   const reload = useCallback(async () => {
     setLoading(true)
@@ -275,6 +298,42 @@ export default function SchedulesPage() {
   useEffect(() => { reload() }, [reload])
 
   function handleSaved() { setShowForm(false); reload() }
+  function handleEditSaved() { setEditing(null); reload() }
+
+  const filteredRows = rows.filter((row) => {
+    const q = debouncedSearch.trim().toLowerCase()
+    if (!q) return true
+    return [row.title, row.memo ?? '', row.schedule_type]
+      .some((value) => value.toLowerCase().includes(q))
+  })
+  const visibleIds = filteredRows.map((row) => row.id)
+  const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
+
+  function toggleSelected(id: string) {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (next.has(id)) next.delete(id)
+      else next.add(id)
+      return next
+    })
+  }
+
+  function toggleAllVisible() {
+    setSelectedIds((prev) => {
+      const next = new Set(prev)
+      if (allVisibleSelected) visibleIds.forEach((id) => next.delete(id))
+      else visibleIds.forEach((id) => next.add(id))
+      return next
+    })
+  }
+
+  async function handleBulkDelete() {
+    const ids = Array.from(selectedIds)
+    await Promise.all(ids.map((id) => deleteSchedule(id)))
+    setBulkDeleting(false)
+    setSelectedIds(new Set())
+    await reload()
+  }
 
   return (
     <>
@@ -283,20 +342,43 @@ export default function SchedulesPage() {
         {/* 툴바 */}
         <div style={S.toolbar}>
           <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.4)' }}>
-            총 {rows.length}건
+            총 {filteredRows.length}건
           </div>
-          <button style={S.addBtn} onClick={() => setShowForm(true)}>
-            + 일정 등록
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <SearchInput value={search} onChange={setSearch} placeholder="제목, 메모 검색" label="일정 검색" />
+            <button style={S.addBtn} onClick={() => setShowForm(true)}>
+              + 일정 등록
+            </button>
+            {selectedIds.size > 0 && (
+              <>
+                <button style={S.cancelBtn} type="button" onClick={() => setSelectedIds(new Set())}>선택 해제</button>
+                <button style={{ ...S.cancelBtn, color: '#ff3b30' }} type="button" onClick={() => setBulkDeleting(true)}>
+                  선택 {selectedIds.size}개 삭제
+                </button>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 일정 카드 리스트 */}
+        {filteredRows.length > 0 && (
+          <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#636366', marginBottom: 10 }}>
+            <input
+              aria-label="select-all-schedules"
+              type="checkbox"
+              checked={allVisibleSelected}
+              onChange={toggleAllVisible}
+            />
+            현재 목록 전체 선택
+          </label>
+        )}
+
         <div style={S.card}>
           {loading ? (
             <div style={S.empty}>
               <div style={{ fontSize: 13, color: 'rgba(0,0,0,0.4)' }}>로딩 중…</div>
             </div>
-          ) : rows.length === 0 ? (
+          ) : filteredRows.length === 0 ? (
             <div style={S.empty}>
               <span style={S.emptyIcon}>📅</span>
               <span style={S.emptyTitle}>등록된 일정이 없습니다</span>
@@ -306,9 +388,17 @@ export default function SchedulesPage() {
               </span>
             </div>
           ) : (
+            <div style={S.listScroll}>
             <div style={S.schedList}>
-              {rows.map((row) => (
+              {filteredRows.map((row) => (
                 <div key={row.id} style={S.schedCard(row.is_done)}>
+                  <input
+                    aria-label={`select-schedule-${row.id}`}
+                    type="checkbox"
+                    checked={selectedIds.has(row.id)}
+                    onClick={(event) => event.stopPropagation()}
+                    onChange={() => toggleSelected(row.id)}
+                  />
                   <div style={S.typeDot(row.schedule_type)} />
                   <div style={{ flex: 1 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
@@ -326,8 +416,13 @@ export default function SchedulesPage() {
                       {row.memo && ` · ${row.memo}`}
                     </div>
                   </div>
+                  <div style={{ display: 'flex', gap: 6 }}>
+                    <button style={S.cancelBtn} onClick={() => setEditing(row)}>수정</button>
+                    <button style={{ ...S.cancelBtn, color: '#ff3b30' }} onClick={() => setDeleting(row)}>삭제</button>
+                  </div>
                 </div>
               ))}
+            </div>
             </div>
           )}
         </div>
@@ -337,6 +432,35 @@ export default function SchedulesPage() {
         <ScheduleForm
           onClose={() => setShowForm(false)}
           onSaved={handleSaved}
+        />
+      )}
+      {editing && (
+        <ScheduleForm
+          editData={editing}
+          onClose={() => setEditing(null)}
+          onSaved={handleEditSaved}
+        />
+      )}
+      {deleting && (
+        <ConfirmDialog
+          title="일정을 삭제할까요?"
+          description={`${deleting.title} 일정이 삭제됩니다.`}
+          onCancel={() => setDeleting(null)}
+          onConfirm={async () => {
+            await deleteSchedule(deleting.id)
+            setDeleting(null)
+            await reload()
+          }}
+        />
+      )}
+      {bulkDeleting && (
+        <ConfirmDialog
+          title="선택 일정을 삭제할까요?"
+          description={`${selectedIds.size}개 일정이 삭제됩니다.`}
+          confirmLabel="삭제"
+          cancelLabel="취소"
+          onCancel={() => setBulkDeleting(false)}
+          onConfirm={handleBulkDelete}
         />
       )}
     </>

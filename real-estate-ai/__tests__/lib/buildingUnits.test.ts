@@ -162,6 +162,38 @@ describe('fetchBuildingUnits', () => {
     expect(units.map((u) => u.ho)).toEqual(['101호', '202호'])
   })
 
+  it('50페이지를 넘는 대단지 전유부 목록도 끝까지 수집한다', async () => {
+    global.fetch = jest.fn(async (input: RequestInfo | URL) => {
+      const url = new URL(String(input))
+      const pageNo = Number(url.searchParams.get('pageNo') ?? '1')
+      const item = pageNo === 52
+        ? '<item><dongNm>4</dongNm><hoNm>101</hoNm><flrNo>1</flrNo><area>142.26</area><exposPubuseGbCd>1</exposPubuseGbCd></item>'
+        : `<item><dongNm>4</dongNm><hoNm>${1000 + pageNo}</hoNm><flrNo>10</flrNo><area>142.26</area><exposPubuseGbCd>1</exposPubuseGbCd></item>`
+
+      return {
+        ok: true,
+        text: async () => `
+          <response>
+            <body>
+              <items>${item}</items>
+              <numOfRows>100</numOfRows>
+              <pageNo>${pageNo}</pageNo>
+              <totalCount>5200</totalCount>
+            </body>
+          </response>
+        `,
+      } as Response
+    })
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11200', bjdongCd: '11300', bun: '0428', ji: '0000' })
+
+    expect(global.fetch).toHaveBeenCalledTimes(52)
+    expect(units).toEqual(expect.arrayContaining([
+      expect.objectContaining({ dongNm: '4동', flrNo: '1', ho: '101' }),
+    ]))
+  })
+
   // ── 정렬: 동 → 층 → 호(숫자) 순 ────────────────────────────────
   it('동 → 층 → 호 순으로 정렬된다', async () => {
     global.fetch = jest.fn().mockResolvedValueOnce(
@@ -269,5 +301,21 @@ describe('fetchBuildingUnits', () => {
 
     expect(units).toHaveLength(2)
     expect(units.map((u) => u.ho)).toEqual(['101호', '102호'])
+  })
+  it('같은 동호수에 지하와 지상 전유부가 함께 있으면 지상 주 전유부를 선택한다', async () => {
+    global.fetch = jest.fn().mockResolvedValueOnce(
+      makeResponse(
+        '<item><dongNm>가동</dongNm><hoNm>305</hoNm><flrNo>1</flrNo><flrGbCd>10</flrGbCd><area>36</area><exposPubuseGbCd>1</exposPubuseGbCd></item>' +
+        '<item><dongNm>가동</dongNm><hoNm>305</hoNm><flrNo>3</flrNo><flrGbCd>20</flrGbCd><area>128.62</area><exposPubuseGbCd>1</exposPubuseGbCd></item>',
+        2,
+      ),
+    )
+
+    const { fetchBuildingUnits } = await import('@/lib/apis/building')
+    const units = await fetchBuildingUnits({ sigunguCd: '11200', bjdongCd: '11300', bun: '0466', ji: '0000' })
+
+    expect(units).toEqual([
+      { dongNm: '가동', ho: '305', flrNo: '3', area: 128.62 },
+    ])
   })
 })

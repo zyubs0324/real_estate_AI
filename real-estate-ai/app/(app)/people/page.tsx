@@ -8,12 +8,15 @@ import { useRouter } from 'next/navigation'
 import Header from '@/components/layout/Header'
 import SearchInput from '@/components/common/SearchInput'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
+import SortableHeader from '@/components/common/SortableHeader'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { compareDate, compareNumber, compareText, type SortState } from '@/lib/table/sort'
 import { deletePerson, listPeople, savePerson, searchPeopleByName, searchPeopleByPhone, updatePerson, type PersonRow, type SavePersonPayload } from '@/lib/supabase/people'
 
 // ─── 상수 ─────────────────────────────────────────────────
 const ROLES = ['없음', '매도인', '매수인', '임차인', '임대인', '복합']
 const CARRIERS = ['SKT', 'KT', 'LGU', '직접입력']
+type PeopleSortKey = 'name' | 'role' | 'phone' | 'carrier' | 'owned' | 'handling' | 'created'
 
 // ─── 스타일 ────────────────────────────────────────────────
 const S = {
@@ -524,6 +527,7 @@ export default function PeoplePage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [search,   setSearch]   = useState('')
+  const [sort, setSort] = useState<SortState<PeopleSortKey>>({ key: 'created', direction: 'desc' })
   const debouncedSearch = useDebounce(search)
 
   const loadList = useCallback(async () => {
@@ -551,7 +555,18 @@ export default function PeoplePage() {
       person.carrier_note ?? '',
     ].some((value) => value.toLowerCase().includes(q))
   })
-  const visibleIds = filteredPeople.map((person) => person.id)
+  const sortedPeople = [...filteredPeople].sort((a, b) => {
+    switch (sort.key) {
+      case 'name': return compareText(a.name, b.name, sort.direction)
+      case 'role': return compareText(a.role, b.role, sort.direction)
+      case 'phone': return compareText(a.phone, b.phone, sort.direction)
+      case 'carrier': return compareText(a.carrier || a.carrier_note, b.carrier || b.carrier_note, sort.direction)
+      case 'owned': return compareNumber(a.owned_property_count, b.owned_property_count, sort.direction)
+      case 'handling': return compareNumber(a.handling_property_count, b.handling_property_count, sort.direction)
+      case 'created': return compareDate(a.created_at, b.created_at, sort.direction)
+    }
+  })
+  const visibleIds = sortedPeople.map((person) => person.id)
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
 
   function toggleSelected(id: string) {
@@ -643,18 +658,18 @@ export default function PeoplePage() {
                       onChange={toggleAllVisible}
                     />
                   </th>
-                  <th style={S.th}>이름</th>
-                  <th style={S.th}>역할</th>
-                  <th style={S.th}>연락처</th>
-                  <th style={S.th}>통신사</th>
-                  <th style={S.th}>소유매물</th>
-                  <th style={S.th}>핸들링</th>
-                  <th style={S.th}>등록일</th>
+                  <SortableHeader style={S.th} label="이름" sortKey="name" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="역할" sortKey="role" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="연락처" sortKey="phone" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="통신사" sortKey="carrier" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="소유매물" sortKey="owned" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="핸들링" sortKey="handling" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="등록일" sortKey="created" sort={sort} onSort={setSort} />
                   <th style={S.th}>관리</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredPeople.map((p) => (
+                {sortedPeople.map((p) => (
                   <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => router.push(`/people/${p.id}`)}>
                     <td style={{ ...S.td, width: 36, position: 'sticky', left: 0, background: '#fff', zIndex: 1 }}>
                       <input

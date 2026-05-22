@@ -8,10 +8,12 @@ import Header from '@/components/layout/Header'
 import SearchInput from '@/components/common/SearchInput'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { compareDate, compareText, nextSortState, type SortState } from '@/lib/table/sort'
 import { deleteSchedule, listSchedules, saveSchedule, updateSchedule, type ScheduleRow, type SaveSchedulePayload } from '@/lib/supabase/schedules'
 
 // ─── 상수 ─────────────────────────────────────────────────
 const SCHEDULE_TYPES = ['계약', '잔금', '현장미팅', '서류', '기타']
+type ScheduleSortKey = 'dueDate' | 'title' | 'type' | 'done'
 
 const TYPE_COLOR: Record<string, string> = {
   '계약':    '#0071e3',
@@ -288,6 +290,7 @@ export default function SchedulesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [search,  setSearch]  = useState('')
+  const [sort, setSort] = useState<SortState<ScheduleSortKey>>({ key: 'dueDate', direction: 'asc' })
   const debouncedSearch = useDebounce(search)
 
   const reload = useCallback(async () => {
@@ -306,7 +309,15 @@ export default function SchedulesPage() {
     return [row.title, row.memo ?? '', row.schedule_type]
       .some((value) => value.toLowerCase().includes(q))
   })
-  const visibleIds = filteredRows.map((row) => row.id)
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    switch (sort.key) {
+      case 'dueDate': return compareDate(a.due_date, b.due_date, sort.direction)
+      case 'title': return compareText(a.title, b.title, sort.direction)
+      case 'type': return compareText(a.schedule_type, b.schedule_type, sort.direction)
+      case 'done': return compareText(a.is_done ? '1' : '0', b.is_done ? '1' : '0', sort.direction)
+    }
+  })
+  const visibleIds = sortedRows.map((row) => row.id)
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
 
   function toggleSelected(id: string) {
@@ -362,6 +373,38 @@ export default function SchedulesPage() {
 
         {/* 일정 카드 리스트 */}
         {filteredRows.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {[
+              ['dueDate', '일정일'],
+              ['title', '제목'],
+              ['type', '유형'],
+              ['done', '완료'],
+            ].map(([key, label]) => {
+              const active = sort.key === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSort(nextSortState(sort, key as ScheduleSortKey))}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    border: `1px solid ${active ? '#0071e3' : 'rgba(0,0,0,0.12)'}`,
+                    background: active ? 'rgba(0,113,227,0.08)' : '#ffffff',
+                    color: active ? '#0071e3' : '#636366',
+                    fontSize: 12,
+                    fontWeight: active ? 700 : 600,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {label} {active ? (sort.direction === 'asc' ? '▲' : '▼') : '↕'}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {filteredRows.length > 0 && (
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#636366', marginBottom: 10 }}>
             <input
               aria-label="select-all-schedules"
@@ -390,7 +433,7 @@ export default function SchedulesPage() {
           ) : (
             <div style={S.listScroll}>
             <div style={S.schedList}>
-              {filteredRows.map((row) => (
+              {sortedRows.map((row) => (
                 <div key={row.id} style={S.schedCard(row.is_done)}>
                   <input
                     aria-label={`select-schedule-${row.id}`}

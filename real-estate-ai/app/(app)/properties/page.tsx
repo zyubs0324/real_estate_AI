@@ -11,6 +11,7 @@ import Header from '@/components/layout/Header'
 import AddressSearch from '@/components/address/AddressSearch'
 import SearchInput from '@/components/common/SearchInput'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
+import SortableHeader from '@/components/common/SortableHeader'
 import type { JusoResult } from '@/lib/apis/juso'
 import { fetchBuilding, fetchBuildingUnits, buildingQueryFromJuso, type BuildingUnit } from '@/lib/apis/building'
 import { saveProperty, listProperties, updateProperty, deleteProperty, updatePropertyLabels, getPropertyMemos, addPropertyMemo, deletePropertyMemo, type PropertyRow, type SavePropertyPayload, type PropertyMemoRow } from '@/lib/supabase/properties'
@@ -23,6 +24,7 @@ import { useDebounce } from '@/lib/hooks/useDebounce'
 import MemoSection, { type MemoSavePayload } from '@/components/common/MemoSection'
 import { isRegisteredDateInRange, normalizeRegisteredDate, registeredDateInputValue } from '@/lib/property/dateNormalizer'
 import { findDuplicatePropertyIds } from '@/lib/property/propertyDuplicate'
+import { compareDate, compareNumber, compareText, parseKoreanPrice, parseNumberText, type SortState } from '@/lib/table/sort'
 
 // ─── 타입 ─────────────────────────────────────────────────
 type TabKey = 'all' | 'ours' | 'interest' | 'focus' | 'exclusive' | 'strategic'
@@ -31,6 +33,27 @@ interface Tab {
   key: TabKey
   label: string
 }
+
+type PropertySortKey =
+  | 'registeredDate'
+  | 'handling'
+  | 'address'
+  | 'category'
+  | 'alias'
+  | 'dong'
+  | 'unit'
+  | 'adLevel'
+  | 'dealType'
+  | 'price'
+  | 'area'
+  | 'owner'
+  | 'phone'
+  | 'carrier'
+  | 'hanjari'
+  | 'deohill'
+  | 'moveIn'
+  | 'direction'
+  | 'maintenance'
 
 // ─── 상수 ─────────────────────────────────────────────────
 const TABS: Tab[] = [
@@ -1177,6 +1200,7 @@ function PropertiesPageInner() {
   const [urlProperty,  setUrlProperty]  = useState<ParsedUrlProperty | null>(null)
   const [sheetSyncing, setSheetSyncing] = useState(false)
   const [sheetMessage, setSheetMessage] = useState('')
+  const [sort, setSort] = useState<SortState<PropertySortKey>>({ key: 'registeredDate', direction: 'desc' })
   const debouncedSearch = useDebounce(search)
   const prefillApplied = useRef(false)
 
@@ -1381,7 +1405,30 @@ function PropertiesPageInner() {
       row.status,
     ].some((value) => value.toLowerCase().includes(q))
   })
-  const visibleIds = filteredRows.map((row) => row.id)
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    switch (sort.key) {
+      case 'registeredDate': return compareDate(normalizeRegisteredDate(a.registered_date) || a.created_at, normalizeRegisteredDate(b.registered_date) || b.created_at, sort.direction)
+      case 'handling': return compareText(a.handling_name, b.handling_name, sort.direction)
+      case 'address': return compareText(a.neighborhood || shortAddr(a.road_address), b.neighborhood || shortAddr(b.road_address), sort.direction)
+      case 'category': return compareText(a.category, b.category, sort.direction)
+      case 'alias': return compareText(a.alias, b.alias, sort.direction)
+      case 'dong': return compareText(a.building_dong, b.building_dong, sort.direction)
+      case 'unit': return compareText(a.unit_number, b.unit_number, sort.direction)
+      case 'adLevel': return compareText(a.ad_level, b.ad_level, sort.direction)
+      case 'dealType': return compareText(a.deal_type, b.deal_type, sort.direction)
+      case 'price': return compareNumber(parseKoreanPrice(a.price_text), parseKoreanPrice(b.price_text), sort.direction)
+      case 'area': return compareNumber(parseNumberText(a.area_text), parseNumberText(b.area_text), sort.direction)
+      case 'owner': return compareText(ownerNames(a), ownerNames(b), sort.direction)
+      case 'phone': return compareText(ownerPhones(a), ownerPhones(b), sort.direction)
+      case 'carrier': return compareText(ownerCarriers(a), ownerCarriers(b), sort.direction)
+      case 'hanjari': return compareText(a.hanjari_date, b.hanjari_date, sort.direction)
+      case 'deohill': return compareText(a.deohill_date, b.deohill_date, sort.direction)
+      case 'moveIn': return compareText(a.move_in_date, b.move_in_date, sort.direction)
+      case 'direction': return compareText(a.direction, b.direction, sort.direction)
+      case 'maintenance': return compareNumber(parseKoreanPrice(a.maintenance_fee), parseKoreanPrice(b.maintenance_fee), sort.direction)
+    }
+  })
+  const visibleIds = sortedRows.map((row) => row.id)
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
   const hasActiveFilters = Boolean(search.trim() || dealType || registeredDateFrom || registeredDateTo || duplicateOnly || activeTab !== 'all')
   const filterSummary = [
@@ -1606,25 +1653,25 @@ function PropertiesPageInner() {
                       onChange={toggleAllVisible}
                     />
                   </th>
-                  <th style={S.th}>등록일</th>
-                  <th style={S.th}>핸들링</th>
-                  <th style={S.th}>대표주소</th>
-                  <th style={S.th}>카테고리</th>
-                  <th style={S.th}>별칭</th>
-                  <th style={S.th}>동</th>
-                  <th style={S.th}>호수</th>
-                  <th style={S.th}>랜덤광고</th>
-                  <th style={S.th}>종류</th>
-                  <th style={S.th}>가격</th>
-                  <th style={S.th}>면적</th>
-                  <th style={S.th}>소유자</th>
-                  <th style={S.th}>연락처</th>
-                  <th style={S.th}>통신사</th>
-                  <th style={S.th}>한자리</th>
-                  <th style={S.th}>더힐</th>
-                  <th style={S.th}>입주시기</th>
-                  <th style={S.th}>방향</th>
-                  <th style={S.th}>관리비</th>
+                  <SortableHeader style={S.th} label="등록일" sortKey="registeredDate" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="핸들링" sortKey="handling" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="대표주소" sortKey="address" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="카테고리" sortKey="category" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="별칭" sortKey="alias" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="동" sortKey="dong" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="호수" sortKey="unit" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="랜덤광고" sortKey="adLevel" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="종류" sortKey="dealType" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="가격" sortKey="price" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="면적" sortKey="area" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="소유자" sortKey="owner" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="연락처" sortKey="phone" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="통신사" sortKey="carrier" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="한자리" sortKey="hanjari" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="더힐" sortKey="deohill" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="입주시기" sortKey="moveIn" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="방향" sortKey="direction" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="관리비" sortKey="maintenance" sort={sort} onSort={setSort} />
                   <th style={S.th}>기타사항</th>
                 </tr>
               </thead>
@@ -1647,7 +1694,7 @@ function PropertiesPageInner() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRows.map((r) => (
+                {sortedRows.map((r) => (
                   <PropertyTableRow
                     key={r.id}
                     row={r}

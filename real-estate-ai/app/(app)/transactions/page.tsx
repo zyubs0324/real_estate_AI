@@ -7,7 +7,9 @@ import { useCallback, useEffect, useState } from 'react'
 import Header from '@/components/layout/Header'
 import SearchInput from '@/components/common/SearchInput'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
+import SortableHeader from '@/components/common/SortableHeader'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { compareDate, compareNumber, compareText, type SortState } from '@/lib/table/sort'
 import {
   listTransactions, saveTransaction, createDefaultPayments,
   getTransactionMemos, addTransactionMemo, deleteTransactionMemo,
@@ -20,6 +22,7 @@ import MemoSection, { type MemoSavePayload } from '@/components/common/MemoSecti
 // ─── 상수 ─────────────────────────────────────────────────
 const DEAL_TYPES    = ['매매', '전세', '월세', '단기임대']
 const STATUS_OPTIONS = ['상담', '계약진행', '계약완료', '잔금완료', '취소']
+type TransactionSortKey = 'property' | 'dealType' | 'status' | 'price' | 'contractDate' | 'endDate'
 
 const STATUS_COLOR: Record<string, string> = {
   '상담':     '#636366',
@@ -569,6 +572,7 @@ export default function TransactionsPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [search,      setSearch]      = useState('')
+  const [sort, setSort] = useState<SortState<TransactionSortKey>>({ key: 'contractDate', direction: 'desc' })
   const debouncedSearch = useDebounce(search)
 
   const loadList = useCallback(async () => {
@@ -592,7 +596,17 @@ export default function TransactionsPage() {
     return [row.property_road_address, row.status, row.deal_type]
       .some((value) => value.toLowerCase().includes(q))
   })
-  const visibleIds = filteredRows.map((row) => row.id)
+  const sortedRows = [...filteredRows].sort((a, b) => {
+    switch (sort.key) {
+      case 'property': return compareText(a.property_road_address, b.property_road_address, sort.direction)
+      case 'dealType': return compareText(a.deal_type, b.deal_type, sort.direction)
+      case 'status': return compareText(a.status, b.status, sort.direction)
+      case 'price': return compareNumber(a.price, b.price, sort.direction)
+      case 'contractDate': return compareDate(a.contract_date, b.contract_date, sort.direction)
+      case 'endDate': return compareDate(a.end_date, b.end_date, sort.direction)
+    }
+  })
+  const visibleIds = sortedRows.map((row) => row.id)
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
 
   function toggleSelected(id: string) {
@@ -679,17 +693,17 @@ export default function TransactionsPage() {
                       onChange={toggleAllVisible}
                     />
                   </th>
-                  <th style={S.th}>매물</th>
-                  <th style={S.th}>거래유형</th>
-                  <th style={S.th}>상태</th>
-                  <th style={S.th}>금액</th>
-                  <th style={S.th}>계약일</th>
-                  <th style={S.th}>종료일</th>
+                  <SortableHeader style={S.th} label="매물" sortKey="property" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="거래유형" sortKey="dealType" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="상태" sortKey="status" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="금액" sortKey="price" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="계약일" sortKey="contractDate" sort={sort} onSort={setSort} />
+                  <SortableHeader style={S.th} label="종료일" sortKey="endDate" sort={sort} onSort={setSort} />
                   <th style={S.th}>관리</th>
                 </tr>
               </thead>
               <tbody>
-                {filteredRows.map((r) => (
+                {sortedRows.map((r) => (
                   <tr key={r.id} style={{ cursor: 'pointer' }} onClick={() => setSelectedRow(r)}>
                     <td style={{ ...S.td, width: 36, position: 'sticky', left: 0, background: '#fff', zIndex: 1 }}>
                       <input

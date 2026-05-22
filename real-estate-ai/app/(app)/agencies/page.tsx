@@ -9,6 +9,7 @@ import Header from '@/components/layout/Header'
 import SearchInput from '@/components/common/SearchInput'
 import ConfirmDialog from '@/components/common/ConfirmDialog'
 import { useDebounce } from '@/lib/hooks/useDebounce'
+import { compareNumber, compareText, nextSortState, type SortState } from '@/lib/table/sort'
 import {
   deleteAgency,
   listAgencies,
@@ -18,6 +19,8 @@ import {
   type SaveAgencyPayload,
 } from '@/lib/supabase/agencies'
 import { searchAgency } from '@/lib/apis/agency'
+
+type AgencySortKey = 'name' | 'representative' | 'phone' | 'address' | 'license' | 'trust' | 'handling' | 'coBroker'
 
 // ─── 스타일 ────────────────────────────────────────────────
 const S = {
@@ -436,6 +439,7 @@ export default function AgenciesPage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set())
   const [bulkDeleting, setBulkDeleting] = useState(false)
   const [search,     setSearch]     = useState('')
+  const [sort, setSort] = useState<SortState<AgencySortKey>>({ key: 'name', direction: 'asc' })
   const debouncedSearch = useDebounce(search)
 
   const load = useCallback(async () => {
@@ -467,7 +471,19 @@ export default function AgenciesPage() {
       agency.alias ?? '',
     ].some((value) => value.toLowerCase().includes(q))
   })
-  const visibleIds = filteredAgencies.map((agency) => agency.id)
+  const sortedAgencies = [...filteredAgencies].sort((a, b) => {
+    switch (sort.key) {
+      case 'name': return compareText(a.name, b.name, sort.direction)
+      case 'representative': return compareText(a.representative, b.representative, sort.direction)
+      case 'phone': return compareText(a.phone, b.phone, sort.direction)
+      case 'address': return compareText(a.address, b.address, sort.direction)
+      case 'license': return compareText(a.license_no, b.license_no, sort.direction)
+      case 'trust': return compareText(a.trust_level, b.trust_level, sort.direction)
+      case 'handling': return compareNumber(a.handling_count, b.handling_count, sort.direction)
+      case 'coBroker': return compareNumber(a.co_broker_count, b.co_broker_count, sort.direction)
+    }
+  })
+  const visibleIds = sortedAgencies.map((agency) => agency.id)
   const allVisibleSelected = visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id))
 
   function toggleSelected(id: string) {
@@ -512,6 +528,42 @@ export default function AgenciesPage() {
 
         {/* 목록 */}
         {filteredAgencies.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: 10 }}>
+            {[
+              ['name', '상호명'],
+              ['representative', '대표자'],
+              ['phone', '전화번호'],
+              ['address', '주소'],
+              ['license', '등록번호'],
+              ['trust', '신뢰등급'],
+              ['handling', '핸들링'],
+              ['coBroker', '공동중개'],
+            ].map(([key, label]) => {
+              const active = sort.key === key
+              return (
+                <button
+                  key={key}
+                  type="button"
+                  onClick={() => setSort(nextSortState(sort, key as AgencySortKey))}
+                  style={{
+                    padding: '6px 10px',
+                    borderRadius: 8,
+                    border: `1px solid ${active ? '#0071e3' : 'rgba(0,0,0,0.12)'}`,
+                    background: active ? 'rgba(0,113,227,0.08)' : '#ffffff',
+                    color: active ? '#0071e3' : '#636366',
+                    fontSize: 12,
+                    fontWeight: active ? 700 : 600,
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  {label} {active ? (sort.direction === 'asc' ? '▲' : '▼') : '↕'}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {filteredAgencies.length > 0 && (
           <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, fontSize: 12, color: '#636366', marginBottom: 10 }}>
             <input
               aria-label="select-all-agencies"
@@ -542,7 +594,7 @@ export default function AgenciesPage() {
           </div>
         ) : (
           <div style={S.listScroll}>
-          {filteredAgencies.map((ag) => (
+          {sortedAgencies.map((ag) => (
             <div
               key={ag.id}
               style={S.agencyCard}

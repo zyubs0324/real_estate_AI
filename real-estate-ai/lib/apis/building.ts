@@ -116,7 +116,9 @@ async function fetchXmlItemsPaged(
   const all: Record<string, unknown>[] = []
   let pageNo = 1
   const numOfRows = Number(params.get('numOfRows') ?? 1000)
-  const maxPages = 50
+  // Some Building HUB endpoints cap each response at 100 rows even when
+  // numOfRows=1000 is requested. Large apartment complexes can exceed 50 pages.
+  const maxPages = 300
 
   while (pageNo <= maxPages) {
     params.set('pageNo', String(pageNo))
@@ -211,9 +213,8 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
     list = await fetchXmlItemsPaged('getBrExposPubuseAreaInfo', apiKey, makeParams(query.bjdongCdFallback))
   }
 
-  // dongNm + ho 조합으로 중복 제거 (동이 다르면 같은 호 번호여도 별개)
-  const seen = new Set<string>()
-  return list
+  const unitsByKey = new Map<string, BuildingUnit & { flrGbCd: string; exposGb: string }>()
+  list
     .map((it) => {
       const row = it as Record<string, unknown>
       // API 응답 필드:
@@ -224,11 +225,13 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
       const dong    = rawDong && /^\d+$/.test(rawDong) ? `${rawDong}동` : rawDong
       const rawHo   = String(row.hoNm ?? row.ho ?? '').trim() // hoNm 우선, mock 호환용 ho 폴백
       const exposGb = String(row.exposPubuseGbCd ?? '').trim() // "1"=전유, "2"=공용
+      const flrGbCd = String(row.flrGbCd ?? '').trim()         // "10"=지하, "20"=지상
       return {
         dongNm:   dong,
         flrNo:    String(row.flrNo ?? '').trim(),
         ho:       rawHo,
         area:     Number(row.area  ?? 0),
+        flrGbCd,
         exposGb,  // 필터링 후 제거 (BuildingUnit 타입에는 없음)
       }
     })
@@ -240,13 +243,18 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
       // 층 번호가 없거나 0 이하인 항목 제거 (공용부 혼입 방어)
       const flr = Number(u.flrNo)
       if (u.flrNo === '' || isNaN(flr) || flr <= 0) return false
-      // 동+호 조합 중복 제거
-      const key = `${u.dongNm}|${u.ho}`
-      if (seen.has(key)) return false
-      seen.add(key)
       return true
     })
-    .map(({ exposGb: _exposGb, ...unit }) => unit) // exposGb 임시 필드 제거
+    .forEach((unit) => {
+      const key = `${unit.dongNm}|${unit.ho}`
+      const prev = unitsByKey.get(key)
+      if (!prev || compareUnitCandidate(unit, prev) > 0) {
+        unitsByKey.set(key, unit)
+      }
+    })
+
+  return [...unitsByKey.values()]
+    .map(({ exposGb: _exposGb, flrGbCd: _flrGbCd, ...unit }) => unit) // 임시 필드 제거
     .sort((a, b) => {
       // 동 → 층 → 호(숫자) 순 정렬
       const dongCmp = a.dongNm.localeCompare(b.dongNm, 'ko')
@@ -259,6 +267,20 @@ export async function fetchBuildingUnits(query: BuildingQuery): Promise<Building
       const bh = parseInt(b.ho, 10) || 0
       return ah !== bh ? ah - bh : a.ho.localeCompare(b.ho, 'ko')
     })
+}
+
+function compareUnitCandidate(
+  a: BuildingUnit & { flrGbCd: string; exposGb: string },
+  b: BuildingUnit & { flrGbCd: string; exposGb: string },
+): number {
+  const score = (unit: BuildingUnit & { flrGbCd: string; exposGb: string }) => {
+    let value = 0
+    if (unit.flrGbCd === '20') value += 1_000_000
+    if (unit.flrGbCd === '10') value -= 1_000_000
+    value += Math.round(unit.area * 100)
+    return value
+  }
+  return score(a) - score(b)
 }
 
 // ─── 유틸 ──────────────────────────────────────────────────
